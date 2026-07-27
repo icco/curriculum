@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillNodeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillNodeData.gd" id="1_o35u6"]
+
+[resource]
+script = ExtResource("1_o35u6")
+id = &"conflagration_recall"
+display_name = "Remember: Fire Drill"
+cost = 5
+description = "Learn Fire Drill."
+requires = Array[StringName]([&"second_circle"])
+effect_type = 7
+value = 0
+spell_id = &"conflagration"

@@ -8,7 +8,11 @@ extends Node2D
 ## overlay, so the dimming follows the full height of wall blocks. Unexplored
 ## cells simply have no tile placed.
 
-const DIM := Color(0.44, 0.48, 0.63)
+## Tint applied to explored-but-unseen tiles.
+@export var fog_tint: Color = Color(0.44, 0.48, 0.63)
+
+const PROP_SCENE := preload("res://scenes/PropSprite.tscn")
+const ENTITY_SCENE := preload("res://scenes/EntityView.tscn")
 
 var map: MapData
 
@@ -40,7 +44,7 @@ func _ready() -> void:
 
 	floor_lit = _make_layer(tileset, false)
 	floor_dim = _make_layer(tileset, false)
-	floor_dim.modulate = DIM
+	floor_dim.modulate = fog_tint
 	add_child(floor_lit)
 	add_child(floor_dim)
 
@@ -56,7 +60,7 @@ func _ready() -> void:
 
 	block_lit = _make_layer(tileset, true)
 	block_dim = _make_layer(tileset, true)
-	block_dim.modulate = DIM
+	block_dim.modulate = fog_tint
 	world.add_child(block_lit)
 	world.add_child(block_dim)
 
@@ -83,7 +87,7 @@ func build(new_map: MapData) -> void:
 			var cell := Vector2i(x, y)
 			var prop := map.prop_at(cell)
 			if prop != MapData.Prop.NONE:
-				var sprite := PropSprite.new()
+				var sprite: PropSprite = PROP_SCENE.instantiate()
 				sprite.setup(prop, map.containers.has(cell))
 				sprite.position = grid_to_world(cell)
 				sprite.visible = false
@@ -215,7 +219,7 @@ func _refresh_entity_visibility() -> void:
 # ---------------------------------------------------------------- entities
 
 func add_entity(e: Entity) -> EntityView:
-	var view := EntityView.new()
+	var view: EntityView = ENTITY_SCENE.instantiate()
 	view.setup(e)
 	view.position = grid_to_world(e.grid_pos)
 	world.add_child(view)

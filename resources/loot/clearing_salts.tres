@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LootItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/LootItemData.gd" id="1_t1aeb"]
+
+[resource]
+script = ExtResource("1_t1aeb")
+id = &"clearing_salts"
+display_name = "Clearing Salts"
+slot = 3
+effect = 3
+power = "0"
+weight = 2.0
+min_depth = 2

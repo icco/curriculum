@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LootItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/LootItemData.gd" id="1_vx2dv"]
+
+[resource]
+script = ExtResource("1_vx2dv")
+id = &"draught_of_vigour"
+display_name = "Draught of Vigour"
+damage_bonus = 2
+weight = 2.0
+min_depth = 3

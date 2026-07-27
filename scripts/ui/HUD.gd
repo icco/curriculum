@@ -7,7 +7,7 @@ extends CanvasLayer
 ## only buttons capture input.
 
 signal action_pressed(action: String)
-signal spell_chosen(spell_id: String)
+signal spell_chosen(spell_id: StringName)
 signal item_chosen(index: int)
 signal confirm_pressed
 signal cancel_pressed
@@ -34,8 +34,10 @@ var _log_history: Array = []
 func _ready() -> void:
 	layer = 10
 	var root := Control.new()
+	root.name = "Root"
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UIKit.apply_theme(root)
 	add_child(root)
 
 	_build_status(root)
@@ -55,29 +57,26 @@ func _build_status(root: Control) -> void:
 	holder.custom_minimum_size = Vector2(300, 0)
 	root.add_child(holder)
 
-	var col := VBoxContainer.new()
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_theme_constant_override("separation", 4)
+	var col := UIKit.vbox(4)
 	holder.add_child(col)
 
-	_status_line = UIKit.label("September — Floor 1", 20)
+	_status_line = UIKit.label("September — Floor 1", &"StatusLabel")
 	col.add_child(_status_line)
-	_meta_line = UIKit.label("Lv 1 · Loop 1 · 0 insight", 15, ArtFactory.UI_DIM)
+	_meta_line = UIKit.label("Lv 1 · Loop 1 · 0 insight", &"DimLabel")
 	col.add_child(_meta_line)
 
-	var hp_row := HBoxContainer.new()
-	hp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var hp_row := UIKit.hbox()
 	col.add_child(hp_row)
-	_hp_bar = UIKit.bar(ArtFactory.UI_GOOD, 18)
+	_hp_bar = UIKit.bar(18)
 	hp_row.add_child(_hp_bar)
-	_hp_text = UIKit.label("20/20", 16)
+	_hp_text = UIKit.label("20/20")
 	hp_row.add_child(_hp_text)
 
-	_slot_line = UIKit.label("Slots  L1 2/2", 15, ArtFactory.UI_DIM)
+	_slot_line = UIKit.label("Slots  L1 2/2", &"DimLabel")
 	col.add_child(_slot_line)
 
 func _build_turn_banner(root: Control) -> void:
-	_turn_banner = UIKit.label("", 26, ArtFactory.UI_ACCENT)
+	_turn_banner = UIKit.label("", &"BannerLabel")
 	_turn_banner.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_turn_banner.anchor_left = 0.5
 	_turn_banner.anchor_right = 0.5
@@ -87,7 +86,7 @@ func _build_turn_banner(root: Control) -> void:
 	root.add_child(_turn_banner)
 
 func _build_log(root: Control) -> void:
-	var holder := UIKit.panel(ArtFactory.UI_BG, 0.72)
+	var holder := UIKit.panel(&"LogPanel")
 	holder.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	holder.anchor_top = 1.0
 	holder.anchor_bottom = 1.0
@@ -117,20 +116,17 @@ func _build_action_bar(root: Control) -> void:
 	holder.offset_bottom = -16
 	root.add_child(holder)
 
-	var row := HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 8)
+	var row := UIKit.hbox(8, true)
 	holder.add_child(row)
 
 	for spec: Array in [
-		["spells", "Spells", ArtFactory.UI_ACCENT],
-		["items", "Items", Color("80cbc4")],
-		["dash", "Dash", Color("ffd54f")],
-		["loot", "Locker", Color("ffb300")],
-		["door", "Door", Color("a1887f")],
-		["descend", "Stairs", Color("66bb6a")],
-		["end_turn", "End Turn", ArtFactory.UI_DANGER],
+		["spells", "Spells", &""],
+		["items", "Items", &""],
+		["dash", "Dash", &""],
+		["loot", "Reliquary", &""],
+		["door", "Door", &""],
+		["descend", "Stairs", &""],
+		["end_turn", "End Turn", &"DangerButton"],
 	]:
 		var b := UIKit.button(str(spec[1]), spec[2])
 		b.pressed.connect(_on_action.bind(str(spec[0])))
@@ -138,10 +134,7 @@ func _build_action_bar(root: Control) -> void:
 		_buttons[str(spec[0])] = b
 
 func _build_confirm(root: Control) -> void:
-	_confirm_row = HBoxContainer.new()
-	_confirm_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	(_confirm_row as HBoxContainer).alignment = BoxContainer.ALIGNMENT_CENTER
-	(_confirm_row as HBoxContainer).add_theme_constant_override("separation", 12)
+	_confirm_row = UIKit.hbox(12, true)
 	_confirm_row.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_confirm_row.anchor_left = 0.5
 	_confirm_row.anchor_right = 0.5
@@ -154,15 +147,15 @@ func _build_confirm(root: Control) -> void:
 	_confirm_row.visible = false
 	root.add_child(_confirm_row)
 
-	_confirm_button = UIKit.primary_button("Confirm")
+	_confirm_button = UIKit.button("Confirm", &"PrimaryButton", 200.0)
 	_confirm_button.pressed.connect(func() -> void: confirm_pressed.emit())
 	_confirm_row.add_child(_confirm_button)
 
-	var cancel := UIKit.button("Cancel", ArtFactory.UI_DIM)
+	var cancel := UIKit.button("Cancel", &"DimButton")
 	cancel.pressed.connect(func() -> void: cancel_pressed.emit())
 	_confirm_row.add_child(cancel)
 
-	_hint = UIKit.label("", 17, ArtFactory.UI_DIM)
+	_hint = UIKit.label("", &"HintLabel")
 	_hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_hint.anchor_left = 0.5
 	_hint.anchor_right = 0.5
@@ -189,14 +182,10 @@ func _build_spell_panel(root: Control) -> void:
 	_spell_panel.visible = false
 	root.add_child(_spell_panel)
 
-	var col := VBoxContainer.new()
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_theme_constant_override("separation", 6)
+	var col := UIKit.vbox()
 	_spell_panel.add_child(col)
-	col.add_child(UIKit.label("Spells", 20))
-	_spell_list = VBoxContainer.new()
-	_spell_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_spell_list.add_theme_constant_override("separation", 6)
+	col.add_child(UIKit.label("Spells", &"HeadingLabel"))
+	_spell_list = UIKit.vbox()
 	col.add_child(_spell_list)
 
 func _build_item_panel(root: Control) -> void:
@@ -213,14 +202,10 @@ func _build_item_panel(root: Control) -> void:
 	_item_panel.visible = false
 	root.add_child(_item_panel)
 
-	var col := VBoxContainer.new()
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_theme_constant_override("separation", 6)
+	var col := UIKit.vbox()
 	_item_panel.add_child(col)
-	col.add_child(UIKit.label("Bag", 20))
-	_item_list = VBoxContainer.new()
-	_item_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_item_list.add_theme_constant_override("separation", 6)
+	col.add_child(UIKit.label("Bag", &"HeadingLabel"))
+	_item_list = UIKit.vbox()
 	col.add_child(_item_list)
 
 func _on_action(name: String) -> void:
@@ -241,7 +226,7 @@ func set_vitals(player: Entity, moves: int) -> void:
 		fill = Color("ffb300")
 	if frac < 0.3:
 		fill = ArtFactory.UI_DANGER
-	_hp_bar.add_theme_stylebox_override("fill", UIKit.stylebox(fill, 6))
+	UIKit.set_bar_fill(_hp_bar, fill)
 	_hp_text.text = "%d/%d" % [player.current_hp, player.max_hp]
 
 	var parts: Array = []
@@ -294,16 +279,15 @@ func toggle_spells(spells: Array, player: Entity, castable: Callable) -> void:
 	for child: Node in _spell_list.get_children():
 		child.queue_free()
 	if spells.is_empty():
-		_spell_list.add_child(UIKit.label("Nothing learned yet.", 16, ArtFactory.UI_DIM))
+		_spell_list.add_child(UIKit.label("Nothing learned yet.", &"DimLabel"))
 		return
-	for spell: Dictionary in spells:
-		var level := int(spell.get("level", 0))
-		var cost: String = "cantrip" if level == 0 else "L%d (%d left)" % [level, player.slots_left(level)]
-		var b := UIKit.button("%s — %s" % [str(spell.get("name", "?")), cost],
-			Color(str(spell.get("color", "4fc3f7"))), 280.0)
+	for spell: SpellData in spells:
+		var cost: String = "cantrip" if spell.is_cantrip() \
+			else "L%d (%d left)" % [spell.level, player.slots_left(spell.level)]
+		var b := UIKit.tinted_button("%s — %s" % [spell.display_name, cost], spell.color, 280.0)
 		b.disabled = not bool(castable.call(spell))
-		b.tooltip_text = str(spell.get("description", ""))
-		b.pressed.connect(func() -> void: spell_chosen.emit(str(spell["id"])))
+		b.tooltip_text = spell.description
+		b.pressed.connect(func() -> void: spell_chosen.emit(spell.id))
 		_spell_list.add_child(b)
 
 func toggle_items(items: Array) -> void:
@@ -314,11 +298,11 @@ func toggle_items(items: Array) -> void:
 	for child: Node in _item_list.get_children():
 		child.queue_free()
 	if items.is_empty():
-		_item_list.add_child(UIKit.label("Your bag is empty.", 16, ArtFactory.UI_DIM))
+		_item_list.add_child(UIKit.label("Your bag is empty.", &"DimLabel"))
 		return
 	for i in items.size():
-		var item: Dictionary = items[i]
-		var b := UIKit.button(str(item.get("name", "item")), Color("80cbc4"), 280.0)
+		var item: LootItemData = items[i]
+		var b := UIKit.button(item.display_name, &"ListButton", 280.0)
 		b.pressed.connect(func() -> void: item_chosen.emit(i))
 		_item_list.add_child(b)
 
@@ -326,5 +310,3 @@ func close_panels() -> void:
 	_spell_panel.visible = false
 	_item_panel.visible = false
 
-func panels_open() -> bool:
-	return _spell_panel.visible or _item_panel.visible

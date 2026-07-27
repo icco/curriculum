@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LootItemData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/LootItemData.gd" id="1_3jihu"]
+
+[resource]
+script = ExtResource("1_3jihu")
+id = &"warded_bracers"
+display_name = "Warded Bracers"
+slot = 1
+ac_bonus = 3
+min_depth = 6

@@ -85,7 +85,7 @@ func test_cover_raises_effective_ac() -> void:
 	eq(int(half["ac"]), bare + 2, "half cover adds 2 AC")
 
 	m.set_prop(Vector2i(5, 5), MapData.Prop.NONE)
-	m.set_prop(Vector2i(7, 5), MapData.Prop.LOCKER)
+	m.set_prop(Vector2i(7, 5), MapData.Prop.RELIQUARY)
 	var three := Combat.defended_ac(defender, attacker.grid_pos, m)
 	eq(int(three["ac"]), bare + 5, "three-quarters cover adds 5 AC")
 
@@ -147,8 +147,8 @@ func test_spell_slots_are_consumed_and_exhausted() -> void:
 	var m := _room()
 	var caster := _fighter("Caster", Entity.Team.PLAYER, Vector2i(4, 4))
 	var target := _fighter("Target", Entity.Team.ENEMY, Vector2i(6, 4))
-	var spell := Roster.spell("spitball_barrage")
-	truthy(not spell.is_empty(), "spell data loads")
+	var spell := Roster.spell(&"ink_barrage")
+	truthy(spell != null, "spell data loads")
 	eq(caster.slots_left(1), 2, "starts with two level 1 slots")
 
 	Combat.cast_spell(caster, spell, target.grid_pos, [caster, target], m)
@@ -162,7 +162,7 @@ func test_cantrips_never_consume_slots() -> void:
 	var m := _room()
 	var caster := _fighter("Caster", Entity.Team.PLAYER, Vector2i(4, 4))
 	var target := _fighter("Target", Entity.Team.ENEMY, Vector2i(6, 4))
-	var cantrip := Roster.spell("chalk_dart")
+	var cantrip := Roster.spell(&"slate_shard")
 	eq(int(cantrip["level"]), 0, "chalk dart is a cantrip")
 	for i in 5:
 		var events := Combat.cast_spell(caster, cantrip, target.grid_pos, [caster, target], m)
@@ -176,14 +176,14 @@ func test_auto_hit_spell_always_damages() -> void:
 	target.ac_base = 200
 	caster.spell_slots = {"level_1": 20}
 	var before := target.current_hp
-	Combat.cast_spell(caster, Roster.spell("spitball_barrage"), target.grid_pos, [caster, target], m)
+	Combat.cast_spell(caster, Roster.spell(&"ink_barrage"), target.grid_pos, [caster, target], m)
 	truthy(target.current_hp < before, "Spitball Barrage ignores AC entirely")
 
 func test_save_spell_halves_on_success_and_applies_conditions() -> void:
 	var m := _room()
 	var caster := _fighter("Caster", Entity.Team.PLAYER, Vector2i(4, 4))
 	caster.spell_slots = {"level_1": 99}
-	var spell := Roster.spell("detention_slip")
+	var spell := Roster.spell(&"writ_of_detention")
 	var saw_stun := false
 	var saw_save := false
 	for i in 60:
@@ -206,7 +206,7 @@ func test_save_effect_half_leaves_partial_damage() -> void:
 	var m := _room()
 	var caster := _fighter("Caster", Entity.Team.PLAYER, Vector2i(4, 4))
 	caster.spell_slots = {"level_1": 99}
-	var spell := Roster.spell("pop_quiz")
+	var spell := Roster.spell(&"sudden_examination")
 	var saw_half := false
 	for i in 80:
 		var target := _fighter("Target", Entity.Team.ENEMY, Vector2i(6, 4))
@@ -222,14 +222,14 @@ func test_heal_buff_and_teleport() -> void:
 	var caster := _fighter("Caster", Entity.Team.PLAYER, Vector2i(4, 4))
 	caster.spell_slots = {"level_1": 9, "level_2": 9}
 	caster.current_hp = 5
-	Combat.cast_spell(caster, Roster.spell("study_hall"), caster.grid_pos, [caster], m)
+	Combat.cast_spell(caster, Roster.spell(&"restorative_study"), caster.grid_pos, [caster], m)
 	truthy(caster.current_hp > 5, "Study Hall heals")
 	truthy(caster.current_hp <= caster.max_hp, "healing cannot exceed max hp")
 
-	Combat.cast_spell(caster, Roster.spell("textbook_barrier"), caster.grid_pos, [caster], m)
+	Combat.cast_spell(caster, Roster.spell(&"grimoire_ward"), caster.grid_pos, [caster], m)
 	truthy(caster.has_condition("shielded"), "Textbook Barrier applies its condition")
 
-	Combat.cast_spell(caster, Roster.spell("hall_pass"), Vector2i(8, 8), [caster], m)
+	Combat.cast_spell(caster, Roster.spell(&"corridor_step"), Vector2i(8, 8), [caster], m)
 	eq(caster.grid_pos, Vector2i(8, 8), "Hall Pass moves the caster")
 
 func test_aoe_hits_everyone_in_radius_with_line_of_sight() -> void:
@@ -240,8 +240,8 @@ func test_aoe_hits_everyone_in_radius_with_line_of_sight() -> void:
 	var edge := _fighter("Edge", Entity.Team.ENEMY, Vector2i(12, 10))
 	var far := _fighter("Far", Entity.Team.ENEMY, Vector2i(15, 10))
 	var roster: Array = [caster, near, edge, far]
-	var spell := Roster.spell("fire_drill")
-	eq(int(spell["aoe"]), 2, "Fire Drill has a 2 tile burst")
+	var spell := Roster.spell(&"conflagration")
+	eq(spell.aoe, 2, "Fire Drill has a 2 tile burst")
 	var hit := Combat.spell_targets(caster, spell, Vector2i(11, 10), roster, m)
 	truthy(hit.has(near), "target 1 tile from centre is caught")
 	truthy(hit.has(edge), "target on the radius edge is caught")
@@ -254,7 +254,7 @@ func test_aoe_respects_walls() -> void:
 	var shielded := _fighter("Behind", Entity.Team.ENEMY, Vector2i(12, 10))
 	for y in range(1, 19):
 		m.set_tile(Vector2i(11, y), MapData.Tile.WALL)
-	var hit := Combat.spell_targets(caster, Roster.spell("fire_drill"), Vector2i(10, 10), [caster, shielded], m)
+	var hit := Combat.spell_targets(caster, Roster.spell(&"conflagration"), Vector2i(10, 10), [caster, shielded], m)
 	falsy(hit.has(shielded), "a wall between blast centre and target blocks it")
 
 # ------------------------------------------------------------ conditions

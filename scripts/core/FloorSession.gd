@@ -1,7 +1,7 @@
 class_name FloorSession
 extends RefCounted
 
-## One school floor being played. Owns the map, the roster and the turn loop,
+## One floor of the academy in play. Owns the map, the roster and the turn loop,
 ## and exposes every player action as a function returning event dictionaries.
 ## Deliberately free of scene nodes so a whole 12-floor run can be played out
 ## headlessly in a test.
@@ -10,7 +10,7 @@ enum Phase { PLAYER, ENEMY, DEAD, ESCAPED }
 
 const SIGHT_RADIUS := 9
 const SHORT_REST_FRACTION := 0.35
-const SEMESTER_BREAK := 4    ## every Nth floor is a full rest
+const TERM_BREAK := 4    ## every Nth floor is a full rest
 const BOSS_GUARD_RADIUS := 6
 
 var state: GameState
@@ -50,11 +50,11 @@ func build(new_depth: int) -> Array:
 		var role := str(spawn["role"])
 		var enemy := Roster.make_enemy(role, depth)
 		if role == "boss" and depth >= GameState.FINAL_FLOOR:
-			enemy = Roster.make_enemy_by_id("principal", depth)
+			enemy = Roster.make_enemy_by_id(&"rector", depth)
 		enemy.grid_pos = spawn["pos"]
 		enemy.home_pos = enemy.grid_pos
 		if role == "boss":
-			# Teachers hold the stairwell instead of hunting across the floor,
+			# Lecturers hold the stairwell instead of hunting across the floor,
 			# so a fast player can gamble on slipping past them.
 			enemy.guard_radius = BOSS_GUARD_RADIUS
 			boss = enemy
@@ -146,21 +146,19 @@ func visible_enemies() -> Array:
 			out.append(e)
 	return out
 
-func known_spells() -> Array:
-	var out: Array = []
-	for id: String in player.known_spells:
+func known_spells() -> Array[SpellData]:
+	var out: Array[SpellData] = []
+	for id: StringName in player.known_spells:
 		var spell := Roster.spell(id)
-		if not spell.is_empty():
+		if spell != null:
 			out.append(spell)
-	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return int(a.get("level", 0)) < int(b.get("level", 0)))
+	out.sort_custom(func(a: SpellData, b: SpellData) -> bool: return a.level < b.level)
 	return out
 
-func can_cast(spell: Dictionary) -> bool:
-	if not Combat.spell_slot_available(player, spell):
+func can_cast(spell: SpellData) -> bool:
+	if spell == null or not Combat.spell_slot_available(player, spell):
 		return false
-	var action := str(spell.get("action", "action"))
-	if action == "bonus":
+	if spell.uses_bonus_action():
 		return tm.has_bonus(player)
 	return tm.has_action(player)
 
@@ -209,28 +207,27 @@ func player_attack(target: Entity) -> Array:
 		events.append_array(_register_kill(target))
 	return events
 
-func player_cast(spell_id: String, center: Vector2i) -> Array:
+func player_cast(spell_id: StringName, center: Vector2i) -> Array:
 	if not is_player_turn():
 		return []
 	var spell := Roster.spell(spell_id)
-	if spell.is_empty():
+	if spell == null:
 		return [{"type": "info", "text": "You do not know that spell."}]
 	if not player.known_spells.has(spell_id):
-		return [{"type": "info", "text": "You have not learned %s yet." % str(spell.get("name", spell_id))}]
+		return [{"type": "info", "text": "You have not learned %s yet." % spell.display_name}]
 	if not Combat.spell_slot_available(player, spell):
-		return [{"type": "info", "text": "No level %d slots left." % int(spell.get("level", 0))}]
-	var uses_bonus := str(spell.get("action", "action")) == "bonus"
+		return [{"type": "info", "text": "No level %d slots left." % spell.level}]
+	var uses_bonus := spell.uses_bonus_action()
 	if uses_bonus and not tm.has_bonus(player):
 		return [{"type": "info", "text": "No bonus action left."}]
 	if not uses_bonus and not tm.has_action(player):
 		return [{"type": "info", "text": "No action left this turn."}]
-	if int(spell.get("range", 0)) > 0:
-		var distance := MapData.chebyshev(player.grid_pos, center)
-		if distance > int(spell["range"]):
+	if spell.range_tiles > 0:
+		if MapData.chebyshev(player.grid_pos, center) > spell.range_tiles:
 			return [{"type": "info", "text": "Out of range."}]
 		if not map.has_line_of_sight(player.grid_pos, center):
 			return [{"type": "info", "text": "No line of sight to that tile."}]
-	if str(spell.get("kind", "")) == "teleport" and not map.is_walkable(center):
+	if spell.kind == SpellData.Kind.TELEPORT and not map.is_walkable(center):
 		return [{"type": "info", "text": "You cannot land there."}]
 
 	if uses_bonus:
@@ -255,59 +252,50 @@ func player_loot() -> Array:
 		return []
 	var cell := adjacent_container()
 	if cell == Vector2i(-1, -1):
-		return [{"type": "info", "text": "No locker within reach."}]
+		return [{"type": "info", "text": "No reliquary within reach."}]
 	if not tm.spend_action(player):
 		return [{"type": "info", "text": "No action left this turn."}]
 	(map.containers[cell] as Dictionary)["looted"] = true
-	var item := Roster.roll_loot("locker", depth)
-	if item.is_empty():
-		return [{"type": "loot", "cell": cell, "item": {}, "text": "The locker is empty. Someone got here first."}]
+	var item := Roster.roll_loot(depth)
+	if item == null:
+		return [{"type": "loot", "cell": cell, "item": null,
+			"text": "The reliquary is empty. Someone got here first."}]
 	return [{"type": "loot", "cell": cell, "item": item, "text": _take_item(item)}]
 
 ## Auto-equips upgrades so mobile play needs no inventory screen.
-func _take_item(item: Dictionary) -> String:
-	var slot := str(item.get("slot", "trinket"))
-	var name := str(item.get("name", "something"))
-	if slot == "consumable":
-		state.add_consumable(item)
-		return "Found %s. Stowed in your bag." % name
-	var current: Dictionary = player.equipped_gear.get(slot, {})
-	if current.is_empty() or _item_score(item) > _item_score(current):
+func _take_item(item: LootItemData) -> String:
+	if item.is_consumable():
+		state.add_consumable(item.id)
+		return "Found %s. Stowed in your bag." % item.display_name
+	var slot := item.slot_key()
+	var current: LootItemData = player.equipped_gear.get(slot, null)
+	if current == null or item.score() > current.score():
 		player.equipped_gear[slot] = item
-		return "Found %s — equipped." % name
-	return "Found %s, but your %s is better. Left behind." % [name, str(current.get("name", slot))]
-
-static func _item_score(item: Dictionary) -> float:
-	var score := 0.0
-	score += Dice.average(str(item.get("damage_dice", "0")))
-	score += float(item.get("attack_bonus", 0)) * 2.0
-	score += float(item.get("damage_bonus", 0)) * 1.5
-	score += float(item.get("ac_bonus", 0)) * 3.0
-	return score
+		return "Found %s — equipped." % item.display_name
+	return "Found %s, but your %s is better. Left behind." % [item.display_name, current.display_name]
 
 func player_use_item(index: int) -> Array:
 	if not is_player_turn():
 		return []
-	var list: Array = state.consumables()
-	if index < 0 or index >= list.size():
+	var item := state.consumable_at(index)
+	if item == null:
 		return [{"type": "info", "text": "Nothing to use."}]
 	if not tm.has_bonus(player):
 		return [{"type": "info", "text": "No bonus action left."}]
 	tm.spend_bonus(player)
-	var item := state.take_consumable(index)
-	var name := str(item.get("name", "item"))
-	match str(item.get("effect", "heal")):
-		"heal":
-			var healed := player.heal(Combat.roll_damage(str(item.get("power", "2d4"))))
+	state.take_consumable(index)
+	match item.effect:
+		LootItemData.Effect.HEAL:
+			var healed := player.heal(Combat.roll_damage(item.power))
 			return [{"type": "heal", "target": player, "amount": healed,
-				"text": "%s restores %d hit points." % [name, healed]}]
-		"dash":
+				"text": "%s restores %d hit points." % [item.display_name, healed]}]
+		LootItemData.Effect.DASH:
 			tm.spend_move(player, -Combat.movement_for(player))
-			return [{"type": "info", "text": "%s — you surge forward." % name}]
-		"cleanse":
+			return [{"type": "info", "text": "%s — you surge forward." % item.display_name}]
+		LootItemData.Effect.CLEANSE:
 			player.conditions.clear()
-			return [{"type": "info", "text": "%s clears your head." % name}]
-	return [{"type": "info", "text": "%s does nothing useful." % name}]
+			return [{"type": "info", "text": "%s clears your head." % item.display_name}]
+	return [{"type": "info", "text": "%s does nothing useful." % item.display_name}]
 
 ## Doors are a free object interaction, once per turn.
 func player_toggle_door() -> Array:
@@ -410,7 +398,7 @@ func _check_player_state() -> Array:
 	if player.is_alive():
 		return []
 	phase = Phase.DEAD
-	return [{"type": "player_died", "text": "You black out. The bell rings. It is September again."}]
+	return [{"type": "player_died", "text": "You black out. The bell tolls. It is September again."}]
 
 # ------------------------------------------------------------- descending
 
@@ -431,23 +419,23 @@ func descend() -> Array:
 	if depth >= GameState.FINAL_FLOOR:
 		phase = Phase.ESCAPED
 		return [{"type": "escaped",
-			"text": "You push through the front doors into the afternoon. The loop breaks."}]
+			"text": "You walk out through the cloister gate into open air. The loop breaks."}]
 
 	var rest := _short_rest()
 	state.capture_player(player)
-	var events: Array = [{"type": "descend", "text": "You take the stairs down to %s." % GameState.month_for(depth + 1)}]
+	var events: Array = [{"type": "descend", "text": "You take the stair down to %s." % GameState.month_for(depth + 1)}]
 	events.append_array(rest)
 	events.append_array(build(depth + 1))
 	return events
 
 func _short_rest() -> Array:
 	var events: Array = []
-	var full: bool = depth % SEMESTER_BREAK == 0
+	var full: bool = depth % TERM_BREAK == 0
 	if full:
 		player.heal(player.max_hp)
 		player.restore_all_slots()
 		player.conditions.clear()
-		events.append({"type": "info", "text": "Semester break: fully rested, all slots recovered."})
+		events.append({"type": "info", "text": "Term break: fully rested, all slots recovered."})
 		return events
 	var healed := player.heal(int(ceil(player.max_hp * SHORT_REST_FRACTION)))
 	# A short rest gives back one slot of each level you have.

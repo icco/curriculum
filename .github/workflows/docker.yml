@@ -94,12 +94,12 @@ jobs:
           context: .
           platforms: ${{ matrix.platform }}
           load: true
-          tags: loopwood-high:ci
+          tags: curriculum:ci
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Smoke test the served page
         run: |
-          docker run -d --name loopwood -p 8080:8080 loopwood-high:ci
+          docker run -d --name curriculum -p 8080:8080 curriculum:ci
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
               break
@@ -109,8 +109,8 @@ jobs:
           curl -fsS http://127.0.0.1:8080/healthz
           curl -fsS -o /dev/null http://127.0.0.1:8080/index.html
           curl -fsSI http://127.0.0.1:8080/index.wasm | grep -i 'content-type: application/wasm'
-          docker logs loopwood
-          docker rm -f loopwood
+          docker logs curriculum
+          docker rm -f curriculum
 
       - name: Build and push by digest
         id: build

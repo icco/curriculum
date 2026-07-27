@@ -99,9 +99,9 @@ static func describe_attack(event: Dictionary) -> String:
 # ----------------------------------------------------------------- spells
 
 ## Cantrips gain dice at levels 5 and 11, as in 5e. Levelled spells do not.
-static func spell_damage_expr(caster: Entity, spell: Dictionary) -> String:
-	var expr := str(spell.get("damage", "1d6"))
-	if int(spell.get("level", 0)) != 0:
+static func spell_damage_expr(caster: Entity, spell: SpellData) -> String:
+	var expr := spell.damage
+	if not spell.is_cantrip():
 		return expr
 	var multiplier := 1
 	if caster.level >= 5:
@@ -117,69 +117,64 @@ static func spell_damage_expr(caster: Entity, spell: Dictionary) -> String:
 	var suffix: String = "" if flat == 0 else ("+%d" % flat if flat > 0 else str(flat))
 	return "%dd%d%s" % [parsed.count * multiplier, parsed.sides, suffix]
 
-static func spell_slot_available(caster: Entity, spell: Dictionary) -> bool:
-	var level := int(spell.get("level", 0))
-	return level == 0 or caster.slots_left(level) > 0
+static func spell_slot_available(caster: Entity, spell: SpellData) -> bool:
+	return spell.is_cantrip() or caster.slots_left(spell.level) > 0
 
 ## Every entity a spell would touch when aimed at `center`.
-static func spell_targets(caster: Entity, spell: Dictionary, center: Vector2i, entities: Array, map: MapData) -> Array:
-	var aoe := int(spell.get("aoe", 0))
-	var target_kind := str(spell.get("target", "enemy"))
+static func spell_targets(caster: Entity, spell: SpellData, center: Vector2i, entities: Array, map: MapData) -> Array:
 	var out: Array = []
-	if target_kind == "self":
+	if spell.target == SpellData.Target.SELF:
 		return [caster]
 	for e: Entity in entities:
 		if not e.is_alive():
 			continue
-		if aoe > 0:
-			if MapData.chebyshev(e.grid_pos, center) > aoe:
+		if spell.aoe > 0:
+			if MapData.chebyshev(e.grid_pos, center) > spell.aoe:
 				continue
 			if not map.has_line_of_sight(center, e.grid_pos):
 				continue
 		elif e.grid_pos != center:
 			continue
-		if target_kind == "enemy" and not e.is_hostile_to(caster):
+		if spell.target == SpellData.Target.ENEMY and not e.is_hostile_to(caster):
 			continue
-		if target_kind == "ally" and e.is_hostile_to(caster):
+		if spell.target == SpellData.Target.ALLY and e.is_hostile_to(caster):
 			continue
 		out.append(e)
 	return out
 
 ## Resolves a spell. `center` is the aimed tile; `entities` is the full roster.
 ## Returns a list of events; the first one is always of type "cast".
-static func cast_spell(caster: Entity, spell: Dictionary, center: Vector2i, entities: Array, map: MapData) -> Array:
+static func cast_spell(caster: Entity, spell: SpellData, center: Vector2i, entities: Array, map: MapData) -> Array:
 	var events: Array = []
-	var level := int(spell.get("level", 0))
-	if not caster.spend_slot(level):
-		return [{"type": "fizzle", "text": "%s has no level %d slots left." % [caster.display_name, level]}]
+	if not caster.spend_slot(spell.level):
+		return [{"type": "fizzle",
+			"text": "%s has no level %d slots left." % [caster.display_name, spell.level]}]
 
 	events.append({
 		"type": "cast",
 		"attacker": caster,
 		"spell": spell,
 		"center": center,
-		"text": "%s casts %s." % [caster.display_name, str(spell.get("name", "a spell"))],
+		"text": "%s casts %s." % [caster.display_name, spell.display_name],
 	})
 
-	var kind := str(spell.get("kind", "attack"))
-	match kind:
-		"teleport":
+	match spell.kind:
+		SpellData.Kind.TELEPORT:
 			var from := caster.grid_pos
 			caster.grid_pos = center
 			events.append({
 				"type": "teleport", "attacker": caster, "from": from, "to": center,
 				"text": "%s blinks from %s to %s." % [caster.display_name, str(from), str(center)],
 			})
-		"buff":
-			var effect: Dictionary = spell.get("effect", {})
-			var cond := str(effect.get("condition", "shielded"))
-			caster.add_condition(cond, int(effect.get("rounds", 1)))
+		SpellData.Kind.BUFF:
+			var cond := str(spell.condition)
+			caster.add_condition(cond, maxi(1, spell.condition_rounds))
 			events.append({
 				"type": "buff", "attacker": caster, "condition": cond,
 				"text": "%s is %s." % [caster.display_name, cond],
 			})
-		"heal":
-			var amount := roll_damage(str(spell.get("damage", "1d8"))) + caster.mod(caster.casting_ability)
+		SpellData.Kind.HEAL:
+			var amount := roll_damage(spell.damage) + caster.mod(caster.casting_ability)
 			var healed := caster.heal(amount)
 			events.append({
 				"type": "heal", "attacker": caster, "target": caster, "amount": healed,
@@ -192,13 +187,12 @@ static func cast_spell(caster: Entity, spell: Dictionary, center: Vector2i, enti
 				events.append({"type": "whiff", "text": "The spell fizzles against empty air."})
 	return events
 
-static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity, map: MapData) -> Array:
-	var kind := str(spell.get("kind", "attack"))
-	var spell_name := str(spell.get("name", "the spell"))
+static func _resolve_offensive(caster: Entity, spell: SpellData, target: Entity, map: MapData) -> Array:
+	var spell_name := spell.display_name
 	var events: Array = []
 
-	match kind:
-		"attack":
+	match spell.kind:
+		SpellData.Kind.ATTACK:
 			var shield := defended_ac(target, caster.grid_pos, map)
 			var check := d20_check(caster.spell_attack_bonus(), int(shield["ac"]))
 			var event := {
@@ -214,16 +208,15 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 				var crit_note: String = "CRITICAL! " if bool(check["crit"]) else ""
 				event["text"] = "%s%s strikes %s for %d %s damage." % [
 					crit_note, spell_name, target.display_name, int(event["damage"]),
-					str(spell.get("damage_type", "force"))]
+					spell.damage_type]
 			else:
 				event["text"] = "%s streaks past %s (rolled %d vs AC %d)." % [
 					spell_name, target.display_name, int(check["total"]), int(shield["ac"])]
 			events.append(event)
 
-		"auto":
-			var darts := int(spell.get("darts", 1))
+		SpellData.Kind.AUTO:
 			var total := 0
-			for i in darts:
+			for i in spell.darts:
 				total += roll_damage(spell_damage_expr(caster, spell))
 			var dealt := target.take_damage(total)
 			events.append({
@@ -232,14 +225,14 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 				"text": "%s hits %s automatically for %d damage." % [spell_name, target.display_name, dealt],
 			})
 
-		"save":
-			var ability := str(spell.get("save_ability", "dex"))
+		SpellData.Kind.SAVE:
+			var ability := spell.save_ability_key()
 			var dc := caster.spell_save_dc()
 			var save := saving_throw(target, ability, dc)
 			var base := roll_damage(spell_damage_expr(caster, spell))
 			var dmg := base
 			if bool(save["success"]):
-				dmg = int(base / 2.0) if str(spell.get("save_effect", "half")) == "half" else 0
+				dmg = int(base / 2.0) if spell.save_effect == SpellData.SaveEffect.HALF else 0
 			var dealt := target.take_damage(dmg)
 			var event := {
 				"type": "spell_save", "attacker": caster, "target": target, "spell": spell,
@@ -247,12 +240,9 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 				"saved": save["success"], "damage": dealt, "killed": not target.is_alive(),
 				"condition": "",
 			}
-			var effect: Dictionary = spell.get("effect", {})
-			if not bool(save["success"]) and not effect.is_empty() and target.is_alive():
-				var cond := str(effect.get("condition", ""))
-				if cond != "":
-					target.add_condition(cond, int(effect.get("rounds", 1)))
-					event["condition"] = cond
+			if not bool(save["success"]) and spell.has_condition() and target.is_alive():
+				target.add_condition(str(spell.condition), spell.condition_rounds)
+				event["condition"] = str(spell.condition)
 			var outcome: String = "resists" if bool(save["success"]) else "fails"
 			event["text"] = "%s %s the %s save (%d vs DC %d) and takes %d." % [
 				target.display_name, outcome, ability.to_upper(), int(save["total"]), dc, dealt]

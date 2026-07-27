@@ -1,10 +1,26 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/DebugShot.gd" id="2_shot"]
+[ext_resource type="Script" path="res://scripts/view/BoardView.gd" id="3_board"]
+[ext_resource type="Script" path="res://scripts/view/CameraRig.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/ui/LoopScreen.gd" id="6_screens"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("3_board")
+
+[node name="Camera" type="Camera2D" parent="."]
+script = ExtResource("4_camera")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("5_hud")
+
+[node name="Screens" type="CanvasLayer" parent="."]
+script = ExtResource("6_screens")
 
 [node name="DebugShot" type="Node" parent="."]
 script = ExtResource("2_shot")

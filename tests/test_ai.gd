@@ -199,7 +199,7 @@ func test_ai_is_idle_when_nothing_is_visible() -> void:
 	_give_turn(tm, brute)
 	var events := EnemyAI.take_turn(brute, tm)
 	for e: Dictionary in events:
-		ne(str(e.get("type", "")), "attack", "no attacks from across the school")
+		ne(str(e.get("type", "")), "attack", "no attacks from across the academy")
 
 func test_stunned_enemy_does_nothing() -> void:
 	var m := _room()

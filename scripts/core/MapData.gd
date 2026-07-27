@@ -5,15 +5,15 @@ extends RefCounted
 ## (line of sight, cover, reachability). Knows nothing about rendering.
 
 enum Tile { VOID, FLOOR, WALL, DOOR, STAIRS }
-enum Prop { NONE, DESK, CHAIR, TRASH, LOCKER, BOOKSHELF, CHALKBOARD, PODIUM }
+enum Prop { NONE, DESK, CHAIR, BRAZIER, RELIQUARY, BOOKSHELF, RUNE_SLATE, PODIUM }
 enum Cover { NONE, HALF, THREE_QUARTERS }
 
-## Props that are waist high: they cost movement and grant half cover but you
-## can see and shoot over them.
-const LOW_PROPS := [Prop.DESK, Prop.CHAIR, Prop.TRASH, Prop.PODIUM]
-## Props taller than a person: three-quarters cover when hugged, and a hard
-## sight blocker at any greater distance.
-const TALL_PROPS := [Prop.LOCKER, Prop.BOOKSHELF, Prop.CHALKBOARD]
+## Waist-high props: they cost movement and grant half cover, but you can see
+## and shoot over them.
+const LOW_PROPS := [Prop.DESK, Prop.CHAIR, Prop.BRAZIER, Prop.PODIUM]
+## Props taller than a person: three-quarters cover to anyone standing against
+## them, and a hard sight blocker at any greater distance.
+const TALL_PROPS := [Prop.RELIQUARY, Prop.BOOKSHELF, Prop.RUNE_SLATE]
 
 const DIRS_8 := [
 	Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
@@ -227,10 +227,6 @@ func is_visible(p: Vector2i) -> bool:
 func is_explored(p: Vector2i) -> bool:
 	return in_bounds(p) and explored[idx(p)] == 1
 
-func reveal_all() -> void:
-	explored.fill(1)
-	visible_cells.fill(1)
-
 # ----------------------------------------------------------- reachability
 
 ## Dijkstra/BFS flood fill from `origin` limited to `budget` steps.
@@ -306,14 +302,6 @@ func find_path(from: Vector2i, to: Vector2i, blocked: Dictionary = {}, allow_blo
 			came_from[nxt] = cur
 			frontier.append(nxt)
 	return []
-
-func walkable_neighbors(p: Vector2i, blocked: Dictionary = {}) -> Array:
-	var out: Array = []
-	for dir: Vector2i in DIRS_8:
-		var n: Vector2i = p + dir
-		if is_walkable(n) and not blocked.has(n):
-			out.append(n)
-	return out
 
 ## Any free tile inside a room, used for spawning.
 func random_floor_in_room(room: Dictionary, blocked: Dictionary = {}) -> Vector2i:

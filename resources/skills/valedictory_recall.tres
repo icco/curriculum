@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillNodeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillNodeData.gd" id="1_4rcwn"]
+
+[resource]
+script = ExtResource("1_4rcwn")
+id = &"valedictory_recall"
+display_name = "Remember: Valedictorian"
+cost = 6
+description = "Learn Valedictorian, the beam of academic superiority."
+requires = Array[StringName]([&"third_circle", &"honours_list"])
+effect_type = 7
+value = 0
+spell_id = &"valedictory_beam"

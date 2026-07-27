@@ -42,10 +42,10 @@ jobs:
         include:
           - preset: Web
             out: build/web/index.html
-            artifact: loopwood-web
+            artifact: curriculum-web
           - preset: Linux
-            out: build/linux/loopwood-high.x86_64
-            artifact: loopwood-linux
+            out: build/linux/curriculum.x86_64
+            artifact: curriculum-linux
     steps:
       - uses: actions/checkout@v7
 
@@ -132,12 +132,12 @@ jobs:
           "$godot" --headless --import --path . 2>&1 | tail -3
           mkdir -p build/android
           "$godot" --headless --path . \
-            --export-debug Android build/android/loopwood-high.apk
-          test -s build/android/loopwood-high.apk
+            --export-debug Android build/android/curriculum.apk
+          test -s build/android/curriculum.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          name: loopwood-android
+          name: curriculum-android
           path: build/android
           if-no-files-found: error

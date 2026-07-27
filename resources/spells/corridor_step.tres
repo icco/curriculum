@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_873vv"]
+
+[resource]
+script = ExtResource("1_873vv")
+id = &"corridor_step"
+display_name = "Corridor Step"
+level = 2
+action = 1
+kind = 5
+target = 3
+range_tiles = 6
+description = "Step sideways through the corridor and reappear up to 6 tiles away."
+color = Color(0.5019608, 0.79607844, 0.76862746, 1)
+icon_name = &"pass"
+unlock_cost = 4

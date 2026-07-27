@@ -1,8 +1,8 @@
-# Loopwood High
+# Curriculum
 
-A 2.5D isometric, turn-based tactical roguelike. You are one student stuck in a
-one-year time loop, fighting your way down through a procedurally generated
-school to the front doors. Die and it is September again — you lose the gear,
+A 2.5D isometric, turn-based tactical roguelike. You are one apprentice stuck in
+a one-year time loop, fighting down through a procedurally generated arcane
+academy to the cloister gate. Die and it is September again — you lose the gear,
 you keep what you learned.
 
 Built with Godot 4.7 and GDScript. Mobile-first: touch controls, tap-to-confirm
@@ -22,7 +22,7 @@ attacking. Take the stairs to reach the next month.
 In a browser, via the published image:
 
 ```sh
-docker run --rm -p 8080:8080 ghcr.io/icco/rogue:latest   # then open :8080
+docker run --rm -p 8080:8080 ghcr.io/icco/curriculum:latest   # then open :8080
 ```
 
 ## How it works
@@ -35,7 +35,7 @@ Desks and chairs give half cover (+2 AC), lockers and bookshelves three-quarters
 action, a bonus action and a reaction — leaving an enemy's reach draws an
 opportunity attack, in both directions.
 
-**Floors** are NetHack-style: rectangular rooms (classrooms, labs, libraries,
+**Floors** are NetHack-style: rectangular rooms (lecture_halls, labs, libraries,
 gyms, locker bays) joined by one-tile hallways, furnished with cover and
 lootable lockers, lit by Bresenham line-of-sight with the rest under fog.
 A teacher guards each stairwell. They hold their post rather than chasing you
@@ -49,23 +49,41 @@ flags, and it never resets. Kills bank insight; insight buys nodes on the
 between-loops screen. Twelve floors is one school year — get past the Principal
 in August and the loop breaks.
 
+**Content** lives in `resources/` as typed Resources — spells, enemies, loot and
+skill nodes with enum fields, indexed by one `ContentLibrary`. Add a spell by
+adding a `.tres` and listing it; nothing in the rules layer changes.
+
 ## Development
 
 ```sh
 ./tools/check.sh                                  # tests; run before committing
 ./tools/shot.sh /tmp/a.png 7 "wait:0.5,tap_far"   # drive the game, screenshot
 godot --headless --path . --script tools/simulate.gd -- 12 6   # balance runs
-./tools/export-web.sh && docker build -t loopwood .            # browser build
+./tools/import-assets.sh --status                 # what art is still missing
+./tools/export-web.sh && docker build -t curriculum .          # browser build
 ```
 
 `check.sh` refreshes Godot's script-class cache, runs the headless suite
-(~110 tests over dice, maps, generation, combat, turns, AI, camera, save/load
-and full twelve-floor playthroughs) and fails on engine errors as well as
+(138 tests over dice, maps, generation, combat, turns, AI, camera, content
+integrity, UI wiring, the asset pipeline, save/load and full twelve-floor
+playthroughs) and fails on engine errors as well as
 assertions. CI runs the same script, then exports Web, Linux and Android
 builds; pushes to `main` publish a container image serving the web build.
 
 See [AGENTS.md](AGENTS.md) for layout, conventions and the Godot-specific traps
 this project ran into.
+
+## Art
+
+The game ships fully playable with procedural art — every texture and sprite is
+painted at runtime. Illustrated art is optional and drops in per sprite: put a
+file in `assets/source/`, run `./tools/import-assets.sh`, and that one sprite
+switches over while everything else stays procedural.
+
+[`assets/prompts/midjourney.md`](assets/prompts/midjourney.md) has the prompt set, tuned to
+the 2:1 isometric grid with a consistent scale reference and a keyable flat
+background (Midjourney cannot output transparency). The importer keys the
+background out, trims and rescales.
 
 ## Deviations from the original spec
 

@@ -1,37 +1,37 @@
 class_name ArtFactory
 extends RefCounted
 
-## The project ships with no image assets: every texture is painted here at
-## startup. Keeps the repo text-only and makes restyling a one-line change.
+## Procedural fallback art: every texture is painted here at startup, so the
+## game is playable before any artwork exists.
 
 const TILE_W := 64
 const TILE_H := 32
 const BLOCK_H := 32  ## how far a wall/door block rises above its floor diamond
 
 ## Floor tile ids inside the floor atlas (one column each).
-enum Floor { HALL, CLASSROOM, LAB, LIBRARY, CAFETERIA, GYM, LOCKER_BAY, OFFICE, STAIRS }
+enum Floor { HALL, LECTURE_HALL, ALCHEMY, SCRIPTORIUM, REFECTORY, TRAINING_YARD, RELIQUARY, STUDY, STAIRS }
 ## Block tile ids inside the block atlas.
 enum Block { WALL, DOOR_CLOSED, DOOR_OPEN }
 
 const ROOM_FLOOR := {
-	"classroom": Floor.CLASSROOM,
-	"science_lab": Floor.LAB,
-	"library": Floor.LIBRARY,
-	"cafeteria": Floor.CAFETERIA,
-	"gym": Floor.GYM,
-	"locker_bay": Floor.LOCKER_BAY,
-	"office": Floor.OFFICE,
+	"lecture_hall": Floor.LECTURE_HALL,
+	"alchemy_lab": Floor.ALCHEMY,
+	"scriptorium": Floor.SCRIPTORIUM,
+	"refectory": Floor.REFECTORY,
+	"training_yard": Floor.TRAINING_YARD,
+	"reliquary_row": Floor.RELIQUARY,
+	"proctors_study": Floor.STUDY,
 }
 
 const FLOOR_STYLE := {
 	Floor.HALL: {"base": Color("4a4f5c"), "alt": Color("545a68"), "line": Color("3a3e49"), "pattern": "checker"},
-	Floor.CLASSROOM: {"base": Color("6b5a45"), "alt": Color("6b5a45"), "line": Color("53442f"), "pattern": "plain"},
-	Floor.LAB: {"base": Color("46596b"), "alt": Color("4d6274"), "line": Color("354552"), "pattern": "grid"},
-	Floor.LIBRARY: {"base": Color("6b3f42"), "alt": Color("6b3f42"), "line": Color("532f33"), "pattern": "plain"},
-	Floor.CAFETERIA: {"base": Color("5e6b44"), "alt": Color("6a7850"), "line": Color("4a5436"), "pattern": "checker"},
-	Floor.GYM: {"base": Color("8a6a3a"), "alt": Color("8a6a3a"), "line": Color("6d5330"), "pattern": "planks"},
-	Floor.LOCKER_BAY: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
-	Floor.OFFICE: {"base": Color("3f5749"), "alt": Color("3f5749"), "line": Color("31443a"), "pattern": "plain"},
+	Floor.LECTURE_HALL: {"base": Color("6b5a45"), "alt": Color("6b5a45"), "line": Color("53442f"), "pattern": "plain"},
+	Floor.ALCHEMY: {"base": Color("46596b"), "alt": Color("4d6274"), "line": Color("354552"), "pattern": "grid"},
+	Floor.SCRIPTORIUM: {"base": Color("6b3f42"), "alt": Color("6b3f42"), "line": Color("532f33"), "pattern": "plain"},
+	Floor.REFECTORY: {"base": Color("5e6b44"), "alt": Color("6a7850"), "line": Color("4a5436"), "pattern": "checker"},
+	Floor.TRAINING_YARD: {"base": Color("8a6a3a"), "alt": Color("8a6a3a"), "line": Color("6d5330"), "pattern": "planks"},
+	Floor.RELIQUARY: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
+	Floor.STUDY: {"base": Color("3f5749"), "alt": Color("3f5749"), "line": Color("31443a"), "pattern": "plain"},
 	Floor.STAIRS: {"base": Color("2f6b8a"), "alt": Color("3a7ea1"), "line": Color("235268"), "pattern": "stairs"},
 }
 
@@ -50,7 +50,8 @@ static func build_tileset() -> Dictionary:
 	var floor_img := Image.create(TILE_W * floor_count, TILE_H, false, Image.FORMAT_RGBA8)
 	floor_img.fill(Color(0, 0, 0, 0))
 	for i in floor_count:
-		_paint_floor(floor_img, i * TILE_W, i)
+		if not _blit_art(floor_img, ArtLibrary.floor_key(i), i * TILE_W, 0, Vector2i(TILE_W, TILE_H)):
+			_paint_floor(floor_img, i * TILE_W, i)
 	var floor_src := TileSetAtlasSource.new()
 	floor_src.texture = ImageTexture.create_from_image(floor_img)
 	floor_src.texture_region_size = Vector2i(TILE_W, TILE_H)
@@ -62,9 +63,15 @@ static func build_tileset() -> Dictionary:
 	var block_h := TILE_H + BLOCK_H
 	var block_img := Image.create(TILE_W * block_count, block_h, false, Image.FORMAT_RGBA8)
 	block_img.fill(Color(0, 0, 0, 0))
-	_paint_wall(block_img, Block.WALL * TILE_W)
-	_paint_door(block_img, Block.DOOR_CLOSED * TILE_W, false)
-	_paint_door(block_img, Block.DOOR_OPEN * TILE_W, true)
+	var block_size := Vector2i(TILE_W, block_h)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.WALL), Block.WALL * TILE_W, 0, block_size):
+		_paint_wall(block_img, Block.WALL * TILE_W)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_CLOSED),
+			Block.DOOR_CLOSED * TILE_W, 0, block_size):
+		_paint_door(block_img, Block.DOOR_CLOSED * TILE_W, false)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_OPEN),
+			Block.DOOR_OPEN * TILE_W, 0, block_size):
+		_paint_door(block_img, Block.DOOR_OPEN * TILE_W, true)
 	var block_src := TileSetAtlasSource.new()
 	block_src.texture = ImageTexture.create_from_image(block_img)
 	block_src.texture_region_size = Vector2i(TILE_W, block_h)
@@ -77,6 +84,22 @@ static func build_tileset() -> Dictionary:
 	var block_id := ts.add_source(block_src)
 
 	return {"tileset": ts, "floor_source": floor_id, "block_source": block_id}
+
+## Copies an authored sprite into the atlas, scaling it to the cell. Returns
+## false when there is no art for that key, so the caller paints instead.
+static func _blit_art(target: Image, key: String, x: int, y: int, size: Vector2i) -> bool:
+	var tex := ArtLibrary.texture(key)
+	if tex == null:
+		return false
+	var src := tex.get_image()
+	if src == null:
+		return false
+	src = src.duplicate()
+	src.convert(Image.FORMAT_RGBA8)
+	if src.get_size() != size:
+		src.resize(size.x, size.y, Image.INTERPOLATE_LANCZOS)
+	target.blit_rect(src, Rect2i(Vector2i.ZERO, size), Vector2i(x, y))
+	return true
 
 # -------------------------------------------------------------- primitives
 
@@ -192,7 +215,6 @@ static func _jitter(col: Color, x: int, y: int, amount: float) -> Color:
 # ------------------------------------------------------------ shared colors
 
 const TEAM_PLAYER := Color("4fc3f7")
-const TEAM_ENEMY := Color("ef5350")
 const ELITE_TRIM := Color("ffca28")
 const BOSS_TRIM := Color("ab47bc")
 

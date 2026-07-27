@@ -6,10 +6,22 @@ extends RefCounted
 
 enum Team { PLAYER, ENEMY }
 enum Rank { GRUNT, ELITE, BOSS, HERO }
+## Content resources refer to abilities by enum; stats stay string-keyed.
+enum Ability { STR, DEX, CON, INT, WIS, CHA }
 
 const ABILITIES := ["str", "dex", "con", "int", "wis", "cha"]
 
+static func ability_key(ability: Ability) -> String:
+	return ABILITIES[clampi(int(ability), 0, ABILITIES.size() - 1)]
+
+static func ability_from_key(key: String) -> Ability:
+	var index := ABILITIES.find(key.to_lower())
+	return (index if index >= 0 else Ability.STR) as Ability
+
 var id: String = "entity"
+## Sprite lookup key; separate from `id` so save ids and art file names can
+## differ (the protagonist is "player_01" but its art is entities/player.png).
+var art_id: String = "entity"
 var display_name: String = "Someone"
 var team: int = Team.ENEMY
 var rank: int = Rank.GRUNT
@@ -36,7 +48,7 @@ var unlocked_spells: Array = []       # spell ids
 var known_spells: Array = []          # what this entity may cast this run
 
 # Gear + effects
-var equipped_gear: Dictionary = {}    # {"weapon": {...}, "trinket": {...}}
+var equipped_gear: Dictionary = {}    ## slot key -> LootItemData
 var conditions: Dictionary = {}       # id -> rounds remaining (-1 = until removed)
 var bonus_ac: int = 0                 # from conditions/gear, recomputed on demand
 
@@ -48,7 +60,6 @@ var home_pos: Vector2i = Vector2i.ZERO
 var guard_radius: int = 0
 var tint: Color = Color(0.8, 0.8, 0.9)
 var xp_value: int = 5
-var loot_table: String = ""
 
 # ---------------------------------------------------------------- ability math
 
@@ -59,8 +70,7 @@ func mod(ability: String) -> int:
 	return ability_mod(int(stats.get(ability, 10)))
 
 func ac() -> int:
-	var total := ac_base + mod("dex") + bonus_ac
-	total += int(gear_bonus("ac"))
+	var total := ac_base + mod("dex") + bonus_ac + gear_ac_bonus()
 	if has_condition("shielded"):
 		total += 5
 	return total
@@ -84,7 +94,7 @@ func best_save_ability() -> String:
 	return best
 
 func attack_bonus() -> int:
-	return mod(attack_ability) + proficiency + int(gear_bonus("attack"))
+	return mod(attack_ability) + proficiency + gear_attack_bonus()
 
 func spell_attack_bonus() -> int:
 	return mod(casting_ability) + proficiency
@@ -92,32 +102,58 @@ func spell_attack_bonus() -> int:
 func spell_save_dc() -> int:
 	return 8 + proficiency + mod(casting_ability)
 
+func weapon() -> LootItemData:
+	return equipped_gear.get("weapon", null)
+
 func damage_expr() -> String:
-	var gear_dice: String = ""
-	if equipped_gear.has("weapon"):
-		gear_dice = str(equipped_gear["weapon"].get("damage_dice", ""))
-	var dice: String = gear_dice if gear_dice != "" else damage_dice
-	var flat: int = mod(attack_ability) + int(gear_bonus("damage"))
+	var held := weapon()
+	var dice: String = damage_dice
+	if held != null and held.damage_dice != "":
+		dice = held.damage_dice
+	var flat: int = mod(attack_ability) + gear_damage_bonus()
 	if flat == 0:
 		return dice
 	return "%s%s%d" % [dice, "+" if flat > 0 else "", flat]
 
 func weapon_label() -> String:
-	if equipped_gear.has("weapon"):
-		return str(equipped_gear["weapon"].get("name", weapon_name))
-	return weapon_name
+	var held := weapon()
+	return held.display_name if held != null else weapon_name
 
 func reach() -> int:
-	if equipped_gear.has("weapon"):
-		return int(equipped_gear["weapon"].get("range", attack_range))
-	return attack_range
+	var held := weapon()
+	return held.range_tiles if held != null else attack_range
 
-func gear_bonus(key: String) -> int:
+func gear_attack_bonus() -> int:
 	var total := 0
-	for slot: Variant in equipped_gear:
-		var item: Dictionary = equipped_gear[slot]
-		total += int(item.get(key + "_bonus", 0))
+	for item: LootItemData in equipped_gear.values():
+		total += item.attack_bonus
 	return total
+
+func gear_damage_bonus() -> int:
+	var total := 0
+	for item: LootItemData in equipped_gear.values():
+		total += item.damage_bonus
+	return total
+
+func gear_ac_bonus() -> int:
+	var total := 0
+	for item: LootItemData in equipped_gear.values():
+		total += item.ac_bonus
+	return total
+
+## Equipped gear as slot -> id, for saving.
+func gear_ids() -> Dictionary:
+	var out: Dictionary = {}
+	for slot: String in equipped_gear:
+		out[slot] = str((equipped_gear[slot] as LootItemData).id)
+	return out
+
+func equip_ids(ids: Dictionary) -> void:
+	equipped_gear.clear()
+	for slot: String in ids:
+		var item := Roster.loot_item(StringName(ids[slot]))
+		if item != null:
+			equipped_gear[slot] = item
 
 # ------------------------------------------------------------------- lifecycle
 
@@ -144,9 +180,6 @@ func add_condition(cond: String, rounds: int = 1) -> void:
 
 func has_condition(cond: String) -> bool:
 	return conditions.has(cond)
-
-func remove_condition(cond: String) -> void:
-	conditions.erase(cond)
 
 ## Ticks condition durations at the start of this entity's turn.
 func tick_conditions() -> Array:
@@ -189,6 +222,7 @@ func restore_all_slots() -> void:
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
+		"art_id": art_id,
 		"name": display_name,
 		"team": team,
 		"rank": rank,
@@ -208,7 +242,7 @@ func to_dict() -> Dictionary:
 		"slots_used": slots_used.duplicate(),
 		"unlocked_spells": unlocked_spells.duplicate(),
 		"known_spells": known_spells.duplicate(),
-		"equipped_gear": equipped_gear.duplicate(true),
+		"equipped_gear": gear_ids(),
 		"conditions": conditions.duplicate(),
 		"xp_value": xp_value,
 		"tint": tint.to_html(false),
@@ -217,6 +251,7 @@ func to_dict() -> Dictionary:
 static func from_dict(data: Dictionary) -> Entity:
 	var e := Entity.new()
 	e.id = str(data.get("id", "entity"))
+	e.art_id = str(data.get("art_id", e.id))
 	e.display_name = str(data.get("name", "Someone"))
 	e.team = int(data.get("team", Team.ENEMY))
 	e.rank = int(data.get("rank", Rank.GRUNT))
@@ -238,7 +273,7 @@ static func from_dict(data: Dictionary) -> Entity:
 	e.slots_used = (data.get("slots_used", {}) as Dictionary).duplicate()
 	e.unlocked_spells = (data.get("unlocked_spells", []) as Array).duplicate()
 	e.known_spells = (data.get("known_spells", e.unlocked_spells) as Array).duplicate()
-	e.equipped_gear = (data.get("equipped_gear", {}) as Dictionary).duplicate(true)
+	e.equip_ids(data.get("equipped_gear", {}))
 	e.conditions = (data.get("conditions", {}) as Dictionary).duplicate()
 	e.xp_value = int(data.get("xp_value", 5))
 	e.loot_table = str(data.get("loot_table", ""))
@@ -246,5 +281,3 @@ static func from_dict(data: Dictionary) -> Entity:
 		e.tint = Color(str(data["tint"]))
 	return e
 
-func duplicate_entity() -> Entity:
-	return Entity.from_dict(to_dict())

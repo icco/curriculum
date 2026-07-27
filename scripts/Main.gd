@@ -5,65 +5,83 @@ extends Node2D
 
 enum Mode { FREE, PREVIEW, AIMING }
 
-const AUTO_SAVE := true
+@export var auto_save: bool = true
+@export_group("Pacing")
+## Seconds each combat beat holds before the next event plays.
+@export_range(0.0, 1.0, 0.02) var attack_beat: float = 0.16
+@export_range(0.0, 1.0, 0.02) var death_beat: float = 0.14
+@export_range(0.0, 1.0, 0.02) var cast_beat: float = 0.1
 
 var state: GameState
 var session: FloorSession
-var board: BoardView
-var camera: CameraRig
-var hud: HUD
-var screens: LoopScreen
-var debug_shot: DebugShot
+
+# Composed in Main.tscn rather than constructed here.
+@onready var board: BoardView = $Board
+@onready var camera: CameraRig = $Camera
+@onready var hud: HUD = $HUD
+@onready var screens: LoopScreen = $Screens
+@onready var debug_shot: DebugShot = $DebugShot
 
 var mode: int = Mode.FREE
 var busy: bool = false
 var pending: Dictionary = {}     ## staged action awaiting a confirming tap
-var aiming_spell: String = ""
+var aiming_spell: StringName = &""
 
 func _ready() -> void:
 	Roster.load_data()
 	DebugShot.seed_from_env()
 
 	state = GameState.new()
-	# LOOPWOOD_FRESH=1 discards the save so scripted runs are reproducible.
-	if OS.get_environment("LOOPWOOD_FRESH") != "":
+	# CURRICULUM_FRESH=1 discards the save so scripted runs are reproducible.
+	if OS.get_environment("CURRICULUM_FRESH") != "":
 		GameState.wipe()
-	elif AUTO_SAVE:
+	elif auto_save:
 		state.load_from()
 
-	board = BoardView.new()
-	board.name = "Board"
-	add_child(board)
-
-	camera = CameraRig.new()
-	camera.name = "Camera"
-	add_child(camera)
 	camera.make_current()
 	camera.tapped.connect(_on_tapped)
 
-	hud = HUD.new()
-	hud.name = "HUD"
-	add_child(hud)
 	hud.action_pressed.connect(_on_action)
 	hud.spell_chosen.connect(_on_spell_chosen)
 	hud.item_chosen.connect(_on_item_chosen)
 	hud.confirm_pressed.connect(_commit_pending)
 	hud.cancel_pressed.connect(_clear_pending)
 
-	screens = LoopScreen.new()
-	screens.name = "Screens"
-	add_child(screens)
 	screens.continue_pressed.connect(_start_new_loop)
 
-	debug_shot = get_node_or_null("DebugShot")
-	if debug_shot != null:
-		debug_shot.action_requested.connect(_on_debug_action)
-		debug_shot.busy_probe = is_busy
+	debug_shot.action_requested.connect(_on_debug_action)
+	debug_shot.busy_probe = is_busy
 
 	_start_session(state.current_depth())
 
 func is_busy() -> bool:
 	return busy
+
+## Keyboard mirrors of the action bar, so the game is playable without touch.
+func _unhandled_input(event: InputEvent) -> void:
+	if session == null or screens.is_open():
+		return
+	if event.is_action_pressed("action_confirm"):
+		_commit_pending()
+	elif event.is_action_pressed("action_cancel"):
+		_clear_pending()
+	elif event.is_action_pressed("turn_end"):
+		_on_action("end_turn")
+	elif event.is_action_pressed("action_dash"):
+		_on_action("dash")
+	elif event.is_action_pressed("action_loot"):
+		_on_action("loot")
+	elif event.is_action_pressed("action_door"):
+		_on_action("door")
+	elif event.is_action_pressed("action_descend"):
+		_on_action("descend")
+	elif event.is_action_pressed("panel_spells"):
+		_on_action("spells")
+	elif event.is_action_pressed("panel_items"):
+		_on_action("items")
+	else:
+		return
+	get_viewport().set_input_as_handled()
 
 # ------------------------------------------------------------------ session
 
@@ -105,7 +123,7 @@ func _refresh_highlights() -> void:
 		var spell := Roster.spell(aiming_spell)
 		var cells: Array = []
 		for e: Entity in session.visible_enemies():
-			if MapData.chebyshev(session.player.grid_pos, e.grid_pos) <= int(spell.get("range", 1)):
+			if MapData.chebyshev(session.player.grid_pos, e.grid_pos) <= spell.range_tiles:
 				cells.append(e.grid_pos)
 		board.set_targets(cells)
 		return
@@ -153,13 +171,13 @@ func _stage_interaction(cell: Vector2i) -> bool:
 	var container: Dictionary = session.map.containers.get(cell, {})
 	if not container.is_empty() and not bool(container.get("looted", false)):
 		if not session.has_action():
-			hud.set_hint("No action left to search that locker.")
+			hud.set_hint("No action left to open that reliquary.")
 			return true
 		pending = {"kind": "loot", "cell": cell}
 		mode = Mode.PREVIEW
 		board.set_cursor(cell)
-		hud.show_confirm("Search")
-		hud.set_hint("Search the locker. Tap again or Confirm.")
+		hud.show_confirm("Open")
+		hud.set_hint("Open the reliquary. Tap again or Confirm.")
 		return true
 	if session.map.doors.has(cell):
 		pending = {"kind": "door", "cell": cell}
@@ -208,7 +226,7 @@ func _stage_spell(cell: Vector2i) -> void:
 	pending = {"kind": "spell", "cell": cell, "spell_id": aiming_spell}
 	board.set_cursor(cell)
 	var affected: Array = [cell]
-	var aoe := int(spell.get("aoe", 0))
+	var aoe := spell.aoe
 	if aoe > 0:
 		affected = []
 		for y in range(cell.y - aoe, cell.y + aoe + 1):
@@ -222,7 +240,7 @@ func _stage_spell(cell: Vector2i) -> void:
 	var where: String = occupant.display_name if occupant != null else "that tile"
 	if aoe > 0:
 		where += " and everything within %d tiles" % aoe
-	hud.set_hint("%s on %s. Tap again or Confirm." % [str(spell.get("name", "Spell")), where])
+	hud.set_hint("%s on %s. Tap again or Confirm." % [spell.display_name, where])
 
 ## Tiles on the path where an enemy could take a swing as you leave.
 func _threatened_cells(path: Array) -> Array:
@@ -240,7 +258,7 @@ func _threatened_cells(path: Array) -> Array:
 func _clear_pending() -> void:
 	pending = {}
 	mode = Mode.FREE
-	aiming_spell = ""
+	aiming_spell = &""
 	hud.hide_confirm()
 	hud.set_hint("")
 	_refresh_highlights()
@@ -257,7 +275,7 @@ func _commit_pending() -> void:
 		"attack":
 			events = session.player_attack(action["target"])
 		"spell":
-			events = session.player_cast(str(action["spell_id"]), action["cell"])
+			events = session.player_cast(action["spell_id"], action["cell"])
 		"loot":
 			events = session.player_loot()
 		"door":
@@ -291,21 +309,20 @@ func _on_action(name: String) -> void:
 			hud.close_panels()
 			await _end_turn()
 
-func _on_spell_chosen(spell_id: String) -> void:
+func _on_spell_chosen(spell_id: StringName) -> void:
 	var spell := Roster.spell(spell_id)
 	hud.close_panels()
-	if not session.can_cast(spell):
-		hud.set_hint("Cannot cast %s right now." % str(spell.get("name", spell_id)))
+	if spell == null or not session.can_cast(spell):
+		hud.set_hint("Cannot cast that right now.")
 		return
 	# Self-target spells need no aiming step.
-	if str(spell.get("target", "")) == "self" or int(spell.get("range", 0)) == 0:
+	if spell.target == SpellData.Target.SELF or spell.range_tiles == 0:
 		await _run(session.player_cast(spell_id, session.player.grid_pos))
 		return
 	pending = {}
 	aiming_spell = spell_id
 	mode = Mode.AIMING
-	hud.set_hint("Tap a target for %s (range %d)." % [
-		str(spell.get("name", spell_id)), int(spell.get("range", 0))])
+	hud.set_hint("Tap a target for %s (range %d)." % [spell.display_name, spell.range_tiles])
 	_refresh_highlights()
 
 func _on_item_chosen(index: int) -> void:
@@ -360,13 +377,13 @@ func _replay(events: Array) -> void:
 				board.snap_entity(event["attacker"])
 			"attack", "opportunity", "spell_attack", "spell_auto", "spell_save":
 				_flash(event.get("target"))
-				await _beat(0.16)
+				await _beat(attack_beat)
 			"cast":
-				await _beat(0.1)
+				await _beat(cast_beat)
 			"death":
 				var victim: Entity = event["target"]
 				board.remove_entity(victim)
-				await _beat(0.14)
+				await _beat(death_beat)
 			"level_up":
 				hud.set_banner("Level %d!" % int(event["level"]), ArtFactory.UI_GOOD)
 				await _beat(0.2)
@@ -437,17 +454,17 @@ func _handle_end_of_run() -> void:
 	board.clear_highlights()
 	if session.phase == FloorSession.Phase.ESCAPED:
 		var summary := state.win_run()
-		if AUTO_SAVE:
+		if auto_save:
 			state.save()
 		screens.show_victory(state, summary)
 	else:
 		var summary := state.fail_loop()
-		if AUTO_SAVE:
+		if auto_save:
 			state.save()
 		screens.show_loop_failed(state, summary)
 
 func _start_new_loop() -> void:
-	if AUTO_SAVE:
+	if auto_save:
 		state.save()
 	_clear_pending()
 	_start_session(1)
@@ -494,9 +511,9 @@ func _on_debug_action(action: String, args: Array) -> void:
 		"dash", "loot", "door", "descend", "spells", "items":
 			await _on_action(action)
 		"spell":
-			await _on_spell_chosen(str(args[0]))
+			await _on_spell_chosen(StringName(args[0]))
 		"cast":
-			await _run(session.player_cast(str(args[0]), Vector2i(int(args[1]), int(args[2]))))
+			await _run(session.player_cast(StringName(args[0]), Vector2i(int(args[1]), int(args[2]))))
 		"kill_all":
 			for e: Entity in session.entities:
 				if e != session.player:

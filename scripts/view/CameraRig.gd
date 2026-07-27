@@ -10,10 +10,13 @@ signal tapped(world_pos: Vector2)
 
 const MIN_ZOOM := 0.55
 const MAX_ZOOM := 2.6
-const TAP_SLOP := 14.0      ## px of travel still counted as a tap
-const TAP_TIME := 0.4       ## seconds a tap may last
 
 @export var pan_enabled: bool = true
+@export_range(0.5, 3.0, 0.05) var start_zoom: float = 1.25
+## Travel still counted as a tap, in pixels.
+@export_range(2.0, 40.0) var tap_slop: float = 14.0
+## How long a tap may last, in seconds.
+@export_range(0.1, 1.0, 0.05) var tap_time: float = 0.4
 
 var bounds: Rect2 = Rect2()
 var _touches: Dictionary = {}        ## index -> current position
@@ -23,7 +26,7 @@ var _dragging: bool = false
 var _elapsed: float = 0.0
 
 func _ready() -> void:
-	zoom = Vector2(1.25, 1.25)
+	zoom = Vector2(start_zoom, start_zoom)
 	set_process(true)
 
 func _process(delta: float) -> void:
@@ -65,6 +68,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_apply_zoom(1.1, event.position)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_apply_zoom(1.0 / 1.1, event.position)
+	elif event.is_action_pressed("camera_zoom_in"):
+		_apply_zoom(1.15, get_viewport_rect().size * 0.5)
+	elif event.is_action_pressed("camera_zoom_out"):
+		_apply_zoom(1.0 / 1.15, get_viewport_rect().size * 0.5)
 
 func _handle_touch(event: InputEventScreenTouch) -> void:
 	if event.pressed:
@@ -83,7 +90,7 @@ func _handle_touch(event: InputEventScreenTouch) -> void:
 			return
 		var travel: float = (event.position - (start["pos"] as Vector2)).length()
 		var held: float = _elapsed - float(start["time"])
-		if travel <= TAP_SLOP and held <= TAP_TIME and not _dragging:
+		if travel <= tap_slop and held <= tap_time and not _dragging:
 			tapped.emit(screen_to_world(event.position))
 
 func _handle_drag(event: InputEventScreenDrag) -> void:

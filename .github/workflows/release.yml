@@ -39,13 +39,13 @@ jobs:
           "$godot" --headless --path . \
             --export-release Web build/web/index.html
           "$godot" --headless --path . \
-            --export-release Linux build/linux/loopwood-high.x86_64
+            --export-release Linux build/linux/curriculum.x86_64
 
       - name: Package
         run: |
           mkdir -p dist
-          (cd build/web && zip -qr ../../dist/loopwood-high-web.zip .)
-          (cd build/linux && tar czf ../../dist/loopwood-high-linux-x86_64.tar.gz .)
+          (cd build/web && zip -qr ../../dist/curriculum-web.zip .)
+          (cd build/linux && tar czf ../../dist/curriculum-linux-x86_64.tar.gz .)
           ls -la dist
 
       - uses: actions/upload-artifact@v7

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_1tjjj"]
+
+[resource]
+script = ExtResource("1_1tjjj")
+id = &"spilled_reagents"
+display_name = "Spilled Reagents"
+level = 1
+kind = 2
+target = 3
+range_tiles = 8
+aoe = 2
+damage = "1d4"
+damage_type = "bludgeoning"
+save_effect = 0
+condition = &"slowed"
+condition_rounds = 2
+description = "Spilled lunch trays. DEX save or slip and be slowed."
+color = Color(0.5647059, 0.7921569, 0.9764706, 1)
+icon_name = &"slick"
+unlock_cost = 3

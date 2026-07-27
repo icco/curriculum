@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_8haao"]
+
+[resource]
+script = ExtResource("1_8haao")
+id = &"illusionist"
+display_name = "Illusionist Understudy"
+min_depth = 3
+score_dex = 15
+score_con = 11
+score_int = 12
+score_wis = 11
+score_cha = 16
+armour_class = 13
+hit_dice = "3d8"
+speed_tiles = 7
+attack_ability = 1
+weapon_name = "Mirror Blade"
+damage_dice = "1d6+1"
+xp_value = 10
+tint = Color(0.14901961, 0.6509804, 0.6039216, 1)

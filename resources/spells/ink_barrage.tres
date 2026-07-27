@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_mcnh6"]
+
+[resource]
+script = ExtResource("1_mcnh6")
+id = &"ink_barrage"
+display_name = "Ink Barrage"
+level = 1
+kind = 1
+range_tiles = 12
+damage = "1d4+1"
+darts = 3
+description = "Three unerring spitballs. No attack roll, 3 x 1d4+1 force."
+color = Color(0.7019608, 0.6156863, 0.85882354, 1)
+icon_name = &"missile"
+starting = true

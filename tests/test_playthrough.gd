@@ -30,11 +30,11 @@ func _play_turn(session: FloorSession) -> void:
 		var seen := session.visible_enemies()
 		if not seen.is_empty():
 			var target: Entity = _nearest(player, seen)
-			for spell: Dictionary in session.known_spells():
-				if str(spell.get("target", "")) != "enemy" or not session.can_cast(spell):
+			for spell: SpellData in session.known_spells():
+				if spell.target != SpellData.Target.ENEMY or not session.can_cast(spell):
 					continue
-				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= int(spell.get("range", 1)):
-					session.player_cast(str(spell["id"]), target.grid_pos)
+				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= spell.range_tiles:
+					session.player_cast(spell.id, target.grid_pos)
 					break
 
 	# 3. Loot anything beside us with a spare action.
@@ -137,7 +137,7 @@ func test_a_single_floor_can_be_played_and_left() -> void:
 ## from its entry to its stairwell, descending advances the month, and the exit
 ## on floor 12 ends the run in victory. Combat is taken out of the picture on
 ## purpose — survivability is a balance question, tested separately below.
-func test_walking_the_whole_school_reaches_the_exit() -> void:
+func test_walking_the_whole_academy_reaches_the_exit() -> void:
 	var state := GameState.new()
 	var session := FloorSession.new(state)
 	session.build(1)
@@ -184,7 +184,8 @@ func test_a_modest_run_can_clear_early_floors() -> void:
 		Dice.seed_with(2200 + s * 17)
 		var state := GameState.new()
 		state.global["skill_points"] = 12
-		for node_id: String in ["study_group", "hall_savvy", "extra_period", "pop_quiz_node", "tenure"]:
+		for node_id: StringName in [&"reading_circle", &"corridor_savvy", &"first_circle",
+				&"examination_recall", &"tenure"]:
 			state.purchase_node(node_id)
 		var session := FloorSession.new(state)
 		session.build(1)
@@ -242,13 +243,13 @@ func test_level_progression_tables() -> void:
 ## Cantrips gain dice at 5 and 11 like their 5e counterparts.
 func test_cantrip_damage_scales_with_level() -> void:
 	var caster := Roster.make_player({}, 1)
-	var cantrip := Roster.spell("chalk_dart")
+	var cantrip := Roster.spell(&"slate_shard")
 	eq(Combat.spell_damage_expr(caster, cantrip), "1d10", "one die at level 1")
 	caster = Roster.make_player({}, 5)
 	eq(Combat.spell_damage_expr(caster, cantrip), "2d10", "two dice at level 5")
 	caster = Roster.make_player({}, 11)
 	eq(Combat.spell_damage_expr(caster, cantrip), "3d10", "three dice at level 11")
-	var levelled := Roster.spell("pop_quiz")
+	var levelled := Roster.spell(&"sudden_examination")
 	eq(Combat.spell_damage_expr(caster, levelled), "2d8", "levelled spells do not scale")
 
 func test_every_floor_generates_and_opens_cleanly() -> void:
@@ -264,17 +265,17 @@ func test_every_floor_generates_and_opens_cleanly() -> void:
 		truthy(session.enemies_alive() >= 3, "floor %d has a roster" % depth)
 		eq(session.state.month_name(), GameState.month_for(depth), "floor %d maps to a month" % depth)
 		if depth == GameState.FINAL_FLOOR:
-			eq(session.boss.id, "principal", "the last floor is guarded by the Principal")
+			eq(session.boss.id, "rector", "the last floor is guarded by the Rector")
 
 func test_death_ends_the_run_and_resets_the_loop() -> void:
 	var state := GameState.new()
-	state.global["unlocked_spells"] = ["pop_quiz"]
+	state.global["unlocked_spells"] = ["sudden_examination"]
 	var session := FloorSession.new(state)
 	session.build(6)  # deep floor, level 1 character: this will not go well
 	session.player.max_hp = 4
 	session.player.current_hp = 4
-	session.player.equipped_gear = {"weapon": {"name": "Hockey Stick", "damage_dice": "1d8"}}
-	state.add_consumable({"name": "Juice Box", "effect": "heal", "power": "2d4"})
+	session.player.equip_ids({"weapon": "oak_quarterstaff"})
+	state.add_consumable(&"vial_of_cordial")
 
 	var result := _drive(session, 2000)
 	eq(int(result["phase"]), FloorSession.Phase.DEAD, "a 4 hp character on floor 6 dies")
@@ -284,7 +285,7 @@ func test_death_ends_the_run_and_resets_the_loop() -> void:
 	eq(int(state.run["depth"]), 1, "the loop resets to floor 1")
 	truthy((state.run["gear"] as Dictionary).is_empty(), "gear is lost with the loop")
 	truthy((state.run["consumables"] as Array).is_empty(), "consumables are lost with the loop")
-	truthy((state.global["unlocked_spells"] as Array).has("pop_quiz"), "learned magic survives")
+	truthy((state.global["unlocked_spells"] as Array).has("sudden_examination"), "learned magic survives")
 	eq(int(state.global["loops"]), 2, "the loop counter advances")
 
 func test_new_loop_starts_a_fresh_floor_one() -> void:
@@ -308,12 +309,12 @@ func test_stairs_on_the_final_floor_are_gated_by_the_boss() -> void:
 	session.build(GameState.FINAL_FLOOR)
 	session.player.grid_pos = session.map.stairs_pos
 	var blocked := session.can_descend()
-	falsy(bool(blocked["ok"]), "cannot leave while the Principal lives")
-	truthy(str(blocked["reason"]).contains("Principal"), "the refusal names them")
+	falsy(bool(blocked["ok"]), "cannot leave while the Rector lives")
+	truthy(str(blocked["reason"]).contains("Rector"), "the refusal names them")
 
 	session.boss.current_hp = 0
 	var allowed := session.can_descend()
-	truthy(bool(allowed["ok"]), "with the Principal down the exit opens")
+	truthy(bool(allowed["ok"]), "with the Rector down the exit opens")
 	var events := session.descend()
 	eq(int(session.phase), FloorSession.Phase.ESCAPED, "taking the exit wins the run")
 	var found := false
@@ -339,11 +340,11 @@ func test_descending_grants_a_short_rest() -> void:
 	truthy(session.player.current_hp > 5, "the landing restored some health")
 	truthy(session.player.slots_left(1) > 0, "and a spell slot")
 
-func test_semester_break_is_a_full_rest() -> void:
+func test_term_break_is_a_full_rest() -> void:
 	Dice.seed_with(707)
 	var state := GameState.new()
 	var session := FloorSession.new(state)
-	session.build(4)  # 4 % SEMESTER_BREAK == 0
+	session.build(4)  # 4 % TERM_BREAK == 0
 	session.player.current_hp = 1
 	session.player.slots_used = {"level_1": 2}
 	session.player.grid_pos = session.map.stairs_pos
@@ -351,7 +352,7 @@ func test_semester_break_is_a_full_rest() -> void:
 		if e != session.player:
 			e.current_hp = 0
 	session.descend()
-	eq(session.player.current_hp, session.player.max_hp, "semester break heals fully")
+	eq(session.player.current_hp, session.player.max_hp, "term break heals fully")
 	eq(session.player.slots_left(1), int(session.player.spell_slots["level_1"]), "and refills every slot")
 
 func test_looting_a_locker_equips_gear() -> void:
@@ -373,7 +374,7 @@ func test_looting_a_locker_equips_gear() -> void:
 	var events := session.player_loot()
 	eq(str(events[0]["type"]), "loot", "looting produces a loot event")
 	truthy(bool((session.map.containers[container] as Dictionary)["looted"]), "the locker is marked looted")
-	var gained: bool = not session.player.equipped_gear.is_empty() or not state.consumables().is_empty()
+	var gained: bool = not session.player.equipped_gear.is_empty() or not state.consumable_ids().is_empty()
 	truthy(gained, "something was actually gained")
 
 func test_player_cannot_act_outside_their_turn() -> void:
@@ -388,7 +389,7 @@ func test_player_cannot_act_outside_their_turn() -> void:
 		"attacks are refused out of turn")
 	eq(session.player_move([session.player.grid_pos, session.player.grid_pos + Vector2i(1, 0)]).size(), 0,
 		"movement is refused out of turn")
-	eq(session.player_cast("chalk_dart", session.player.grid_pos).size(), 0,
+	eq(session.player_cast(&"slate_shard", session.player.grid_pos).size(), 0,
 		"casting is refused out of turn")
 
 func test_action_economy_is_enforced_for_the_player() -> void:
@@ -399,11 +400,11 @@ func test_action_economy_is_enforced_for_the_player() -> void:
 	while not session.is_player_turn():
 		session.advance()
 	truthy(session.has_action(), "turn starts with an action")
-	session.player_cast("chalk_dart", session.player.grid_pos + Vector2i(1, 0))
+	session.player_cast(&"slate_shard", session.player.grid_pos + Vector2i(1, 0))
 	falsy(session.has_action(), "casting a cantrip spends the action")
-	var refused := session.player_cast("chalk_dart", session.player.grid_pos + Vector2i(1, 0))
+	var refused := session.player_cast(&"slate_shard", session.player.grid_pos + Vector2i(1, 0))
 	eq(str(refused[0]["type"]), "info", "a second cast is refused")
 	truthy(session.has_bonus(), "the bonus action is still free")
-	session.player_cast("textbook_barrier", session.player.grid_pos)
+	session.player_cast(&"grimoire_ward", session.player.grid_pos)
 	falsy(session.has_bonus(), "the bonus action spell consumed it")
 	truthy(session.player.has_condition("shielded"), "and it took effect")
