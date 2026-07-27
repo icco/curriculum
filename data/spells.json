@@ -42,7 +42,10 @@
     "kind": "buff",
     "target": "self",
     "range": 0,
-    "effect": { "condition": "shielded", "rounds": 2 },
+    "effect": {
+      "condition": "shielded",
+      "rounds": 2
+    },
     "icon": "shield",
     "color": "4fc3f7",
     "description": "Hovering textbooks grant +5 AC until your next turn ends.",
@@ -78,7 +81,10 @@
     "damage_type": "force",
     "save_ability": "wis",
     "save_effect": "none",
-    "effect": { "condition": "stunned", "rounds": 1 },
+    "effect": {
+      "condition": "stunned",
+      "rounds": 1
+    },
     "icon": "slip",
     "color": "ff8a65",
     "description": "WIS save or be held in place for a round. 1d6 on a failure.",
@@ -124,7 +130,10 @@
     "damage_type": "fire",
     "save_ability": "dex",
     "save_effect": "half",
-    "effect": { "condition": "burning", "rounds": 2 },
+    "effect": {
+      "condition": "burning",
+      "rounds": 2
+    },
     "icon": "fire",
     "color": "ff7043",
     "description": "Alarms scream and flame erupts. 2-tile burst, DEX save for half.",
@@ -143,7 +152,10 @@
     "damage_type": "bludgeoning",
     "save_ability": "dex",
     "save_effect": "none",
-    "effect": { "condition": "slowed", "rounds": 2 },
+    "effect": {
+      "condition": "slowed",
+      "rounds": 2
+    },
     "icon": "slick",
     "color": "90caf9",
     "description": "Spilled lunch trays. DEX save or slip and be slowed.",
