@@ -26,7 +26,7 @@ runtime, so the repo stays text-only.
 | `scripts/ui/` | HUD and screens. |
 | `scripts/data/` | Content Resource classes (SpellData, EnemyData, ...). |
 | `resources/` | Content `.tres` files, the ContentLibrary index, the UI theme. |
-| `assets/` | `source/` raw art in, `sprites/` processed art out, `PROMPTS.md`. |
+| `assets/` | `source/` raw art in, `sprites/` processed art out, `prompts/` the design spec and art prompts. |
 | `tests/` | Headless suites, one `test_*.gd` per area. |
 | `tools/` | Dev and CI scripts. |
 

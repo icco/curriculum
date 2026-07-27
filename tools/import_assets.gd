@@ -7,7 +7,7 @@ extends SceneTree
 ## Reads assets/source/<category>/<name>.png, keys out the flat background,
 ## trims the transparent margin, scales to the slot's target size and writes
 ## assets/sprites/<category>/<name>.png. Midjourney cannot output transparency,
-## so every prompt asks for a flat chroma background — see assets/PROMPTS.md.
+## so every prompt asks for a flat chroma background — see assets/prompts/midjourney.md.
 
 const SOURCE_DIR := "res://assets/source"
 const OUT_DIR := "res://assets/sprites"

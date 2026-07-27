@@ -80,7 +80,7 @@ painted at runtime. Illustrated art is optional and drops in per sprite: put a
 file in `assets/source/`, run `./tools/import-assets.sh`, and that one sprite
 switches over while everything else stays procedural.
 
-[`assets/PROMPTS.md`](assets/PROMPTS.md) has the Midjourney prompt set, tuned to
+[`assets/prompts/midjourney.md`](assets/prompts/midjourney.md) has the prompt set, tuned to
 the 2:1 isometric grid with a consistent scale reference and a keyable flat
 background (Midjourney cannot output transparency). The importer keys the
 background out, trims and rescales.
