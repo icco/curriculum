@@ -140,7 +140,36 @@ func _on_tapped(world_pos: Vector2) -> void:
 	if target != null and target.is_hostile_to(session.player) and session.map.is_visible(cell):
 		_stage_attack(target)
 		return
+	if _stage_interaction(cell):
+		return
 	_stage_move(cell)
+
+## Tapping an adjacent locker or door stages opening it. Returns true if the
+## tile is interactive.
+func _stage_interaction(cell: Vector2i) -> bool:
+	var adjacent := MapData.chebyshev(cell, session.player.grid_pos) <= 1
+	if not adjacent:
+		return false
+	var container: Dictionary = session.map.containers.get(cell, {})
+	if not container.is_empty() and not bool(container.get("looted", false)):
+		if not session.has_action():
+			hud.set_hint("No action left to search that locker.")
+			return true
+		pending = {"kind": "loot", "cell": cell}
+		mode = Mode.PREVIEW
+		board.set_cursor(cell)
+		hud.show_confirm("Search")
+		hud.set_hint("Search the locker. Tap again or Confirm.")
+		return true
+	if session.map.doors.has(cell):
+		pending = {"kind": "door", "cell": cell}
+		mode = Mode.PREVIEW
+		board.set_cursor(cell)
+		var open: bool = session.map.is_door_open(cell)
+		hud.show_confirm("Close" if open else "Open")
+		hud.set_hint("%s the door. Tap again or Confirm." % ("Close" if open else "Open"))
+		return true
+	return false
 
 func _stage_move(cell: Vector2i) -> void:
 	var reach := session.reachable_cells()
@@ -229,6 +258,10 @@ func _commit_pending() -> void:
 			events = session.player_attack(action["target"])
 		"spell":
 			events = session.player_cast(str(action["spell_id"]), action["cell"])
+		"loot":
+			events = session.player_loot()
+		"door":
+			events = session.player_toggle_door()
 	await _run(events)
 
 # ------------------------------------------------------------------ actions
@@ -477,6 +510,18 @@ func _on_debug_action(action: String, args: Array) -> void:
 			screens.show_victory(state, {"insight": 12, "depth": 12, "kills": 40, "loop": 4})
 		"zoom":
 			camera.zoom = Vector2(float(args[0]), float(args[0]))
+		"tap_locker":
+			for c: Vector2i in session.map.containers:
+				for d: Vector2i in MapData.DIRS_8:
+					if session.map.is_walkable(c + d) and session.entity_at(c + d) == null:
+						session.player.grid_pos = c + d
+						board.snap_entity(session.player)
+						session.update_fov()
+						board.refresh_visibility(true)
+						camera.focus_on(board.grid_to_world(c), true)
+						_refresh_ui()
+						_on_tapped(board.grid_to_world(c))
+						return
 		"warp_prop":
 			# Stand beside a tall prop to check isometric draw order.
 			var offset := Vector2i(int(args[0]), int(args[1]))
