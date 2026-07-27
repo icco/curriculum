@@ -22,12 +22,14 @@ func _ready() -> void:
 	add_child(_scrim)
 
 	_root = Control.new()
+	_root.name = "Root"
+	UIKit.apply_theme(_root)
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.visible = false
 	add_child(_root)
 
-	var panel := UIKit.panel(ArtFactory.UI_PANEL, 0.98)
+	var panel := UIKit.panel(&"ScreenPanel")
 	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.offset_left = 60
 	panel.offset_right = -60
@@ -35,34 +37,29 @@ func _ready() -> void:
 	panel.offset_bottom = -40
 	_root.add_child(panel)
 
-	var col := VBoxContainer.new()
-	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	col.add_theme_constant_override("separation", 10)
+	var col := UIKit.vbox(10)
 	panel.add_child(col)
 
-	_title = UIKit.label("The loop resets", 34, ArtFactory.UI_ACCENT)
+	_title = UIKit.label("The loop resets", &"TitleLabel")
 	col.add_child(_title)
-	_summary = UIKit.label("", 18)
+	_summary = UIKit.label("")
 	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_summary)
-	_insight = UIKit.label("", 20, Color("ffd54f"))
+	_insight = UIKit.label("", &"InsightLabel")
 	col.add_child(_insight)
 
-	col.add_child(UIKit.label("What you remember", 22))
+	col.add_child(UIKit.label("What you remember", &"HeadingLabel"))
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.custom_minimum_size = Vector2(0, 240)
 	col.add_child(scroll)
-	_node_list = VBoxContainer.new()
+	_node_list = UIKit.vbox()
 	_node_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_node_list.add_theme_constant_override("separation", 6)
 	scroll.add_child(_node_list)
 
-	var row := HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var row := UIKit.hbox(8, true)
 	col.add_child(row)
-	_continue = UIKit.primary_button("Start the loop again")
+	_continue = UIKit.button("Start the loop again", &"PrimaryButton", 260.0)
 	_continue.pressed.connect(_on_continue)
 	row.add_child(_continue)
 
@@ -107,8 +104,7 @@ func _refresh() -> void:
 	var offered := 0
 	for node: SkillNodeData in GameState.skill_nodes():
 		if _state.has_node_unlocked(node.id):
-			var owned := UIKit.label("✓ %s — %s" % [node.display_name, node.description],
-				16, ArtFactory.UI_GOOD)
+			var owned := UIKit.label("✓ %s — %s" % [node.display_name, node.description], &"GoodLabel")
 			owned.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			_node_list.add_child(owned)
 			continue
@@ -117,18 +113,18 @@ func _refresh() -> void:
 		offered += 1
 		var affordable := _state.can_afford(node.id)
 		var b := UIKit.button("%s — %d insight" % [node.display_name, node.cost],
-			ArtFactory.UI_ACCENT if affordable else ArtFactory.UI_DIM, 420.0)
+			&"ListButton" if affordable else &"DimButton", 420.0)
 		b.disabled = not affordable
 		b.tooltip_text = node.description
 		b.pressed.connect(_on_buy.bind(node.id))
 		_node_list.add_child(b)
-		var desc := UIKit.label("    %s" % node.description, 14, ArtFactory.UI_DIM)
+		var desc := UIKit.label("    %s" % node.description, &"DimLabel")
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_node_list.add_child(desc)
 
 	if offered == 0:
-		_node_list.add_child(UIKit.label("Nothing new to remember yet — survive deeper to earn insight.",
-			16, ArtFactory.UI_DIM))
+		_node_list.add_child(UIKit.label(
+			"Nothing new to remember yet — survive deeper to earn insight.", &"DimLabel"))
 
 func _on_buy(id: StringName) -> void:
 	if _state.purchase_node(id):

@@ -5,15 +5,22 @@ extends Node2D
 
 enum Mode { FREE, PREVIEW, AIMING }
 
-const AUTO_SAVE := true
+@export var auto_save: bool = true
+@export_group("Pacing")
+## Seconds each combat beat holds before the next event plays.
+@export_range(0.0, 1.0, 0.02) var attack_beat: float = 0.16
+@export_range(0.0, 1.0, 0.02) var death_beat: float = 0.14
+@export_range(0.0, 1.0, 0.02) var cast_beat: float = 0.1
 
 var state: GameState
 var session: FloorSession
-var board: BoardView
-var camera: CameraRig
-var hud: HUD
-var screens: LoopScreen
-var debug_shot: DebugShot
+
+# Composed in Main.tscn rather than constructed here.
+@onready var board: BoardView = $Board
+@onready var camera: CameraRig = $Camera
+@onready var hud: HUD = $HUD
+@onready var screens: LoopScreen = $Screens
+@onready var debug_shot: DebugShot = $DebugShot
 
 var mode: int = Mode.FREE
 var busy: bool = false
@@ -28,42 +35,53 @@ func _ready() -> void:
 	# CURRICULUM_FRESH=1 discards the save so scripted runs are reproducible.
 	if OS.get_environment("CURRICULUM_FRESH") != "":
 		GameState.wipe()
-	elif AUTO_SAVE:
+	elif auto_save:
 		state.load_from()
 
-	board = BoardView.new()
-	board.name = "Board"
-	add_child(board)
-
-	camera = CameraRig.new()
-	camera.name = "Camera"
-	add_child(camera)
 	camera.make_current()
 	camera.tapped.connect(_on_tapped)
 
-	hud = HUD.new()
-	hud.name = "HUD"
-	add_child(hud)
 	hud.action_pressed.connect(_on_action)
 	hud.spell_chosen.connect(_on_spell_chosen)
 	hud.item_chosen.connect(_on_item_chosen)
 	hud.confirm_pressed.connect(_commit_pending)
 	hud.cancel_pressed.connect(_clear_pending)
 
-	screens = LoopScreen.new()
-	screens.name = "Screens"
-	add_child(screens)
 	screens.continue_pressed.connect(_start_new_loop)
 
-	debug_shot = get_node_or_null("DebugShot")
-	if debug_shot != null:
-		debug_shot.action_requested.connect(_on_debug_action)
-		debug_shot.busy_probe = is_busy
+	debug_shot.action_requested.connect(_on_debug_action)
+	debug_shot.busy_probe = is_busy
 
 	_start_session(state.current_depth())
 
 func is_busy() -> bool:
 	return busy
+
+## Keyboard mirrors of the action bar, so the game is playable without touch.
+func _unhandled_input(event: InputEvent) -> void:
+	if session == null or screens.is_open():
+		return
+	if event.is_action_pressed("action_confirm"):
+		_commit_pending()
+	elif event.is_action_pressed("action_cancel"):
+		_clear_pending()
+	elif event.is_action_pressed("turn_end"):
+		_on_action("end_turn")
+	elif event.is_action_pressed("action_dash"):
+		_on_action("dash")
+	elif event.is_action_pressed("action_loot"):
+		_on_action("loot")
+	elif event.is_action_pressed("action_door"):
+		_on_action("door")
+	elif event.is_action_pressed("action_descend"):
+		_on_action("descend")
+	elif event.is_action_pressed("panel_spells"):
+		_on_action("spells")
+	elif event.is_action_pressed("panel_items"):
+		_on_action("items")
+	else:
+		return
+	get_viewport().set_input_as_handled()
 
 # ------------------------------------------------------------------ session
 
@@ -359,13 +377,13 @@ func _replay(events: Array) -> void:
 				board.snap_entity(event["attacker"])
 			"attack", "opportunity", "spell_attack", "spell_auto", "spell_save":
 				_flash(event.get("target"))
-				await _beat(0.16)
+				await _beat(attack_beat)
 			"cast":
-				await _beat(0.1)
+				await _beat(cast_beat)
 			"death":
 				var victim: Entity = event["target"]
 				board.remove_entity(victim)
-				await _beat(0.14)
+				await _beat(death_beat)
 			"level_up":
 				hud.set_banner("Level %d!" % int(event["level"]), ArtFactory.UI_GOOD)
 				await _beat(0.2)
@@ -436,17 +454,17 @@ func _handle_end_of_run() -> void:
 	board.clear_highlights()
 	if session.phase == FloorSession.Phase.ESCAPED:
 		var summary := state.win_run()
-		if AUTO_SAVE:
+		if auto_save:
 			state.save()
 		screens.show_victory(state, summary)
 	else:
 		var summary := state.fail_loop()
-		if AUTO_SAVE:
+		if auto_save:
 			state.save()
 		screens.show_loop_failed(state, summary)
 
 func _start_new_loop() -> void:
-	if AUTO_SAVE:
+	if auto_save:
 		state.save()
 	_clear_pending()
 	_start_session(1)

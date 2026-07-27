@@ -1,0 +1,175 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/LoopScreen.gd" id="1_p861n"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bcmpv"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.10980392, 0.12941177, 0.1882353, 0.98)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8q13s"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.22000001, 0.40333334, 0.22862746, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.73333335, 0.41568628, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ybekw"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.16, 0.29333332, 0.1662745, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.73333335, 0.41568628, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_orloe"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.3, 0.55, 0.31176472, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.73333335, 0.41568628, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vt7qc"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.11, 0.12, 0.16, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.08)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_spu7n"]
+
+[node name="@CanvasLayer@49" type="CanvasLayer" unique_id=67172128]
+layer = 20
+script = ExtResource("1_p861n")
+
+[node name="@ColorRect@50" type="ColorRect" parent="." unique_id=31139186]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.025, 0.04, 0.82)
+
+[node name="@Control@51" type="Control" parent="." unique_id=1050355906]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="@PanelContainer@52" type="PanelContainer" parent="@Control@51" unique_id=980947168]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = 40.0
+offset_right = -60.0
+offset_bottom = -40.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bcmpv")
+
+[node name="@VBoxContainer@53" type="VBoxContainer" parent="@Control@51/@PanelContainer@52" unique_id=1822544719]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="@Label@54" type="Label" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=383680109]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.30980393, 0.7647059, 0.96862745, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 34
+text = "The loop resets"
+
+[node name="@Label@55" type="Label" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=127364459]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9098039, 0.91764706, 0.9411765, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="@Label@56" type="Label" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=935890057]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8352941, 0.30980393, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+
+[node name="@Label@57" type="Label" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=2024572236]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9098039, 0.91764706, 0.9411765, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "What you remember"
+
+[node name="@ScrollContainer@60" type="ScrollContainer" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=857555952]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="@VBoxContainer@61" type="VBoxContainer" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53/@ScrollContainer@60" unique_id=1785375438]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="@HBoxContainer@62" type="HBoxContainer" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53" unique_id=698560424]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="@Button@63" type="Button" parent="@Control@51/@PanelContainer@52/@VBoxContainer@53/@HBoxContainer@62" unique_id=773586563]
+custom_minimum_size = Vector2(200, 60)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9098039, 0.91764706, 0.9411765, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.53333336, 0.5686275, 0.64705884, 1)
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("StyleBoxFlat_8q13s")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ybekw")
+theme_override_styles/hover = SubResource("StyleBoxFlat_orloe")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_vt7qc")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_spu7n")
+text = "Start the loop again"
