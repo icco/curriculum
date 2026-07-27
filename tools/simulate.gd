@@ -28,10 +28,10 @@ func _init() -> void:
 		var state := GameState.new()
 		state.global["skill_points"] = 99
 		var bought := 0
-		for node: Dictionary in GameState.skill_nodes():
+		for node: SkillNodeData in GameState.skill_nodes():
 			if bought >= upgrades:
 				break
-			if state.purchase_node(str(node["id"])):
+			if state.purchase_node(node.id):
 				bought += 1
 		state.global["skill_points"] = 0
 
@@ -90,19 +90,19 @@ func _play(session: FloorSession) -> void:
 
 	# Defensive bonus actions first: shield up when threatened, drink when low.
 	if session.has_bonus() and hurt < 0.45:
-		var potion := _find_consumable(session, "heal")
+		var potion := _find_consumable(session, LootItemData.Effect.HEAL)
 		if potion >= 0:
 			session.player_use_item(potion)
 	if session.has_bonus() and threatened and not player.has_condition("shielded"):
-		for spell: Dictionary in session.known_spells():
-			if str(spell.get("action", "")) == "bonus" and str(spell.get("kind", "")) == "buff" \
+		for spell: SpellData in session.known_spells():
+			if spell.uses_bonus_action() and spell.kind == SpellData.Kind.BUFF \
 					and session.can_cast(spell):
-				session.player_cast(str(spell["id"]), player.grid_pos)
+				session.player_cast(spell.id, player.grid_pos)
 				break
 	if session.has_action() and hurt < 0.4:
-		for spell: Dictionary in session.known_spells():
-			if str(spell.get("kind", "")) == "heal" and session.can_cast(spell):
-				session.player_cast(str(spell["id"]), player.grid_pos)
+		for spell: SpellData in session.known_spells():
+			if spell.kind == SpellData.Kind.HEAL and session.can_cast(spell):
+				session.player_cast(spell.id, player.grid_pos)
 				break
 
 	if session.has_action():
@@ -113,11 +113,11 @@ func _play(session: FloorSession) -> void:
 		var seen := session.visible_enemies()
 		if not seen.is_empty():
 			var target: Entity = seen[0]
-			for spell: Dictionary in session.known_spells():
-				if str(spell.get("target", "")) != "enemy" or not session.can_cast(spell):
+			for spell: SpellData in session.known_spells():
+				if spell.target != SpellData.Target.ENEMY or not session.can_cast(spell):
 					continue
-				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= int(spell.get("range", 1)):
-					session.player_cast(str(spell["id"]), target.grid_pos)
+				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= spell.range_tiles:
+					session.player_cast(spell.id, target.grid_pos)
 					break
 	if session.has_action() and session.adjacent_container() != Vector2i(-1, -1):
 		session.player_loot()
@@ -145,10 +145,10 @@ func _closest(from: Entity, candidates: Array) -> Entity:
 			best = e
 	return best
 
-func _find_consumable(session: FloorSession, effect: String) -> int:
-	var list: Array = session.state.consumables()
+func _find_consumable(session: FloorSession, effect: LootItemData.Effect) -> int:
+	var list := session.state.consumables()
 	for i in list.size():
-		if str((list[i] as Dictionary).get("effect", "")) == effect:
+		if list[i].effect == effect:
 			return i
 	return -1
 

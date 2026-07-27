@@ -7,7 +7,7 @@ extends CanvasLayer
 ## only buttons capture input.
 
 signal action_pressed(action: String)
-signal spell_chosen(spell_id: String)
+signal spell_chosen(spell_id: StringName)
 signal item_chosen(index: int)
 signal confirm_pressed
 signal cancel_pressed
@@ -296,14 +296,13 @@ func toggle_spells(spells: Array, player: Entity, castable: Callable) -> void:
 	if spells.is_empty():
 		_spell_list.add_child(UIKit.label("Nothing learned yet.", 16, ArtFactory.UI_DIM))
 		return
-	for spell: Dictionary in spells:
-		var level := int(spell.get("level", 0))
-		var cost: String = "cantrip" if level == 0 else "L%d (%d left)" % [level, player.slots_left(level)]
-		var b := UIKit.button("%s — %s" % [str(spell.get("name", "?")), cost],
-			Color(str(spell.get("color", "4fc3f7"))), 280.0)
+	for spell: SpellData in spells:
+		var cost: String = "cantrip" if spell.is_cantrip() \
+			else "L%d (%d left)" % [spell.level, player.slots_left(spell.level)]
+		var b := UIKit.button("%s — %s" % [spell.display_name, cost], spell.color, 280.0)
 		b.disabled = not bool(castable.call(spell))
-		b.tooltip_text = str(spell.get("description", ""))
-		b.pressed.connect(func() -> void: spell_chosen.emit(str(spell["id"])))
+		b.tooltip_text = spell.description
+		b.pressed.connect(func() -> void: spell_chosen.emit(spell.id))
 		_spell_list.add_child(b)
 
 func toggle_items(items: Array) -> void:
@@ -317,8 +316,8 @@ func toggle_items(items: Array) -> void:
 		_item_list.add_child(UIKit.label("Your bag is empty.", 16, ArtFactory.UI_DIM))
 		return
 	for i in items.size():
-		var item: Dictionary = items[i]
-		var b := UIKit.button(str(item.get("name", "item")), Color("80cbc4"), 280.0)
+		var item: LootItemData = items[i]
+		var b := UIKit.button(item.display_name, Color("80cbc4"), 280.0)
 		b.pressed.connect(func() -> void: item_chosen.emit(i))
 		_item_list.add_child(b)
 

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillNodeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillNodeData.gd" id="1_c27wt"]
+
+[resource]
+script = ExtResource("1_c27wt")
+id = &"reagents_recall"
+display_name = "Remember: Cafeteria Slick"
+cost = 3
+description = "Learn Cafeteria Slick."
+requires = Array[StringName]([&"reading_circle"])
+effect_type = 7
+value = 0
+spell_id = &"spilled_reagents"

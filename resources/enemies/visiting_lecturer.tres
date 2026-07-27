@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_b2dj2"]
+
+[resource]
+script = ExtResource("1_b2dj2")
+id = &"visiting_lecturer"
+display_name = "Visiting Lecturer"
+role = 2
+max_depth = 3
+score_str = 12
+score_dex = 11
+score_con = 15
+score_int = 15
+score_wis = 14
+score_cha = 12
+armour_class = 13
+hit_dice = "3d8+6"
+proficiency = 3
+attack_ability = 3
+weapon_name = "Red Quill"
+damage_dice = "1d6"
+attack_range = 2
+xp_value = 45
+tint = Color(0.67058825, 0.2784314, 0.7372549, 1)

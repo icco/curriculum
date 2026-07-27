@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SkillNodeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillNodeData.gd" id="1_xep1m"]
+
+[resource]
+script = ExtResource("1_xep1m")
+id = &"second_circle"
+display_name = "Second Circle"
+cost = 5
+description = "+1 level 2 spell slot."
+requires = Array[StringName]([&"first_circle"])
+effect_type = 4

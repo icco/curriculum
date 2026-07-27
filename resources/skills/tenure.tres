@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="SkillNodeData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SkillNodeData.gd" id="1_w10d1"]
+
+[resource]
+script = ExtResource("1_w10d1")
+id = &"tenure"
+display_name = "Tenured Survivor"
+cost = 6
+description = "+8 maximum hit points."
+requires = Array[StringName]([&"reading_circle", &"corridor_savvy"])
+value = 8

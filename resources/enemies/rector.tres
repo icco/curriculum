@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_e87xe"]
+
+[resource]
+script = ExtResource("1_e87xe")
+id = &"rector"
+display_name = "The Rector"
+role = 2
+min_depth = 12
+score_str = 18
+score_dex = 16
+score_con = 20
+score_int = 19
+score_wis = 18
+score_cha = 18
+armour_class = 18
+hit_dice = "16d8+64"
+speed_tiles = 7
+proficiency = 5
+attack_ability = 5
+casting_ability = 5
+weapon_name = "Writ of Expulsion"
+damage_dice = "4d8"
+attack_range = 9
+xp_value = 300
+tint = Color(0.2901961, 0.078431375, 0.54901963, 1)

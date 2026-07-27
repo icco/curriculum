@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_ememu"]
+
+[resource]
+script = ExtResource("1_ememu")
+id = &"conflagration"
+display_name = "Conflagration Drill"
+level = 2
+kind = 2
+target = 3
+range_tiles = 9
+aoe = 2
+damage = "3d6"
+damage_type = "fire"
+condition = &"burning"
+condition_rounds = 2
+description = "Alarms scream and flame erupts. 2-tile burst, DEX save for half."
+color = Color(1, 0.4392157, 0.2627451, 1)
+icon_name = &"fire"
+unlock_cost = 5

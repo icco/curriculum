@@ -30,11 +30,11 @@ func _play_turn(session: FloorSession) -> void:
 		var seen := session.visible_enemies()
 		if not seen.is_empty():
 			var target: Entity = _nearest(player, seen)
-			for spell: Dictionary in session.known_spells():
-				if str(spell.get("target", "")) != "enemy" or not session.can_cast(spell):
+			for spell: SpellData in session.known_spells():
+				if spell.target != SpellData.Target.ENEMY or not session.can_cast(spell):
 					continue
-				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= int(spell.get("range", 1)):
-					session.player_cast(str(spell["id"]), target.grid_pos)
+				if MapData.chebyshev(player.grid_pos, target.grid_pos) <= spell.range_tiles:
+					session.player_cast(spell.id, target.grid_pos)
 					break
 
 	# 3. Loot anything beside us with a spare action.
@@ -184,7 +184,8 @@ func test_a_modest_run_can_clear_early_floors() -> void:
 		Dice.seed_with(2200 + s * 17)
 		var state := GameState.new()
 		state.global["skill_points"] = 12
-		for node_id: String in ["reading_circle", "corridor_savvy", "first_circle", "examination_recall", "tenure"]:
+		for node_id: StringName in [&"reading_circle", &"corridor_savvy", &"first_circle",
+				&"examination_recall", &"tenure"]:
 			state.purchase_node(node_id)
 		var session := FloorSession.new(state)
 		session.build(1)
@@ -242,13 +243,13 @@ func test_level_progression_tables() -> void:
 ## Cantrips gain dice at 5 and 11 like their 5e counterparts.
 func test_cantrip_damage_scales_with_level() -> void:
 	var caster := Roster.make_player({}, 1)
-	var cantrip := Roster.spell("slate_shard")
+	var cantrip := Roster.spell(&"slate_shard")
 	eq(Combat.spell_damage_expr(caster, cantrip), "1d10", "one die at level 1")
 	caster = Roster.make_player({}, 5)
 	eq(Combat.spell_damage_expr(caster, cantrip), "2d10", "two dice at level 5")
 	caster = Roster.make_player({}, 11)
 	eq(Combat.spell_damage_expr(caster, cantrip), "3d10", "three dice at level 11")
-	var levelled := Roster.spell("sudden_examination")
+	var levelled := Roster.spell(&"sudden_examination")
 	eq(Combat.spell_damage_expr(caster, levelled), "2d8", "levelled spells do not scale")
 
 func test_every_floor_generates_and_opens_cleanly() -> void:
@@ -273,8 +274,8 @@ func test_death_ends_the_run_and_resets_the_loop() -> void:
 	session.build(6)  # deep floor, level 1 character: this will not go well
 	session.player.max_hp = 4
 	session.player.current_hp = 4
-	session.player.equipped_gear = {"weapon": {"name": "Oak Quarterstaff", "damage_dice": "1d8"}}
-	state.add_consumable({"name": "Vial of Cordial", "effect": "heal", "power": "2d4"})
+	session.player.equip_ids({"weapon": "oak_quarterstaff"})
+	state.add_consumable(&"vial_of_cordial")
 
 	var result := _drive(session, 2000)
 	eq(int(result["phase"]), FloorSession.Phase.DEAD, "a 4 hp character on floor 6 dies")
@@ -373,7 +374,7 @@ func test_looting_a_locker_equips_gear() -> void:
 	var events := session.player_loot()
 	eq(str(events[0]["type"]), "loot", "looting produces a loot event")
 	truthy(bool((session.map.containers[container] as Dictionary)["looted"]), "the locker is marked looted")
-	var gained: bool = not session.player.equipped_gear.is_empty() or not state.consumables().is_empty()
+	var gained: bool = not session.player.equipped_gear.is_empty() or not state.consumable_ids().is_empty()
 	truthy(gained, "something was actually gained")
 
 func test_player_cannot_act_outside_their_turn() -> void:
@@ -388,7 +389,7 @@ func test_player_cannot_act_outside_their_turn() -> void:
 		"attacks are refused out of turn")
 	eq(session.player_move([session.player.grid_pos, session.player.grid_pos + Vector2i(1, 0)]).size(), 0,
 		"movement is refused out of turn")
-	eq(session.player_cast("slate_shard", session.player.grid_pos).size(), 0,
+	eq(session.player_cast(&"slate_shard", session.player.grid_pos).size(), 0,
 		"casting is refused out of turn")
 
 func test_action_economy_is_enforced_for_the_player() -> void:
@@ -399,11 +400,11 @@ func test_action_economy_is_enforced_for_the_player() -> void:
 	while not session.is_player_turn():
 		session.advance()
 	truthy(session.has_action(), "turn starts with an action")
-	session.player_cast("slate_shard", session.player.grid_pos + Vector2i(1, 0))
+	session.player_cast(&"slate_shard", session.player.grid_pos + Vector2i(1, 0))
 	falsy(session.has_action(), "casting a cantrip spends the action")
-	var refused := session.player_cast("slate_shard", session.player.grid_pos + Vector2i(1, 0))
+	var refused := session.player_cast(&"slate_shard", session.player.grid_pos + Vector2i(1, 0))
 	eq(str(refused[0]["type"]), "info", "a second cast is refused")
 	truthy(session.has_bonus(), "the bonus action is still free")
-	session.player_cast("grimoire_ward", session.player.grid_pos)
+	session.player_cast(&"grimoire_ward", session.player.grid_pos)
 	falsy(session.has_bonus(), "the bonus action spell consumed it")
 	truthy(session.player.has_condition("shielded"), "and it took effect")

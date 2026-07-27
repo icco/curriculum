@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_y28p8"]
+
+[resource]
+script = ExtResource("1_y28p8")
+id = &"senior_warden"
+display_name = "Senior Warden"
+role = 1
+min_depth = 5
+score_str = 14
+score_dex = 15
+score_con = 15
+score_int = 13
+score_wis = 15
+score_cha = 14
+armour_class = 16
+hit_dice = "6d8+12"
+speed_tiles = 7
+proficiency = 3
+attack_ability = 1
+casting_ability = 5
+weapon_name = "Warding Horn"
+damage_dice = "2d6"
+attack_range = 5
+xp_value = 30
+tint = Color(1, 0.7176471, 0.3019608, 1)

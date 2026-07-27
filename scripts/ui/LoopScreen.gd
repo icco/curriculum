@@ -105,25 +105,24 @@ func _refresh() -> void:
 		child.queue_free()
 
 	var offered := 0
-	for node: Dictionary in GameState.skill_nodes():
-		var id := str(node["id"])
-		if _state.has_node_unlocked(id):
-			var owned := UIKit.label("✓ %s — %s" % [str(node["name"]), str(node["description"])],
+	for node: SkillNodeData in GameState.skill_nodes():
+		if _state.has_node_unlocked(node.id):
+			var owned := UIKit.label("✓ %s — %s" % [node.display_name, node.description],
 				16, ArtFactory.UI_GOOD)
 			owned.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			_node_list.add_child(owned)
 			continue
-		if not _state.node_available(id):
+		if not _state.node_available(node.id):
 			continue
 		offered += 1
-		var affordable := _state.can_afford(id)
-		var b := UIKit.button("%s — %d insight" % [str(node["name"]), int(node["cost"])],
+		var affordable := _state.can_afford(node.id)
+		var b := UIKit.button("%s — %d insight" % [node.display_name, node.cost],
 			ArtFactory.UI_ACCENT if affordable else ArtFactory.UI_DIM, 420.0)
 		b.disabled = not affordable
-		b.tooltip_text = str(node["description"])
-		b.pressed.connect(_on_buy.bind(id))
+		b.tooltip_text = node.description
+		b.pressed.connect(_on_buy.bind(node.id))
 		_node_list.add_child(b)
-		var desc := UIKit.label("    %s" % str(node["description"]), 14, ArtFactory.UI_DIM)
+		var desc := UIKit.label("    %s" % node.description, 14, ArtFactory.UI_DIM)
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_node_list.add_child(desc)
 
@@ -131,7 +130,7 @@ func _refresh() -> void:
 		_node_list.add_child(UIKit.label("Nothing new to remember yet — survive deeper to earn insight.",
 			16, ArtFactory.UI_DIM))
 
-func _on_buy(id: String) -> void:
+func _on_buy(id: StringName) -> void:
 	if _state.purchase_node(id):
 		_state.save()
 		_refresh()

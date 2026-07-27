@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_504a4"]
+
+[resource]
+script = ExtResource("1_504a4")
+id = &"slate_shard"
+display_name = "Slate Shard"
+range_tiles = 10
+damage = "1d10"
+description = "A shard of chalk fired like a bullet. Spell attack, 1d10 force."
+color = Color(0.8784314, 0.8784314, 0.8784314, 1)
+icon_name = &"dart"
+starting = true

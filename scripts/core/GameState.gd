@@ -7,7 +7,6 @@ extends RefCounted
 ## RunState is the current loop and is thrown away when the loop fails.
 
 const SAVE_PATH := "user://curriculum_save.json"
-const SKILLS_PATH := "res://data/skills.json"
 const SAVE_VERSION := 1
 
 const MONTHS := [
@@ -15,8 +14,6 @@ const MONTHS := [
 	"March", "April", "May", "June", "July", "August",
 ]
 const FINAL_FLOOR := 12
-
-static var _skills: Array = []
 
 var global: Dictionary = {}
 var run: Dictionary = {}
@@ -81,64 +78,52 @@ func xp_to_next_level() -> int:
 
 # ------------------------------------------------------------- skill tree
 
-static func skill_nodes() -> Array:
-	if not _skills.is_empty():
-		return _skills
-	var file := FileAccess.open(SKILLS_PATH, FileAccess.READ)
-	if file == null:
-		push_error("GameState: cannot open %s" % SKILLS_PATH)
-		return []
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	if typeof(parsed) == TYPE_DICTIONARY:
-		_skills = (parsed as Dictionary).get("nodes", [])
-	return _skills
+static func skill_nodes() -> Array[SkillNodeData]:
+	return Roster.skill_nodes()
 
-static func skill_node(id: String) -> Dictionary:
-	for node: Dictionary in skill_nodes():
-		if str(node["id"]) == id:
-			return node
-	return {}
+static func skill_node(id: StringName) -> SkillNodeData:
+	return Roster.skill_node(id)
 
-func has_node_unlocked(id: String) -> bool:
-	return (global["skill_nodes"] as Array).has(id)
+func has_node_unlocked(id: StringName) -> bool:
+	return (global["skill_nodes"] as Array).has(str(id))
 
 ## A node is offered once its prerequisites are met and it is not already taken.
-func node_available(id: String) -> bool:
+func node_available(id: StringName) -> bool:
 	var node := skill_node(id)
-	if node.is_empty() or has_node_unlocked(id):
+	if node == null or has_node_unlocked(id):
 		return false
-	for req: String in node.get("requires", []):
+	for req: StringName in node.requires:
 		if not has_node_unlocked(req):
 			return false
 	return true
 
-func can_afford(id: String) -> bool:
+func can_afford(id: StringName) -> bool:
 	var node := skill_node(id)
-	return not node.is_empty() and int(global["skill_points"]) >= int(node.get("cost", 0))
+	return node != null and int(global["skill_points"]) >= node.cost
 
-func purchase_node(id: String) -> bool:
+func purchase_node(id: StringName) -> bool:
 	if not node_available(id) or not can_afford(id):
 		return false
 	var node := skill_node(id)
-	global["skill_points"] = int(global["skill_points"]) - int(node.get("cost", 0))
-	(global["skill_nodes"] as Array).append(id)
-	_apply_effect(node.get("effect", {}))
+	global["skill_points"] = int(global["skill_points"]) - node.cost
+	(global["skill_nodes"] as Array).append(str(id))
+	_apply_effect(node)
 	return true
 
-func _apply_effect(effect: Dictionary) -> void:
-	var type := str(effect.get("type", ""))
-	match type:
-		"unlock_spell":
-			var spell_id := str(effect.get("value", ""))
+func _apply_effect(node: SkillNodeData) -> void:
+	match node.effect_type:
+		SkillNodeData.EffectType.UNLOCK_SPELL:
+			var spell_id := str(node.spell_id)
 			if spell_id != "" and not (global["unlocked_spells"] as Array).has(spell_id):
 				(global["unlocked_spells"] as Array).append(spell_id)
-		"stat":
-			var ability := str(effect.get("ability", "int"))
+		SkillNodeData.EffectType.ABILITY_SCORE:
+			var ability := Entity.ability_key(node.ability)
 			var bonuses: Dictionary = global["stat_bonuses"]
-			bonuses[ability] = int(bonuses.get(ability, 0)) + int(effect.get("value", 1))
+			bonuses[ability] = int(bonuses.get(ability, 0)) + node.value
 		_:
-			if global.has(type):
-				global[type] = int(global[type]) + int(effect.get("value", 0))
+			var key := node.global_key()
+			if key != "" and global.has(key):
+				global[key] = int(global[key]) + node.value
 
 # --------------------------------------------------------------- the loop
 
@@ -204,27 +189,40 @@ func restore_player(player: Entity) -> void:
 	if int(run["hp"]) >= 0:
 		player.current_hp = clampi(int(run["hp"]), 0, player.max_hp)
 	player.slots_used = (run["slots_used"] as Dictionary).duplicate()
-	player.equipped_gear = (run["gear"] as Dictionary).duplicate(true)
+	player.equip_ids(run["gear"])
 	player.conditions = (run["conditions"] as Dictionary).duplicate()
 
 func capture_player(player: Entity) -> void:
 	run["hp"] = player.current_hp
 	run["slots_used"] = player.slots_used.duplicate()
-	run["gear"] = player.equipped_gear.duplicate(true)
+	run["gear"] = player.gear_ids()
 	run["conditions"] = player.conditions.duplicate()
 
-func consumables() -> Array:
+## Consumables are stored as ids and resolved through Roster.
+func consumable_ids() -> Array:
 	return run["consumables"]
 
-func add_consumable(item: Dictionary) -> void:
-	(run["consumables"] as Array).append(item)
+func consumables() -> Array[LootItemData]:
+	var out: Array[LootItemData] = []
+	for id: Variant in run["consumables"]:
+		var item := Roster.loot_item(StringName(id))
+		if item != null:
+			out.append(item)
+	return out
 
-func take_consumable(index: int) -> Dictionary:
+func consumable_at(index: int) -> LootItemData:
 	var list: Array = run["consumables"]
 	if index < 0 or index >= list.size():
-		return {}
-	var item: Dictionary = list[index]
-	list.remove_at(index)
+		return null
+	return Roster.loot_item(StringName(list[index]))
+
+func add_consumable(id: StringName) -> void:
+	(run["consumables"] as Array).append(str(id))
+
+func take_consumable(index: int) -> LootItemData:
+	var item := consumable_at(index)
+	if item != null:
+		(run["consumables"] as Array).remove_at(index)
 	return item
 
 # ------------------------------------------------------------------- save

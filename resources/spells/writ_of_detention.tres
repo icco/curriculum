@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpellData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/SpellData.gd" id="1_grtqn"]
+
+[resource]
+script = ExtResource("1_grtqn")
+id = &"writ_of_detention"
+display_name = "Writ of Detention"
+level = 1
+kind = 2
+range_tiles = 8
+damage = "1d6"
+save_ability = 4
+save_effect = 0
+condition = &"stunned"
+condition_rounds = 1
+description = "WIS save or be held in place for a round. 1d6 on a failure."
+color = Color(1, 0.5411765, 0.39607844, 1)
+icon_name = &"slip"
+unlock_cost = 3

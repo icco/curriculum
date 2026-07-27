@@ -18,7 +18,7 @@ var debug_shot: DebugShot
 var mode: int = Mode.FREE
 var busy: bool = false
 var pending: Dictionary = {}     ## staged action awaiting a confirming tap
-var aiming_spell: String = ""
+var aiming_spell: StringName = &""
 
 func _ready() -> void:
 	Roster.load_data()
@@ -105,7 +105,7 @@ func _refresh_highlights() -> void:
 		var spell := Roster.spell(aiming_spell)
 		var cells: Array = []
 		for e: Entity in session.visible_enemies():
-			if MapData.chebyshev(session.player.grid_pos, e.grid_pos) <= int(spell.get("range", 1)):
+			if MapData.chebyshev(session.player.grid_pos, e.grid_pos) <= spell.range_tiles:
 				cells.append(e.grid_pos)
 		board.set_targets(cells)
 		return
@@ -208,7 +208,7 @@ func _stage_spell(cell: Vector2i) -> void:
 	pending = {"kind": "spell", "cell": cell, "spell_id": aiming_spell}
 	board.set_cursor(cell)
 	var affected: Array = [cell]
-	var aoe := int(spell.get("aoe", 0))
+	var aoe := spell.aoe
 	if aoe > 0:
 		affected = []
 		for y in range(cell.y - aoe, cell.y + aoe + 1):
@@ -222,7 +222,7 @@ func _stage_spell(cell: Vector2i) -> void:
 	var where: String = occupant.display_name if occupant != null else "that tile"
 	if aoe > 0:
 		where += " and everything within %d tiles" % aoe
-	hud.set_hint("%s on %s. Tap again or Confirm." % [str(spell.get("name", "Spell")), where])
+	hud.set_hint("%s on %s. Tap again or Confirm." % [spell.display_name, where])
 
 ## Tiles on the path where an enemy could take a swing as you leave.
 func _threatened_cells(path: Array) -> Array:
@@ -240,7 +240,7 @@ func _threatened_cells(path: Array) -> Array:
 func _clear_pending() -> void:
 	pending = {}
 	mode = Mode.FREE
-	aiming_spell = ""
+	aiming_spell = &""
 	hud.hide_confirm()
 	hud.set_hint("")
 	_refresh_highlights()
@@ -257,7 +257,7 @@ func _commit_pending() -> void:
 		"attack":
 			events = session.player_attack(action["target"])
 		"spell":
-			events = session.player_cast(str(action["spell_id"]), action["cell"])
+			events = session.player_cast(action["spell_id"], action["cell"])
 		"loot":
 			events = session.player_loot()
 		"door":
@@ -291,21 +291,20 @@ func _on_action(name: String) -> void:
 			hud.close_panels()
 			await _end_turn()
 
-func _on_spell_chosen(spell_id: String) -> void:
+func _on_spell_chosen(spell_id: StringName) -> void:
 	var spell := Roster.spell(spell_id)
 	hud.close_panels()
-	if not session.can_cast(spell):
-		hud.set_hint("Cannot cast %s right now." % str(spell.get("name", spell_id)))
+	if spell == null or not session.can_cast(spell):
+		hud.set_hint("Cannot cast that right now.")
 		return
 	# Self-target spells need no aiming step.
-	if str(spell.get("target", "")) == "self" or int(spell.get("range", 0)) == 0:
+	if spell.target == SpellData.Target.SELF or spell.range_tiles == 0:
 		await _run(session.player_cast(spell_id, session.player.grid_pos))
 		return
 	pending = {}
 	aiming_spell = spell_id
 	mode = Mode.AIMING
-	hud.set_hint("Tap a target for %s (range %d)." % [
-		str(spell.get("name", spell_id)), int(spell.get("range", 0))])
+	hud.set_hint("Tap a target for %s (range %d)." % [spell.display_name, spell.range_tiles])
 	_refresh_highlights()
 
 func _on_item_chosen(index: int) -> void:
@@ -494,9 +493,9 @@ func _on_debug_action(action: String, args: Array) -> void:
 		"dash", "loot", "door", "descend", "spells", "items":
 			await _on_action(action)
 		"spell":
-			await _on_spell_chosen(str(args[0]))
+			await _on_spell_chosen(StringName(args[0]))
 		"cast":
-			await _run(session.player_cast(str(args[0]), Vector2i(int(args[1]), int(args[2]))))
+			await _run(session.player_cast(StringName(args[0]), Vector2i(int(args[1]), int(args[2]))))
 		"kill_all":
 			for e: Entity in session.entities:
 				if e != session.player:
