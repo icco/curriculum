@@ -3,14 +3,14 @@
 # Serves the Godot web export as a static site. The export is built outside the
 # image (needs the editor plus ~1GB of templates) and is platform independent:
 #
-#   ./tools/export-web.sh && docker build -t loopwood-high .
-#   docker run --rm -p 8080:8080 loopwood-high
+#   ./tools/export-web.sh && docker build -t curriculum .
+#   docker run --rm -p 8080:8080 curriculum
 
 FROM nginx:1.27-alpine
 
-LABEL org.opencontainers.image.title="Loopwood High"
+LABEL org.opencontainers.image.title="Curriculum"
 LABEL org.opencontainers.image.description="2.5D isometric turn-based tactical roguelike, playable in a browser"
-LABEL org.opencontainers.image.source="https://github.com/icco/rogue"
+LABEL org.opencontainers.image.source="https://github.com/icco/curriculum"
 LABEL org.opencontainers.image.licenses="MIT"
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf

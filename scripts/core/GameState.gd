@@ -6,7 +6,7 @@ extends RefCounted
 ## GlobalState survives death: everything the protagonist has *learned*.
 ## RunState is the current loop and is thrown away when the loop fails.
 
-const SAVE_PATH := "user://loopwood_save.json"
+const SAVE_PATH := "user://curriculum_save.json"
 const SKILLS_PATH := "res://data/skills.json"
 const SAVE_VERSION := 1
 
@@ -174,7 +174,7 @@ func fail_loop() -> Dictionary:
 func win_run() -> Dictionary:
 	var summary := fail_loop()
 	global["escaped"] = true
-	(global["story_flags"] as Dictionary)["escaped_school"] = true
+	(global["story_flags"] as Dictionary)["escaped_academy"] = true
 	return summary
 
 ## Banks experience. Returns the new level if the kill caused a level up, else 0.

@@ -10,15 +10,15 @@ OUT="${1:?usage: shot.sh <out.png> [seed] [script] [delay]}"
 SEED="${2:-7}"
 STEPS="${3:-}"
 DELAY="${4:-1.0}"
-LOG="${TMPDIR:-/tmp}/loopwood-shot.log"
+LOG="${TMPDIR:-/tmp}/curriculum-shot.log"
 
 mkdir -p "$(dirname "$OUT")"
 rm -f "$OUT"
 
 "$GODOT" --headless --import --path . >/dev/null 2>&1
 
-LOOPWOOD_SEED="$SEED" LOOPWOOD_SHOT="$OUT" LOOPWOOD_SHOT_AFTER="$DELAY" \
-	LOOPWOOD_SCRIPT="$STEPS" LOOPWOOD_FRESH="${LOOPWOOD_FRESH:-1}" \
+CURRICULUM_SEED="$SEED" CURRICULUM_SHOT="$OUT" CURRICULUM_SHOT_AFTER="$DELAY" \
+	CURRICULUM_SCRIPT="$STEPS" CURRICULUM_FRESH="${CURRICULUM_FRESH:-1}" \
 	timeout 120 "$GODOT" --path . scenes/Main.tscn >"$LOG" 2>&1
 status=$?
 

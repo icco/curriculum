@@ -71,8 +71,8 @@ func is_open() -> bool:
 
 func show_loop_failed(state: GameState, summary: Dictionary) -> void:
 	_state = state
-	_title.text = "The bell rings. It is September again."
-	_summary.text = "You made it to floor %d and put down %d classmates before the loop caught you. Gear is gone. What you learned is not." % [
+	_title.text = "The bell tolls. It is September again."
+	_summary.text = "You reached floor %d and put down %d students before the loop caught you. Gear is gone. What you learned is not." % [
 		int(summary.get("depth", 1)), int(summary.get("kills", 0))]
 	_continue.text = "Start loop %d" % int(state.global["loops"])
 	_refresh()
@@ -81,7 +81,7 @@ func show_loop_failed(state: GameState, summary: Dictionary) -> void:
 func show_victory(state: GameState, summary: Dictionary) -> void:
 	_state = state
 	_title.text = "You walked out."
-	_summary.text = "Twelve floors, %d classmates, and one very surprised Principal. The loop is broken — but the school is still there tomorrow, if you want another run at it." % int(summary.get("kills", 0))
+	_summary.text = "Twelve floors, %d students, and one very surprised Rector. The loop is broken — but the academy still stands tomorrow, if you want another run at it." % int(summary.get("kills", 0))
 	_continue.text = "Run it again"
 	_refresh()
 	_open()

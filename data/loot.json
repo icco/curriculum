@@ -2,7 +2,7 @@
   "locker": [
     {
       "slot": "weapon",
-      "name": "Dog-eared Textbook",
+      "name": "Dog-eared Grimoire",
       "damage_dice": "1d6",
       "range": 1,
       "weight": 3,
@@ -10,7 +10,7 @@
     },
     {
       "slot": "weapon",
-      "name": "Metal Ruler",
+      "name": "Iron Stylus",
       "damage_dice": "1d6",
       "attack_bonus": 1,
       "range": 1,
@@ -19,7 +19,7 @@
     },
     {
       "slot": "weapon",
-      "name": "Hockey Stick",
+      "name": "Oak Quarterstaff",
       "damage_dice": "1d8",
       "range": 1,
       "weight": 2,
@@ -27,7 +27,7 @@
     },
     {
       "slot": "weapon",
-      "name": "Fire Axe (Break Glass)",
+      "name": "Ceremonial Axe",
       "damage_dice": "1d12",
       "range": 1,
       "weight": 1,
@@ -35,7 +35,7 @@
     },
     {
       "slot": "weapon",
-      "name": "Compass Set",
+      "name": "Brass Dividers",
       "damage_dice": "1d6",
       "attack_bonus": 2,
       "damage_bonus": 1,
@@ -45,7 +45,7 @@
     },
     {
       "slot": "weapon",
-      "name": "Slingshot",
+      "name": "Chalk Sling",
       "damage_dice": "1d6",
       "range": 6,
       "weight": 2,
@@ -53,21 +53,21 @@
     },
     {
       "slot": "armor",
-      "name": "Varsity Jacket",
+      "name": "Apprentice Robes",
       "ac_bonus": 1,
       "weight": 3,
       "min_depth": 1
     },
     {
       "slot": "armor",
-      "name": "Marching Band Breastplate",
+      "name": "Choirmaster's Breastplate",
       "ac_bonus": 2,
       "weight": 2,
       "min_depth": 3
     },
     {
       "slot": "armor",
-      "name": "Lab Apron",
+      "name": "Alchemist's Apron",
       "ac_bonus": 1,
       "damage_bonus": 1,
       "weight": 2,
@@ -75,28 +75,28 @@
     },
     {
       "slot": "armor",
-      "name": "Goalie Pads",
+      "name": "Warded Bracers",
       "ac_bonus": 3,
       "weight": 1,
       "min_depth": 6
     },
     {
       "slot": "trinket",
-      "name": "Lucky Eraser",
+      "name": "Lucky Pumice",
       "attack_bonus": 1,
       "weight": 3,
       "min_depth": 1
     },
     {
       "slot": "trinket",
-      "name": "Energy Drink",
+      "name": "Draught of Vigour",
       "damage_bonus": 2,
       "weight": 2,
       "min_depth": 3
     },
     {
       "slot": "trinket",
-      "name": "Honour Roll Pin",
+      "name": "Honours Sigil",
       "ac_bonus": 1,
       "attack_bonus": 1,
       "weight": 1,
@@ -104,7 +104,7 @@
     },
     {
       "slot": "consumable",
-      "name": "Juice Box",
+      "name": "Vial of Cordial",
       "effect": "heal",
       "power": "2d4+2",
       "weight": 4,
@@ -112,7 +112,7 @@
     },
     {
       "slot": "consumable",
-      "name": "Energy Bar",
+      "name": "Waybread Ration",
       "effect": "heal",
       "power": "3d4+3",
       "weight": 2,
@@ -128,7 +128,7 @@
     },
     {
       "slot": "consumable",
-      "name": "Smelling Salts",
+      "name": "Clearing Salts",
       "effect": "cleanse",
       "power": "0",
       "weight": 2,

@@ -25,8 +25,8 @@ func _ready() -> void:
 	DebugShot.seed_from_env()
 
 	state = GameState.new()
-	# LOOPWOOD_FRESH=1 discards the save so scripted runs are reproducible.
-	if OS.get_environment("LOOPWOOD_FRESH") != "":
+	# CURRICULUM_FRESH=1 discards the save so scripted runs are reproducible.
+	if OS.get_environment("CURRICULUM_FRESH") != "":
 		GameState.wipe()
 	elif AUTO_SAVE:
 		state.load_from()
@@ -153,13 +153,13 @@ func _stage_interaction(cell: Vector2i) -> bool:
 	var container: Dictionary = session.map.containers.get(cell, {})
 	if not container.is_empty() and not bool(container.get("looted", false)):
 		if not session.has_action():
-			hud.set_hint("No action left to search that locker.")
+			hud.set_hint("No action left to open that reliquary.")
 			return true
 		pending = {"kind": "loot", "cell": cell}
 		mode = Mode.PREVIEW
 		board.set_cursor(cell)
-		hud.show_confirm("Search")
-		hud.set_hint("Search the locker. Tap again or Confirm.")
+		hud.show_confirm("Open")
+		hud.set_hint("Open the reliquary. Tap again or Confirm.")
 		return true
 	if session.map.doors.has(cell):
 		pending = {"kind": "door", "cell": cell}

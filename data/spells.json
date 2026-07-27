@@ -1,7 +1,7 @@
 {
-  "chalk_dart": {
-    "id": "chalk_dart",
-    "name": "Chalk Dart",
+  "slate_shard": {
+    "id": "slate_shard",
+    "name": "Slate Shard",
     "level": 0,
     "action": "action",
     "kind": "attack",
@@ -15,9 +15,9 @@
     "unlock_cost": 0,
     "starting": true
   },
-  "spitball_barrage": {
-    "id": "spitball_barrage",
-    "name": "Spitball Barrage",
+  "ink_barrage": {
+    "id": "ink_barrage",
+    "name": "Ink Barrage",
     "legacy_id": "magic_missile",
     "level": 1,
     "action": "action",
@@ -33,9 +33,9 @@
     "unlock_cost": 0,
     "starting": true
   },
-  "textbook_barrier": {
-    "id": "textbook_barrier",
-    "name": "Textbook Barrier",
+  "grimoire_ward": {
+    "id": "grimoire_ward",
+    "name": "Grimoire Ward",
     "legacy_id": "shield",
     "level": 1,
     "action": "bonus",
@@ -52,9 +52,9 @@
     "unlock_cost": 0,
     "starting": true
   },
-  "pop_quiz": {
-    "id": "pop_quiz",
-    "name": "Pop Quiz",
+  "sudden_examination": {
+    "id": "sudden_examination",
+    "name": "Sudden Examination",
     "level": 1,
     "action": "action",
     "kind": "save",
@@ -69,9 +69,9 @@
     "description": "Surprise assessment. INT save or 2d8 psychic, half on a pass.",
     "unlock_cost": 2
   },
-  "detention_slip": {
-    "id": "detention_slip",
-    "name": "Detention Slip",
+  "writ_of_detention": {
+    "id": "writ_of_detention",
+    "name": "Writ of Detention",
     "level": 1,
     "action": "action",
     "kind": "save",
@@ -90,9 +90,9 @@
     "description": "WIS save or be held in place for a round. 1d6 on a failure.",
     "unlock_cost": 3
   },
-  "study_hall": {
-    "id": "study_hall",
-    "name": "Study Hall",
+  "restorative_study": {
+    "id": "restorative_study",
+    "name": "Restorative Study",
     "level": 1,
     "action": "action",
     "kind": "heal",
@@ -104,9 +104,9 @@
     "description": "A restorative cram session. Heals 2d4 + casting modifier.",
     "unlock_cost": 3
   },
-  "hall_pass": {
-    "id": "hall_pass",
-    "name": "Hall Pass",
+  "corridor_step": {
+    "id": "corridor_step",
+    "name": "Corridor Step",
     "level": 2,
     "action": "bonus",
     "kind": "teleport",
@@ -117,9 +117,9 @@
     "description": "Step sideways through the corridor and reappear up to 6 tiles away.",
     "unlock_cost": 4
   },
-  "fire_drill": {
-    "id": "fire_drill",
-    "name": "Fire Drill",
+  "conflagration": {
+    "id": "conflagration",
+    "name": "Conflagration Drill",
     "level": 2,
     "action": "action",
     "kind": "save",
@@ -139,9 +139,9 @@
     "description": "Alarms scream and flame erupts. 2-tile burst, DEX save for half.",
     "unlock_cost": 5
   },
-  "cafeteria_slick": {
-    "id": "cafeteria_slick",
-    "name": "Cafeteria Slick",
+  "spilled_reagents": {
+    "id": "spilled_reagents",
+    "name": "Spilled Reagents",
     "level": 1,
     "action": "action",
     "kind": "save",
@@ -161,9 +161,9 @@
     "description": "Spilled lunch trays. DEX save or slip and be slowed.",
     "unlock_cost": 3
   },
-  "valedictorian": {
-    "id": "valedictorian",
-    "name": "Valedictorian",
+  "valedictory_beam": {
+    "id": "valedictory_beam",
+    "name": "Valedictory Beam",
     "level": 3,
     "action": "action",
     "kind": "attack",

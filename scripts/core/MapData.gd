@@ -5,15 +5,15 @@ extends RefCounted
 ## (line of sight, cover, reachability). Knows nothing about rendering.
 
 enum Tile { VOID, FLOOR, WALL, DOOR, STAIRS }
-enum Prop { NONE, DESK, CHAIR, TRASH, LOCKER, BOOKSHELF, CHALKBOARD, PODIUM }
+enum Prop { NONE, DESK, CHAIR, BRAZIER, RELIQUARY, BOOKSHELF, RUNE_SLATE, PODIUM }
 enum Cover { NONE, HALF, THREE_QUARTERS }
 
 ## Props that are waist high: they cost movement and grant half cover but you
 ## can see and shoot over them.
-const LOW_PROPS := [Prop.DESK, Prop.CHAIR, Prop.TRASH, Prop.PODIUM]
+const LOW_PROPS := [Prop.DESK, Prop.CHAIR, Prop.BRAZIER, Prop.PODIUM]
 ## Props taller than a person: three-quarters cover when hugged, and a hard
 ## sight blocker at any greater distance.
-const TALL_PROPS := [Prop.LOCKER, Prop.BOOKSHELF, Prop.CHALKBOARD]
+const TALL_PROPS := [Prop.RELIQUARY, Prop.BOOKSHELF, Prop.RUNE_SLATE]
 
 const DIRS_8 := [
 	Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),

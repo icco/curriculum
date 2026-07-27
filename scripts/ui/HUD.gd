@@ -127,7 +127,7 @@ func _build_action_bar(root: Control) -> void:
 		["spells", "Spells", ArtFactory.UI_ACCENT],
 		["items", "Items", Color("80cbc4")],
 		["dash", "Dash", Color("ffd54f")],
-		["loot", "Locker", Color("ffb300")],
+		["loot", "Reliquary", Color("ffb300")],
 		["door", "Door", Color("a1887f")],
 		["descend", "Stairs", Color("66bb6a")],
 		["end_turn", "End Turn", ArtFactory.UI_DANGER],

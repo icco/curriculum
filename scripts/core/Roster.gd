@@ -174,8 +174,8 @@ static func make_player(global: Dictionary = {}, level: int = 1) -> Entity:
 	e.speed_tiles = 6 + int(global.get("bonus_speed", 0))
 	e.attack_ability = "dex"
 	e.casting_ability = "int"
-	# Every loop starts with the textbook you were carrying when the bell rang.
-	e.weapon_name = "Dog-eared Textbook"
+	# Every loop starts with the grimoire you were carrying when the bell rang.
+	e.weapon_name = "Dog-eared Grimoire"
 	e.damage_dice = "1d6"
 	e.attack_range = 1
 	e.tint = ArtFactory.TEAM_PLAYER

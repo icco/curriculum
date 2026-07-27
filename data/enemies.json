@@ -1,7 +1,7 @@
 {
-  "freshman": {
-    "id": "freshman",
-    "name": "Nervous Freshman",
+  "novice": {
+    "id": "novice",
+    "name": "Trembling Novice",
     "role": "grunt",
     "min_depth": 1,
     "max_depth": 5,
@@ -18,15 +18,15 @@
     "speed_tiles": 5,
     "proficiency": 2,
     "attack_ability": "str",
-    "weapon_name": "Backpack Swing",
+    "weapon_name": "Satchel Swing",
     "damage_dice": "1d4",
     "attack_range": 1,
     "xp_value": 4,
     "tint": "8d6e63"
   },
-  "jock": {
-    "id": "jock",
-    "name": "Varsity Jock",
+  "battle_chanter": {
+    "id": "battle_chanter",
+    "name": "Battle-Chanter",
     "role": "grunt",
     "min_depth": 2,
     "max_depth": 12,
@@ -43,15 +43,15 @@
     "speed_tiles": 7,
     "proficiency": 2,
     "attack_ability": "str",
-    "weapon_name": "Shoulder Charge",
+    "weapon_name": "Shield Rush",
     "damage_dice": "1d8",
     "attack_range": 1,
     "xp_value": 8,
     "tint": "ef5350"
   },
-  "debate_kid": {
-    "id": "debate_kid",
-    "name": "Debate Club Sniper",
+  "disputation_adept": {
+    "id": "disputation_adept",
+    "name": "Disputation Adept",
     "role": "grunt",
     "min_depth": 2,
     "max_depth": 12,
@@ -69,15 +69,15 @@
     "proficiency": 2,
     "attack_ability": "dex",
     "casting_ability": "int",
-    "weapon_name": "Cutting Remark",
+    "weapon_name": "Cutting Syllogism",
     "damage_dice": "1d6",
     "attack_range": 7,
     "xp_value": 9,
     "tint": "7e57c2"
   },
-  "theater_kid": {
-    "id": "theater_kid",
-    "name": "Theatre Kid",
+  "illusionist": {
+    "id": "illusionist",
+    "name": "Illusionist Understudy",
     "role": "grunt",
     "min_depth": 3,
     "max_depth": 12,
@@ -94,15 +94,15 @@
     "speed_tiles": 7,
     "proficiency": 2,
     "attack_ability": "dex",
-    "weapon_name": "Prop Sword",
+    "weapon_name": "Mirror Blade",
     "damage_dice": "1d6+1",
     "attack_range": 1,
     "xp_value": 10,
     "tint": "26a69a"
   },
-  "hall_monitor": {
-    "id": "hall_monitor",
-    "name": "Hall Monitor",
+  "proctor": {
+    "id": "proctor",
+    "name": "Corridor Proctor",
     "role": "elite",
     "min_depth": 1,
     "max_depth": 8,
@@ -119,15 +119,15 @@
     "speed_tiles": 7,
     "proficiency": 3,
     "attack_ability": "dex",
-    "weapon_name": "Clipboard Jab",
+    "weapon_name": "Ledger Spike",
     "damage_dice": "1d8+1",
     "attack_range": 1,
     "xp_value": 20,
     "tint": "ffa726"
   },
-  "prefect": {
-    "id": "prefect",
-    "name": "Senior Prefect",
+  "senior_warden": {
+    "id": "senior_warden",
+    "name": "Senior Warden",
     "role": "elite",
     "min_depth": 5,
     "max_depth": 12,
@@ -145,15 +145,15 @@
     "proficiency": 3,
     "attack_ability": "dex",
     "casting_ability": "cha",
-    "weapon_name": "Whistle Blast",
+    "weapon_name": "Warding Horn",
     "damage_dice": "2d6",
     "attack_range": 5,
     "xp_value": 30,
     "tint": "ffb74d"
   },
-  "sub_teacher": {
-    "id": "sub_teacher",
-    "name": "Substitute Teacher",
+  "visiting_lecturer": {
+    "id": "visiting_lecturer",
+    "name": "Visiting Lecturer",
     "role": "boss",
     "min_depth": 1,
     "max_depth": 3,
@@ -171,15 +171,15 @@
     "proficiency": 3,
     "attack_ability": "int",
     "casting_ability": "int",
-    "weapon_name": "Red Pen",
+    "weapon_name": "Red Quill",
     "damage_dice": "1d6",
     "attack_range": 2,
     "xp_value": 45,
     "tint": "ab47bc"
   },
-  "chem_teacher": {
-    "id": "chem_teacher",
-    "name": "Chemistry Teacher",
+  "alchemy_master": {
+    "id": "alchemy_master",
+    "name": "Master of Alchemy",
     "role": "boss",
     "min_depth": 3,
     "max_depth": 7,
@@ -197,15 +197,15 @@
     "proficiency": 4,
     "attack_ability": "int",
     "casting_ability": "int",
-    "weapon_name": "Beaker Toss",
+    "weapon_name": "Flask Volley",
     "damage_dice": "3d6",
     "attack_range": 7,
     "xp_value": 70,
     "tint": "8e24aa"
   },
-  "gym_coach": {
-    "id": "gym_coach",
-    "name": "Gym Coach",
+  "drillmaster": {
+    "id": "drillmaster",
+    "name": "Yard Drillmaster",
     "role": "boss",
     "min_depth": 5,
     "max_depth": 9,
@@ -222,15 +222,15 @@
     "speed_tiles": 8,
     "proficiency": 4,
     "attack_ability": "str",
-    "weapon_name": "Dodgeball Volley",
+    "weapon_name": "Bound Stones",
     "damage_dice": "2d8+2",
     "attack_range": 5,
     "xp_value": 90,
     "tint": "c62828"
   },
-  "vice_principal": {
-    "id": "vice_principal",
-    "name": "Vice Principal",
+  "vice_chancellor": {
+    "id": "vice_chancellor",
+    "name": "Vice-Chancellor",
     "role": "boss",
     "min_depth": 8,
     "max_depth": 11,
@@ -248,15 +248,15 @@
     "proficiency": 4,
     "attack_ability": "wis",
     "casting_ability": "wis",
-    "weapon_name": "Permanent Record",
+    "weapon_name": "The Permanent Record",
     "damage_dice": "3d8",
     "attack_range": 8,
     "xp_value": 130,
     "tint": "6a1b9a"
   },
-  "principal": {
-    "id": "principal",
-    "name": "The Principal",
+  "rector": {
+    "id": "rector",
+    "name": "The Rector",
     "role": "boss",
     "min_depth": 12,
     "max_depth": 12,
@@ -274,7 +274,7 @@
     "proficiency": 5,
     "attack_ability": "cha",
     "casting_ability": "cha",
-    "weapon_name": "Expulsion Order",
+    "weapon_name": "Writ of Expulsion",
     "damage_dice": "4d8",
     "attack_range": 9,
     "xp_value": 300,

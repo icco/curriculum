@@ -87,7 +87,7 @@ func test_containers_are_reachable_lockers() -> void:
 		truthy(map.containers.size() >= 2, "at least two lootable lockers")
 		var reach: Dictionary = map.flood_fill(map.entry_pos, map.width * map.height)["cost"]
 		for p: Vector2i in map.containers:
-			eq(map.prop_at(p), MapData.Prop.LOCKER, "container %s is a locker" % str(p))
+			eq(map.prop_at(p), MapData.Prop.RELIQUARY, "container %s is a locker" % str(p))
 			var adjacent := false
 			for dir: Vector2i in MapData.DIRS_8:
 				if reach.has(p + dir):

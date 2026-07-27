@@ -4,10 +4,10 @@ extends Node
 ## Development harness: lets the game be driven from the command line so a
 ## screenshot can be taken without a human at the keyboard.
 ##
-##   LOOPWOOD_SEED=42 LOOPWOOD_SHOT=/tmp/a.png LOOPWOOD_SHOT_AFTER=1.5 \
+##   CURRICULUM_SEED=42 CURRICULUM_SHOT=/tmp/a.png CURRICULUM_SHOT_AFTER=1.5 \
 ##       godot --path . scenes/Main.tscn
 ##
-## LOOPWOOD_SCRIPT names a comma separated list of actions run before the
+## CURRICULUM_SCRIPT names a comma separated list of actions run before the
 ## screenshot, e.g. "wait:0.5,tap_cell:12:9,confirm,end_turn".
 
 signal action_requested(action: String, args: Array)
@@ -21,11 +21,11 @@ var busy_probe: Callable = Callable()
 var _script_steps: Array = []
 
 func _ready() -> void:
-	shot_path = OS.get_environment("LOOPWOOD_SHOT")
-	var after := OS.get_environment("LOOPWOOD_SHOT_AFTER")
+	shot_path = OS.get_environment("CURRICULUM_SHOT")
+	var after := OS.get_environment("CURRICULUM_SHOT_AFTER")
 	if after != "":
 		shot_after = float(after)
-	var steps := OS.get_environment("LOOPWOOD_SCRIPT")
+	var steps := OS.get_environment("CURRICULUM_SCRIPT")
 	if steps != "":
 		_script_steps = steps.split(",", false)
 	if shot_path == "" and _script_steps.is_empty():
@@ -34,7 +34,7 @@ func _ready() -> void:
 	_run.call_deferred()
 
 static func seed_from_env() -> int:
-	var s := OS.get_environment("LOOPWOOD_SEED")
+	var s := OS.get_environment("CURRICULUM_SEED")
 	if s == "":
 		return Dice.randomize_seed()
 	Dice.seed_with(int(s))

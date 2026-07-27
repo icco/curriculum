@@ -6,7 +6,7 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.."
 GODOT="${GODOT:-godot}"
-LOG="${TMPDIR:-/tmp}/loopwood-check.log"
+LOG="${TMPDIR:-/tmp}/curriculum-check.log"
 
 echo "== refreshing script class cache =="
 "$GODOT" --headless --import --path . >"$LOG" 2>&1

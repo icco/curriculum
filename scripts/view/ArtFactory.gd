@@ -1,37 +1,37 @@
 class_name ArtFactory
 extends RefCounted
 
-## The project ships with no image assets: every texture is painted here at
-## startup. Keeps the repo text-only and makes restyling a one-line change.
+## Procedural fallback art: every texture is painted here at startup, so the
+## game is playable before any artwork exists.
 
 const TILE_W := 64
 const TILE_H := 32
 const BLOCK_H := 32  ## how far a wall/door block rises above its floor diamond
 
 ## Floor tile ids inside the floor atlas (one column each).
-enum Floor { HALL, CLASSROOM, LAB, LIBRARY, CAFETERIA, GYM, LOCKER_BAY, OFFICE, STAIRS }
+enum Floor { HALL, LECTURE_HALL, ALCHEMY, SCRIPTORIUM, REFECTORY, TRAINING_YARD, RELIQUARY, STUDY, STAIRS }
 ## Block tile ids inside the block atlas.
 enum Block { WALL, DOOR_CLOSED, DOOR_OPEN }
 
 const ROOM_FLOOR := {
-	"classroom": Floor.CLASSROOM,
-	"science_lab": Floor.LAB,
-	"library": Floor.LIBRARY,
-	"cafeteria": Floor.CAFETERIA,
-	"gym": Floor.GYM,
-	"locker_bay": Floor.LOCKER_BAY,
-	"office": Floor.OFFICE,
+	"lecture_hall": Floor.LECTURE_HALL,
+	"alchemy_lab": Floor.ALCHEMY,
+	"scriptorium": Floor.SCRIPTORIUM,
+	"refectory": Floor.REFECTORY,
+	"training_yard": Floor.TRAINING_YARD,
+	"reliquary_row": Floor.RELIQUARY,
+	"proctors_study": Floor.STUDY,
 }
 
 const FLOOR_STYLE := {
 	Floor.HALL: {"base": Color("4a4f5c"), "alt": Color("545a68"), "line": Color("3a3e49"), "pattern": "checker"},
-	Floor.CLASSROOM: {"base": Color("6b5a45"), "alt": Color("6b5a45"), "line": Color("53442f"), "pattern": "plain"},
-	Floor.LAB: {"base": Color("46596b"), "alt": Color("4d6274"), "line": Color("354552"), "pattern": "grid"},
-	Floor.LIBRARY: {"base": Color("6b3f42"), "alt": Color("6b3f42"), "line": Color("532f33"), "pattern": "plain"},
-	Floor.CAFETERIA: {"base": Color("5e6b44"), "alt": Color("6a7850"), "line": Color("4a5436"), "pattern": "checker"},
-	Floor.GYM: {"base": Color("8a6a3a"), "alt": Color("8a6a3a"), "line": Color("6d5330"), "pattern": "planks"},
-	Floor.LOCKER_BAY: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
-	Floor.OFFICE: {"base": Color("3f5749"), "alt": Color("3f5749"), "line": Color("31443a"), "pattern": "plain"},
+	Floor.LECTURE_HALL: {"base": Color("6b5a45"), "alt": Color("6b5a45"), "line": Color("53442f"), "pattern": "plain"},
+	Floor.ALCHEMY: {"base": Color("46596b"), "alt": Color("4d6274"), "line": Color("354552"), "pattern": "grid"},
+	Floor.SCRIPTORIUM: {"base": Color("6b3f42"), "alt": Color("6b3f42"), "line": Color("532f33"), "pattern": "plain"},
+	Floor.REFECTORY: {"base": Color("5e6b44"), "alt": Color("6a7850"), "line": Color("4a5436"), "pattern": "checker"},
+	Floor.TRAINING_YARD: {"base": Color("8a6a3a"), "alt": Color("8a6a3a"), "line": Color("6d5330"), "pattern": "planks"},
+	Floor.RELIQUARY: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
+	Floor.STUDY: {"base": Color("3f5749"), "alt": Color("3f5749"), "line": Color("31443a"), "pattern": "plain"},
 	Floor.STAIRS: {"base": Color("2f6b8a"), "alt": Color("3a7ea1"), "line": Color("235268"), "pattern": "stairs"},
 }
 

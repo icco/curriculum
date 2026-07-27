@@ -1,18 +1,18 @@
 class_name MapGenerator
 extends RefCounted
 
-## NetHack-flavoured floor plan generator dressed up as a school wing:
+## NetHack-flavoured floor plan generator dressed up as an academy wing:
 ## rejection-sampled rectangular rooms joined by one-tile hallways, then
 ## furnished with cover props, lockers, doors and a stairwell.
 
 const ROOM_KINDS := {
-	"classroom": {"label": "Classroom", "weight": 4.0, "min": Vector2i(6, 5), "max": Vector2i(11, 8)},
-	"science_lab": {"label": "Science Lab", "weight": 2.0, "min": Vector2i(7, 6), "max": Vector2i(11, 9)},
-	"library": {"label": "Library", "weight": 1.5, "min": Vector2i(8, 7), "max": Vector2i(13, 10)},
-	"cafeteria": {"label": "Cafeteria", "weight": 1.0, "min": Vector2i(9, 8), "max": Vector2i(14, 11)},
-	"gym": {"label": "Gymnasium", "weight": 1.0, "min": Vector2i(10, 8), "max": Vector2i(14, 11)},
-	"locker_bay": {"label": "Locker Bay", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
-	"office": {"label": "Faculty Office", "weight": 1.5, "min": Vector2i(5, 4), "max": Vector2i(8, 6)},
+	"lecture_hall": {"label": "Lecture Hall", "weight": 4.0, "min": Vector2i(6, 5), "max": Vector2i(11, 8)},
+	"alchemy_lab": {"label": "Alchemy Laboratory", "weight": 2.0, "min": Vector2i(7, 6), "max": Vector2i(11, 9)},
+	"scriptorium": {"label": "Scriptorium", "weight": 1.5, "min": Vector2i(8, 7), "max": Vector2i(13, 10)},
+	"refectory": {"label": "Refectory", "weight": 1.0, "min": Vector2i(9, 8), "max": Vector2i(14, 11)},
+	"training_yard": {"label": "Training Yard", "weight": 1.0, "min": Vector2i(10, 8), "max": Vector2i(14, 11)},
+	"reliquary_row": {"label": "Reliquary Row", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
+	"proctors_study": {"label": "Proctor's Study", "weight": 1.5, "min": Vector2i(5, 4), "max": Vector2i(8, 6)},
 }
 
 var width: int = 46
@@ -168,13 +168,13 @@ func _place_doors(map: MapData) -> void:
 func _furnish(map: MapData) -> void:
 	for room: Dictionary in map.rooms:
 		match str(room["kind"]):
-			"classroom": _furnish_classroom(map, room)
-			"science_lab": _furnish_lab(map, room)
-			"library": _furnish_library(map, room)
-			"cafeteria": _furnish_cafeteria(map, room)
-			"gym": _furnish_gym(map, room)
-			"locker_bay": _furnish_lockers(map, room)
-			"office": _furnish_office(map, room)
+			"lecture_hall": _furnish_lecture_hall(map, room)
+			"alchemy_lab": _furnish_alchemy_lab(map, room)
+			"scriptorium": _furnish_scriptorium(map, room)
+			"refectory": _furnish_refectory(map, room)
+			"training_yard": _furnish_training_yard(map, room)
+			"reliquary_row": _furnish_reliquaries(map, room)
+			"proctors_study": _furnish_study(map, room)
 	_scatter_hall_props(map)
 	_clear_thresholds(map)
 
@@ -192,7 +192,7 @@ func _try_prop(map: MapData, p: Vector2i, prop: int) -> void:
 		return
 	map.set_prop(p, prop)
 
-func _furnish_classroom(map: MapData, room: Dictionary) -> void:
+func _furnish_lecture_hall(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	# Desks in rows with an aisle, chalkboard on the north wall.
 	for y in range(rect.position.y + 1, rect.end.y - 1, 2):
@@ -203,10 +203,10 @@ func _furnish_classroom(map: MapData, room: Dictionary) -> void:
 				_try_prop(map, Vector2i(x, y), MapData.Prop.DESK)
 	for x in range(rect.position.x + 1, rect.end.x - 1):
 		if Dice.chance(0.5):
-			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.CHALKBOARD)
+			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.RUNE_SLATE)
 	_try_prop(map, Vector2i(rect.position.x + 1, rect.position.y + 1), MapData.Prop.PODIUM)
 
-func _furnish_lab(map: MapData, room: Dictionary) -> void:
+func _furnish_alchemy_lab(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	for y in range(rect.position.y + 1, rect.end.y - 1, 3):
 		for x in range(rect.position.x + 1, rect.end.x - 1):
@@ -214,9 +214,9 @@ func _furnish_lab(map: MapData, room: Dictionary) -> void:
 				_try_prop(map, Vector2i(x, y), MapData.Prop.DESK)
 	for i in 3:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.BOOKSHELF)
-	_try_prop(map, map.random_floor_in_room(room), MapData.Prop.LOCKER)
+	_try_prop(map, map.random_floor_in_room(room), MapData.Prop.RELIQUARY)
 
-func _furnish_library(map: MapData, room: Dictionary) -> void:
+func _furnish_scriptorium(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	for x in range(rect.position.x + 1, rect.end.x - 1, 2):
 		for y in range(rect.position.y + 1, rect.end.y - 2):
@@ -225,34 +225,34 @@ func _furnish_library(map: MapData, room: Dictionary) -> void:
 	for i in 4:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHAIR)
 
-func _furnish_cafeteria(map: MapData, room: Dictionary) -> void:
+func _furnish_refectory(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	for y in range(rect.position.y + 2, rect.end.y - 1, 3):
 		for x in range(rect.position.x + 2, rect.end.x - 2):
 			if Dice.chance(0.8):
 				_try_prop(map, Vector2i(x, y), MapData.Prop.DESK)
 	for i in 3:
-		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.TRASH)
+		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.BRAZIER)
 
-func _furnish_gym(map: MapData, room: Dictionary) -> void:
+func _furnish_training_yard(map: MapData, room: Dictionary) -> void:
 	for i in 5:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHAIR)
 	for i in 2:
-		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.LOCKER)
+		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.RELIQUARY)
 
-func _furnish_lockers(map: MapData, room: Dictionary) -> void:
+func _furnish_reliquaries(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	for x in range(rect.position.x, rect.end.x):
 		if Dice.chance(0.7):
-			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.LOCKER)
+			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.RELIQUARY)
 		if Dice.chance(0.7):
-			_try_prop(map, Vector2i(x, rect.end.y - 1), MapData.Prop.LOCKER)
+			_try_prop(map, Vector2i(x, rect.end.y - 1), MapData.Prop.RELIQUARY)
 
-func _furnish_office(map: MapData, room: Dictionary) -> void:
+func _furnish_study(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	_try_prop(map, rect.position, MapData.Prop.DESK)
 	_try_prop(map, Vector2i(rect.end.x - 1, rect.position.y), MapData.Prop.BOOKSHELF)
-	_try_prop(map, Vector2i(rect.position.x, rect.end.y - 1), MapData.Prop.LOCKER)
+	_try_prop(map, Vector2i(rect.position.x, rect.end.y - 1), MapData.Prop.RELIQUARY)
 	for i in 2:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHAIR)
 
@@ -271,9 +271,9 @@ func _scatter_hall_props(map: MapData) -> void:
 			if wall_neighbors >= 2:
 				continue
 			if Dice.chance(0.03):
-				_try_prop(map, p, MapData.Prop.LOCKER)
+				_try_prop(map, p, MapData.Prop.RELIQUARY)
 			elif Dice.chance(0.03):
-				_try_prop(map, p, MapData.Prop.TRASH)
+				_try_prop(map, p, MapData.Prop.BRAZIER)
 
 # ---------------------------------------------------------------- placement
 
@@ -369,7 +369,7 @@ func _place_containers(map: MapData, reach: Dictionary) -> void:
 	for y in height:
 		for x in width:
 			var p := Vector2i(x, y)
-			if map.prop_at(p) == MapData.Prop.LOCKER and _adjacent_reachable(map, p, reach):
+			if map.prop_at(p) == MapData.Prop.RELIQUARY and _adjacent_reachable(map, p, reach):
 				locker_cells.append(p)
 
 	for p: Vector2i in Dice.shuffled(locker_cells).slice(0, loot_target):
@@ -396,7 +396,7 @@ func _place_containers(map: MapData, reach: Dictionary) -> void:
 	for p: Vector2i in Dice.shuffled(candidates):
 		if map.containers.size() >= loot_target:
 			break
-		map.set_prop(p, MapData.Prop.LOCKER)
+		map.set_prop(p, MapData.Prop.RELIQUARY)
 		var after: Dictionary = map.flood_fill(map.entry_pos, width * height)["cost"]
 		if after.size() < baseline - 1:
 			map.set_prop(p, MapData.Prop.NONE)  # would have sealed something off

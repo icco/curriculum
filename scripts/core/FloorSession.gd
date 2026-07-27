@@ -1,7 +1,7 @@
 class_name FloorSession
 extends RefCounted
 
-## One school floor being played. Owns the map, the roster and the turn loop,
+## One floor of the academy in play. Owns the map, the roster and the turn loop,
 ## and exposes every player action as a function returning event dictionaries.
 ## Deliberately free of scene nodes so a whole 12-floor run can be played out
 ## headlessly in a test.
@@ -10,7 +10,7 @@ enum Phase { PLAYER, ENEMY, DEAD, ESCAPED }
 
 const SIGHT_RADIUS := 9
 const SHORT_REST_FRACTION := 0.35
-const SEMESTER_BREAK := 4    ## every Nth floor is a full rest
+const TERM_BREAK := 4    ## every Nth floor is a full rest
 const BOSS_GUARD_RADIUS := 6
 
 var state: GameState
@@ -50,11 +50,11 @@ func build(new_depth: int) -> Array:
 		var role := str(spawn["role"])
 		var enemy := Roster.make_enemy(role, depth)
 		if role == "boss" and depth >= GameState.FINAL_FLOOR:
-			enemy = Roster.make_enemy_by_id("principal", depth)
+			enemy = Roster.make_enemy_by_id("rector", depth)
 		enemy.grid_pos = spawn["pos"]
 		enemy.home_pos = enemy.grid_pos
 		if role == "boss":
-			# Teachers hold the stairwell instead of hunting across the floor,
+			# Lecturers hold the stairwell instead of hunting across the floor,
 			# so a fast player can gamble on slipping past them.
 			enemy.guard_radius = BOSS_GUARD_RADIUS
 			boss = enemy
@@ -255,13 +255,13 @@ func player_loot() -> Array:
 		return []
 	var cell := adjacent_container()
 	if cell == Vector2i(-1, -1):
-		return [{"type": "info", "text": "No locker within reach."}]
+		return [{"type": "info", "text": "No reliquary within reach."}]
 	if not tm.spend_action(player):
 		return [{"type": "info", "text": "No action left this turn."}]
 	(map.containers[cell] as Dictionary)["looted"] = true
 	var item := Roster.roll_loot("locker", depth)
 	if item.is_empty():
-		return [{"type": "loot", "cell": cell, "item": {}, "text": "The locker is empty. Someone got here first."}]
+		return [{"type": "loot", "cell": cell, "item": {}, "text": "The reliquary is empty. Someone got here first."}]
 	return [{"type": "loot", "cell": cell, "item": item, "text": _take_item(item)}]
 
 ## Auto-equips upgrades so mobile play needs no inventory screen.
@@ -410,7 +410,7 @@ func _check_player_state() -> Array:
 	if player.is_alive():
 		return []
 	phase = Phase.DEAD
-	return [{"type": "player_died", "text": "You black out. The bell rings. It is September again."}]
+	return [{"type": "player_died", "text": "You black out. The bell tolls. It is September again."}]
 
 # ------------------------------------------------------------- descending
 
@@ -431,23 +431,23 @@ func descend() -> Array:
 	if depth >= GameState.FINAL_FLOOR:
 		phase = Phase.ESCAPED
 		return [{"type": "escaped",
-			"text": "You push through the front doors into the afternoon. The loop breaks."}]
+			"text": "You walk out through the cloister gate into open air. The loop breaks."}]
 
 	var rest := _short_rest()
 	state.capture_player(player)
-	var events: Array = [{"type": "descend", "text": "You take the stairs down to %s." % GameState.month_for(depth + 1)}]
+	var events: Array = [{"type": "descend", "text": "You take the stair down to %s." % GameState.month_for(depth + 1)}]
 	events.append_array(rest)
 	events.append_array(build(depth + 1))
 	return events
 
 func _short_rest() -> Array:
 	var events: Array = []
-	var full: bool = depth % SEMESTER_BREAK == 0
+	var full: bool = depth % TERM_BREAK == 0
 	if full:
 		player.heal(player.max_hp)
 		player.restore_all_slots()
 		player.conditions.clear()
-		events.append({"type": "info", "text": "Semester break: fully rested, all slots recovered."})
+		events.append({"type": "info", "text": "Term break: fully rested, all slots recovered."})
 		return events
 	var healed := player.heal(int(ceil(player.max_hp * SHORT_REST_FRACTION)))
 	# A short rest gives back one slot of each level you have.

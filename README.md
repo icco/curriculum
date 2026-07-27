@@ -1,4 +1,4 @@
-# Loopwood High
+# Curriculum
 
 A 2.5D isometric, turn-based tactical roguelike. You are one student stuck in a
 one-year time loop, fighting your way down through a procedurally generated
@@ -22,7 +22,7 @@ attacking. Take the stairs to reach the next month.
 In a browser, via the published image:
 
 ```sh
-docker run --rm -p 8080:8080 ghcr.io/icco/rogue:latest   # then open :8080
+docker run --rm -p 8080:8080 ghcr.io/icco/curriculum:latest   # then open :8080
 ```
 
 ## How it works
@@ -35,7 +35,7 @@ Desks and chairs give half cover (+2 AC), lockers and bookshelves three-quarters
 action, a bonus action and a reaction — leaving an enemy's reach draws an
 opportunity attack, in both directions.
 
-**Floors** are NetHack-style: rectangular rooms (classrooms, labs, libraries,
+**Floors** are NetHack-style: rectangular rooms (lecture_halls, labs, libraries,
 gyms, locker bays) joined by one-tile hallways, furnished with cover and
 lootable lockers, lit by Bresenham line-of-sight with the rest under fog.
 A teacher guards each stairwell. They hold their post rather than chasing you
@@ -55,7 +55,7 @@ in August and the loop breaks.
 ./tools/check.sh                                  # tests; run before committing
 ./tools/shot.sh /tmp/a.png 7 "wait:0.5,tap_far"   # drive the game, screenshot
 godot --headless --path . --script tools/simulate.gd -- 12 6   # balance runs
-./tools/export-web.sh && docker build -t loopwood .            # browser build
+./tools/export-web.sh && docker build -t curriculum .            # browser build
 ```
 
 `check.sh` refreshes Godot's script-class cache, runs the headless suite
