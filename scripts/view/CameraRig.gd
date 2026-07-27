@@ -121,5 +121,8 @@ func _apply_zoom(factor: float, anchor: Vector2) -> void:
 	var after := screen_to_world(anchor)
 	position = _clamp_to_bounds(position + (before - after))
 
+## Computed from position/zoom, not get_canvas_transform(): that is a frame
+## stale after a zoom change, which breaks pinch anchoring.
 func screen_to_world(screen_pos: Vector2) -> Vector2:
-	return get_canvas_transform().affine_inverse() * screen_pos
+	var half := get_viewport_rect().size * 0.5
+	return position + offset + (screen_pos - half) / zoom
