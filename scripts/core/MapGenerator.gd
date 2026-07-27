@@ -3,7 +3,7 @@ extends RefCounted
 
 ## NetHack-flavoured floor plan generator dressed up as an academy wing:
 ## rejection-sampled rectangular rooms joined by one-tile hallways, then
-## furnished with cover props, lockers, doors and a stairwell.
+## furnished with cover props, warded reliquaries, doors and a stairwell.
 
 const ROOM_KINDS := {
 	"lecture_hall": {"label": "Lecture Hall", "weight": 4.0, "min": Vector2i(6, 5), "max": Vector2i(11, 8)},

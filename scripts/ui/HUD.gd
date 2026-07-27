@@ -310,5 +310,3 @@ func close_panels() -> void:
 	_spell_panel.visible = false
 	_item_panel.visible = false
 
-func panels_open() -> bool:
-	return _spell_panel.visible or _item_panel.visible

@@ -60,7 +60,6 @@ var home_pos: Vector2i = Vector2i.ZERO
 var guard_radius: int = 0
 var tint: Color = Color(0.8, 0.8, 0.9)
 var xp_value: int = 5
-var loot_table: String = ""
 
 # ---------------------------------------------------------------- ability math
 
@@ -182,9 +181,6 @@ func add_condition(cond: String, rounds: int = 1) -> void:
 func has_condition(cond: String) -> bool:
 	return conditions.has(cond)
 
-func remove_condition(cond: String) -> void:
-	conditions.erase(cond)
-
 ## Ticks condition durations at the start of this entity's turn.
 func tick_conditions() -> Array:
 	var expired: Array = []
@@ -285,5 +281,3 @@ static func from_dict(data: Dictionary) -> Entity:
 		e.tint = Color(str(data["tint"]))
 	return e
 
-func duplicate_entity() -> Entity:
-	return Entity.from_dict(to_dict())

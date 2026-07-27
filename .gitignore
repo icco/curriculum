@@ -1,30 +1,10 @@
-# Godot 4+ specific ignores
+# Godot 4
 .godot/
-.nomedia
-
-# Godot-specific ignores
-.import/
-export.cfg
 export_credentials.cfg
-*.tmp
-
-# Imported translations (automatically generated from CSV files)
-*.translation
-
-# Mono-specific ignores
-.mono/
-data_*/
-mono_crash.*.json
-
-# Agent scratch
-/screenshots/
 
 # Export output
 /build/
 /dist/
-
-# Playwright MCP scratch
-/.playwright-mcp/
 
 # Raw Midjourney downloads; only the processed sprites are committed
 /assets/source/**

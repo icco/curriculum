@@ -70,12 +70,6 @@ static func level_for_xp(xp: int) -> int:
 func player_level() -> int:
 	return int(run["level"])
 
-func xp_to_next_level() -> int:
-	var next: int = player_level()  # index of the next threshold
-	if next >= XP_CURVE.size():
-		return 0
-	return maxi(0, int(XP_CURVE[next]) - int(run["xp"]))
-
 # ------------------------------------------------------------- skill tree
 
 static func skill_nodes() -> Array[SkillNodeData]:

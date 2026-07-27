@@ -9,8 +9,6 @@ const SPRITE_DIR := "res://assets/sprites"
 
 ## Tile art is drawn on a 2:1 isometric diamond this size.
 const TILE_SIZE := Vector2i(64, 32)
-## Wall and door art rises this far above its floor diamond.
-const BLOCK_RISE := 32
 
 static var _cache: Dictionary = {}     ## key -> Texture2D or null
 static var _enabled: bool = true
@@ -20,9 +18,6 @@ static func set_enabled(value: bool) -> void:
 	if _enabled != value:
 		_enabled = value
 		_cache.clear()
-
-static func is_enabled() -> bool:
-	return _enabled
 
 ## `key` is a path under assets/sprites without extension, e.g. "props/desk".
 static func texture(key: String) -> Texture2D:
@@ -74,11 +69,6 @@ static func _enum_name(enum_dict: Dictionary, value: int) -> String:
 static func draw_standing(ci: CanvasItem, tex: Texture2D, extra_lift: float = 0.0) -> void:
 	var size := tex.get_size()
 	ci.draw_texture(tex, Vector2(-size.x * 0.5, -size.y + extra_lift))
-
-## Draws a floor diamond covering exactly one tile.
-static func draw_floor(ci: CanvasItem, tex: Texture2D) -> void:
-	ci.draw_texture_rect(tex, Rect2(Vector2(-TILE_SIZE.x * 0.5, -TILE_SIZE.y * 0.5),
-		Vector2(TILE_SIZE)), false)
 
 ## Reports what is present, for the asset status tool.
 static func inventory() -> Dictionary:

@@ -64,7 +64,7 @@ godot --headless --path . --script tools/simulate.gd -- 12 6   # balance runs
 ```
 
 `check.sh` refreshes Godot's script-class cache, runs the headless suite
-(~135 tests over dice, maps, generation, combat, turns, AI, camera, content
+(138 tests over dice, maps, generation, combat, turns, AI, camera, content
 integrity, UI wiring, the asset pipeline, save/load and full twelve-floor
 playthroughs) and fails on engine errors as well as
 assertions. CI runs the same script, then exports Web, Linux and Android

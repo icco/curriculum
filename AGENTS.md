@@ -14,11 +14,13 @@ runtime, so the repo stays text-only.
 | `./tools/import-assets.sh [--status]` | Processes `assets/source` into `assets/sprites` and re-imports. `--status` lists art still drawn procedurally. |
 | `godot --headless --path . --script tools/generate_theme.gd` | Regenerates `resources/ui_theme.tres` after changing UI styling. |
 | `godot --headless --path . --script tools/generate_input_map.gd` | Rewrites the input actions in `project.godot`. |
+| `godot --headless --path . --script tools/generate_scenes.gd` | Packs a code-built tree into a `.tscn`, verifying no nodes were dropped. |
 
 ## Layout
 
 | Path | Contents |
 | --- | --- |
+| `scenes/` | `Main.tscn` composition root plus the instanced leaf views. |
 | `scripts/core/` | Rules and simulation. No scene nodes, no rendering. |
 | `scripts/view/` | Isometric rendering, sprites, camera. |
 | `scripts/ui/` | HUD and screens. |

@@ -215,7 +215,6 @@ static func _jitter(col: Color, x: int, y: int, amount: float) -> Color:
 # ------------------------------------------------------------ shared colors
 
 const TEAM_PLAYER := Color("4fc3f7")
-const TEAM_ENEMY := Color("ef5350")
 const ELITE_TRIM := Color("ffca28")
 const BOSS_TRIM := Color("ab47bc")
 

@@ -198,9 +198,9 @@ func _provoke(mover: Entity, from: Vector2i, to: Vector2i) -> Array:
 			continue
 		if not has_reaction(other):
 			continue
-		var reach: int = maxi(1, mini(other.reach(), 1))
-		var was_adjacent: bool = MapData.chebyshev(other.grid_pos, from) <= reach
-		var still_adjacent: bool = MapData.chebyshev(other.grid_pos, to) <= reach
+		# Melee only: a ranged weapon does not threaten the tiles around it.
+		var was_adjacent: bool = MapData.chebyshev(other.grid_pos, from) <= 1
+		var still_adjacent: bool = MapData.chebyshev(other.grid_pos, to) <= 1
 		if not was_adjacent or still_adjacent:
 			continue
 		spend_reaction(other)
@@ -228,9 +228,3 @@ func team_alive(team: int) -> bool:
 			return true
 	return false
 
-func remove_dead() -> Array:
-	var removed: Array = []
-	for e: Entity in entities.duplicate():
-		if not e.is_alive():
-			removed.append(e)
-	return removed
