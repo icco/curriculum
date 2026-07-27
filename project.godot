@@ -9,6 +9,7 @@ config/name="Loopwood High"
 config/description="A 2.5D isometric turn-based tactical roguelike set in a time-looping high school."
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.4", "Mobile")
+config/icon="res://icon.svg"
 boot_splash/show_image=false
 
 [display]

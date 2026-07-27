@@ -1,0 +1,145 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+env:
+  GODOT_VERSION: 4.7.1
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Cache Godot binary
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-bin
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Install Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: ./tools/ci-install-godot.sh
+
+      - name: Report Godot version
+        run: ~/godot-bin/godot --version
+
+      # check.sh refreshes the script-class cache, runs the headless suite and
+      # fails on engine errors as well as failed assertions.
+      - name: Run test suite
+        run: GODOT=~/godot-bin/godot ./tools/check.sh
+
+  export:
+    name: Export ${{ matrix.preset }}
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: Web
+            out: build/web/index.html
+            artifact: loopwood-web
+          - preset: Linux
+            out: build/linux/loopwood-high.x86_64
+            artifact: loopwood-linux
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Cache Godot binary and export templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-linux-templates
+
+      - name: Install Godot and export templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: ./tools/ci-install-godot.sh --with-templates
+
+      - name: Export
+        env:
+          PRESET: ${{ matrix.preset }}
+          OUT: ${{ matrix.out }}
+        run: |
+          godot=~/godot-bin/godot
+          "$godot" --headless --import --path . 2>&1 | tail -3
+          mkdir -p "$(dirname "$OUT")"
+          "$godot" --headless --path . --export-debug "$PRESET" "$OUT"
+          test -s "$OUT"
+
+      - name: Upload ${{ matrix.artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: build/
+          if-no-files-found: error
+
+  # Android needs a JDK and the Android SDK on top of the export templates.
+  # Not yet run on a real runner, so it reports without blocking the branch.
+  export-android:
+    name: Export Android (APK)
+    runs-on: ubuntu-latest
+    needs: test
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Cache Godot binary and export templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-linux-templates
+
+      - name: Install Godot and export templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: ./tools/ci-install-godot.sh --with-templates
+
+      # A throwaway debug keystore is enough for CI artifacts; release signing
+      # uses repository secrets in release.yml.
+      - name: Generate debug keystore
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey \
+            -keypass android -keystore "$HOME/debug.keystore" \
+            -storepass android -dname "CN=Android Debug,O=Android,C=US" \
+            -validity 9999 -deststoretype pkcs12
+
+      # Godot reads the SDK and JDK locations from editor settings, not from
+      # the environment, so they are written before exporting.
+      - name: Point Godot at the Android SDK
+        run: ./tools/ci-android-editor-settings.sh
+
+      - name: Export APK
+        env:
+          GODOT_ANDROID_KEYSTORE_DEBUG_PATH: /home/runner/debug.keystore
+          GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+          GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+        run: |
+          godot=~/godot-bin/godot
+          "$godot" --headless --import --path . 2>&1 | tail -3
+          mkdir -p build/android
+          "$godot" --headless --path . \
+            --export-debug Android build/android/loopwood-high.apk
+          test -s build/android/loopwood-high.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: loopwood-android
+          path: build/android
+          if-no-files-found: error

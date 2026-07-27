@@ -1,16 +1,17 @@
 version: 2
 updates:
-  - package-ecosystem: gomod
-    directory: /
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
-  - package-ecosystem: docker
-    directory: /
-    open-pull-requests-limit: 10
-    schedule:
-      interval: weekly
+  # Godot/GDScript has no package manager and this project vendors no
+  # third-party libraries, so GitHub Actions are the only dependency surface.
+  # The gomod and docker ecosystems the template shipped with have nothing to
+  # scan here.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - '*'
