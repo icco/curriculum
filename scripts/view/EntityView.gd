@@ -68,6 +68,18 @@ func _draw() -> void:
 
 	IsoDraw.shadow(self, 0.5, 0.34)
 
+	var art := ArtLibrary.texture(ArtLibrary.entity_key(entity.art_id))
+	if art != null:
+		if selected or active_turn:
+			var art_ring: Color = ArtFactory.UI_ACCENT if entity.team == Entity.Team.PLAYER \
+				else ArtFactory.UI_DANGER
+			art_ring.a = 0.9
+			IsoDraw.tile_outline(self, art_ring, 2.5, 0.86)
+		ArtLibrary.draw_standing(self, art, IsoDraw.HALF_H + lift)
+		_draw_health(art.get_height() - IsoDraw.HALF_H)
+		_draw_conditions(art.get_height() - IsoDraw.HALF_H)
+		return
+
 	if selected or active_turn:
 		var ring: Color = ArtFactory.UI_ACCENT if entity.team == Entity.Team.PLAYER else ArtFactory.UI_DANGER
 		ring.a = 0.9

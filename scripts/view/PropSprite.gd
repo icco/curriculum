@@ -18,6 +18,13 @@ func setup(type: int, container: bool = false) -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	var art := ArtLibrary.texture(ArtLibrary.prop_key(prop_type, looted))
+	if art != null:
+		IsoDraw.shadow(self, 0.6, 0.3)
+		ArtLibrary.draw_standing(self, art, IsoDraw.HALF_H)
+		if is_container and not looted:
+			_draw_seal()
+		return
 	match prop_type:
 		MapData.Prop.DESK:
 			IsoDraw.shadow(self, 0.66, 0.28)
@@ -49,11 +56,7 @@ func _draw() -> void:
 				draw_rect(Rect2(-11, -32 + i * 14, 22, 3), Color("3a3128"))
 			draw_rect(Rect2(-3, -20, 6, 8), Color("c9a227"))
 			if is_container and not looted:
-				# Warded seal: still holds something.
-				draw_circle(Vector2(0, -45), 5.0, Color(1.0, 0.84, 0.35, 0.35))
-				draw_arc(Vector2(0, -45), 4.0, 0, TAU, 12, Color("ffd54f"), 1.6)
-				draw_line(Vector2(-3, -45), Vector2(3, -45), Color("ffd54f"), 1.4)
-				draw_line(Vector2(0, -48), Vector2(0, -42), Color("ffd54f"), 1.4)
+				_draw_seal()
 		MapData.Prop.BOOKSHELF:
 			IsoDraw.shadow(self, 0.6, 0.3)
 			IsoDraw.box(self, 0.6, 34, Color("5b4029"))
@@ -74,3 +77,10 @@ func _draw() -> void:
 			draw_arc(Vector2(10, -20), 5.0, 0, TAU, 10, Color(0.55, 0.85, 1.0, 0.7), 1.5)
 		_:
 			pass
+
+## Warded seal: this reliquary still holds something.
+func _draw_seal() -> void:
+	draw_circle(Vector2(0, -45), 5.0, Color(1.0, 0.84, 0.35, 0.35))
+	draw_arc(Vector2(0, -45), 4.0, 0, TAU, 12, Color("ffd54f"), 1.6)
+	draw_line(Vector2(-3, -45), Vector2(3, -45), Color("ffd54f"), 1.4)
+	draw_line(Vector2(0, -48), Vector2(0, -42), Color("ffd54f"), 1.4)

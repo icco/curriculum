@@ -25,3 +25,7 @@ mono_crash.*.json
 
 # Playwright MCP scratch
 /.playwright-mcp/
+
+# Raw Midjourney downloads; only the processed sprites are committed
+/assets/source/**
+!/assets/source/.gitkeep

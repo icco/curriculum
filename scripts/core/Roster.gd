@@ -106,6 +106,7 @@ static func make_enemy_by_id(id: StringName, depth: int) -> Entity:
 		push_error("Roster: unknown enemy '%s'" % id)
 		return e
 	e.id = str(def.id)
+	e.art_id = str(def.id)
 	e.display_name = def.display_name
 	e.team = Entity.Team.ENEMY
 	e.rank = def.rank()
@@ -162,6 +163,7 @@ static func make_player(global: Dictionary = {}, level: int = 1) -> Entity:
 	load_data()
 	var e := Entity.new()
 	e.id = "player_01"
+	e.art_id = "player"
 	e.display_name = str(global.get("player_name", "Wren"))
 	e.team = Entity.Team.PLAYER
 	e.rank = Entity.Rank.HERO

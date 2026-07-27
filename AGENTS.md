@@ -11,6 +11,9 @@ runtime, so the repo stays text-only.
 | `./tools/shot.sh <out.png> [seed] [script] [delay]` | Launches the game windowed, optionally drives it, screenshots, quits. The only way to check anything visual. |
 | `godot --headless --path . --script tools/simulate.gd -- 12 6 [aggressive] [verbose]` | Plays N headless runs and reports how deep they got. Use for balance work. |
 | `./tools/export-web.sh` | Produces `build/web`, which the Docker image serves. |
+| `./tools/import-assets.sh [--status]` | Processes `assets/source` into `assets/sprites` and re-imports. `--status` lists art still drawn procedurally. |
+| `godot --headless --path . --script tools/generate_theme.gd` | Regenerates `resources/ui_theme.tres` after changing UI styling. |
+| `godot --headless --path . --script tools/generate_input_map.gd` | Rewrites the input actions in `project.godot`. |
 
 ## Layout
 
@@ -19,7 +22,9 @@ runtime, so the repo stays text-only.
 | `scripts/core/` | Rules and simulation. No scene nodes, no rendering. |
 | `scripts/view/` | Isometric rendering, sprites, camera. |
 | `scripts/ui/` | HUD and screens. |
-| `data/` | JSON content: spells, enemies, loot, skill tree. |
+| `scripts/data/` | Content Resource classes (SpellData, EnemyData, ...). |
+| `resources/` | Content `.tres` files, the ContentLibrary index, the UI theme. |
+| `assets/` | `source/` raw art in, `sprites/` processed art out, `PROMPTS.md`. |
 | `tests/` | Headless suites, one `test_*.gd` per area. |
 | `tools/` | Dev and CI scripts. |
 
@@ -59,11 +64,27 @@ treats those as cyclic and refuses to parse.
 - **`await` on a signal that already fired never returns.** Guard for empty
   paths and null views before awaiting an animation, or the game hangs with no
   error.
+- **`.tres` reference their script by path**, not uid, so content resources
+  load without the class cache. The cache is still needed for `class_name`
+  references in code.
+- **A `.png` is not loadable until Godot has imported it.** Writing sprite files
+  is not enough; `--headless --import` has to run before `ResourceLoader.exists`
+  sees them, which is why `tools/import-assets.sh` does both.
+- **Sprite keys come from `Entity.art_id`, not `id`** — the protagonist saves as
+  `player_01` but its art is `entities/player.png`. Mismatching the two fails
+  silently to the procedural fallback.
 - **Export presets have project-setting prerequisites** and report them as an
   empty error list. Web needed `vram_texture_compression/for_mobile=false`;
   Android needed `rendering/textures/vram_compression/import_etc2_astc=true`.
 - **Godot reads the Android SDK/JDK from editor settings, not the
   environment** — `tools/ci-android-editor-settings.sh` writes them in CI.
+
+## Art pipeline
+
+Procedural art is the shipping default, not a stub: `ArtLibrary` looks for
+`assets/sprites/<key>.png` and falls back per sprite, so a half-finished art set
+renders correctly. Keys are derived from enum names, so adding a prop or enemy
+automatically adds its expected filename to `--status`.
 
 ## Design notes
 

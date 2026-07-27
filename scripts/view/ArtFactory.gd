@@ -50,7 +50,8 @@ static func build_tileset() -> Dictionary:
 	var floor_img := Image.create(TILE_W * floor_count, TILE_H, false, Image.FORMAT_RGBA8)
 	floor_img.fill(Color(0, 0, 0, 0))
 	for i in floor_count:
-		_paint_floor(floor_img, i * TILE_W, i)
+		if not _blit_art(floor_img, ArtLibrary.floor_key(i), i * TILE_W, 0, Vector2i(TILE_W, TILE_H)):
+			_paint_floor(floor_img, i * TILE_W, i)
 	var floor_src := TileSetAtlasSource.new()
 	floor_src.texture = ImageTexture.create_from_image(floor_img)
 	floor_src.texture_region_size = Vector2i(TILE_W, TILE_H)
@@ -62,9 +63,15 @@ static func build_tileset() -> Dictionary:
 	var block_h := TILE_H + BLOCK_H
 	var block_img := Image.create(TILE_W * block_count, block_h, false, Image.FORMAT_RGBA8)
 	block_img.fill(Color(0, 0, 0, 0))
-	_paint_wall(block_img, Block.WALL * TILE_W)
-	_paint_door(block_img, Block.DOOR_CLOSED * TILE_W, false)
-	_paint_door(block_img, Block.DOOR_OPEN * TILE_W, true)
+	var block_size := Vector2i(TILE_W, block_h)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.WALL), Block.WALL * TILE_W, 0, block_size):
+		_paint_wall(block_img, Block.WALL * TILE_W)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_CLOSED),
+			Block.DOOR_CLOSED * TILE_W, 0, block_size):
+		_paint_door(block_img, Block.DOOR_CLOSED * TILE_W, false)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_OPEN),
+			Block.DOOR_OPEN * TILE_W, 0, block_size):
+		_paint_door(block_img, Block.DOOR_OPEN * TILE_W, true)
 	var block_src := TileSetAtlasSource.new()
 	block_src.texture = ImageTexture.create_from_image(block_img)
 	block_src.texture_region_size = Vector2i(TILE_W, block_h)
@@ -77,6 +84,22 @@ static func build_tileset() -> Dictionary:
 	var block_id := ts.add_source(block_src)
 
 	return {"tileset": ts, "floor_source": floor_id, "block_source": block_id}
+
+## Copies an authored sprite into the atlas, scaling it to the cell. Returns
+## false when there is no art for that key, so the caller paints instead.
+static func _blit_art(target: Image, key: String, x: int, y: int, size: Vector2i) -> bool:
+	var tex := ArtLibrary.texture(key)
+	if tex == null:
+		return false
+	var src := tex.get_image()
+	if src == null:
+		return false
+	src = src.duplicate()
+	src.convert(Image.FORMAT_RGBA8)
+	if src.get_size() != size:
+		src.resize(size.x, size.y, Image.INTERPOLATE_LANCZOS)
+	target.blit_rect(src, Rect2i(Vector2i.ZERO, size), Vector2i(x, y))
+	return true
 
 # -------------------------------------------------------------- primitives
 

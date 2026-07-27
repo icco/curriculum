@@ -19,6 +19,9 @@ static func ability_from_key(key: String) -> Ability:
 	return (index if index >= 0 else Ability.STR) as Ability
 
 var id: String = "entity"
+## Sprite lookup key; separate from `id` so save ids and art file names can
+## differ (the protagonist is "player_01" but its art is entities/player.png).
+var art_id: String = "entity"
 var display_name: String = "Someone"
 var team: int = Team.ENEMY
 var rank: int = Rank.GRUNT
@@ -223,6 +226,7 @@ func restore_all_slots() -> void:
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
+		"art_id": art_id,
 		"name": display_name,
 		"team": team,
 		"rank": rank,
@@ -251,6 +255,7 @@ func to_dict() -> Dictionary:
 static func from_dict(data: Dictionary) -> Entity:
 	var e := Entity.new()
 	e.id = str(data.get("id", "entity"))
+	e.art_id = str(data.get("art_id", e.id))
 	e.display_name = str(data.get("name", "Someone"))
 	e.team = int(data.get("team", Team.ENEMY))
 	e.rank = int(data.get("rank", Rank.GRUNT))
