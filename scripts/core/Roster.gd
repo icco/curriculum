@@ -125,9 +125,7 @@ static func make_enemy_by_id(id: String, depth: int) -> Entity:
 
 # ------------------------------------------------------------------ player
 
-## The spec's example stat block lists 12 hit points. A lone student facing
-## D&D-scaled encounters dies to two hits at that value, so the protagonist gets
-## a deliberately larger pool. Documented in the README.
+## Larger than the spec's example 12 hp: see README deviations.
 const BASE_HP := 20
 const HP_PER_LEVEL := 6
 

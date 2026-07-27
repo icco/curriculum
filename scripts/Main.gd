@@ -424,7 +424,7 @@ func _start_new_loop() -> void:
 ## Actions issued by DebugShot so a run can be driven from the command line.
 func _on_debug_action(action: String, args: Array) -> void:
 	const ARITY := {
-		"tap_cell": 2, "tap_rel": 2, "spell": 1, "cast": 3, "zoom": 1, "warp_prop": 2,
+		"tap_cell": 2, "tap_rel": 2, "tap_screen": 2, "spell": 1, "cast": 3, "zoom": 1, "warp_prop": 2,
 	}
 	if args.size() < int(ARITY.get(action, 0)):
 		push_warning("debug action '%s' needs %d args" % [action, int(ARITY[action])])
@@ -432,6 +432,11 @@ func _on_debug_action(action: String, args: Array) -> void:
 	match action:
 		"tap_cell":
 			_on_tapped(board.grid_to_world(Vector2i(int(args[0]), int(args[1]))))
+		"tap_screen":
+			# Goes through the camera's screen->world maths, unlike tap_cell.
+			var screen := Vector2(float(args[0]), float(args[1]))
+			_on_tapped(camera.screen_to_world(screen))
+			board.set_cursor(board.world_to_grid(camera.screen_to_world(screen)))
 		"tap_rel":
 			var cell: Vector2i = session.player.grid_pos + Vector2i(int(args[0]), int(args[1]))
 			_on_tapped(board.grid_to_world(cell))
