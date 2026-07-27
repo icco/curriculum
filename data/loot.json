@@ -1,0 +1,21 @@
+{
+  "locker": [
+    { "slot": "weapon", "name": "Dog-eared Textbook", "damage_dice": "1d6", "range": 1, "weight": 3, "min_depth": 1 },
+    { "slot": "weapon", "name": "Metal Ruler", "damage_dice": "1d6", "attack_bonus": 1, "range": 1, "weight": 3, "min_depth": 1 },
+    { "slot": "weapon", "name": "Hockey Stick", "damage_dice": "1d8", "range": 1, "weight": 2, "min_depth": 2 },
+    { "slot": "weapon", "name": "Fire Axe (Break Glass)", "damage_dice": "1d12", "range": 1, "weight": 1, "min_depth": 5 },
+    { "slot": "weapon", "name": "Compass Set", "damage_dice": "1d6", "attack_bonus": 2, "damage_bonus": 1, "range": 1, "weight": 1, "min_depth": 4 },
+    { "slot": "weapon", "name": "Slingshot", "damage_dice": "1d6", "range": 6, "weight": 2, "min_depth": 2 },
+    { "slot": "armor", "name": "Varsity Jacket", "ac_bonus": 1, "weight": 3, "min_depth": 1 },
+    { "slot": "armor", "name": "Marching Band Breastplate", "ac_bonus": 2, "weight": 2, "min_depth": 3 },
+    { "slot": "armor", "name": "Lab Apron", "ac_bonus": 1, "damage_bonus": 1, "weight": 2, "min_depth": 2 },
+    { "slot": "armor", "name": "Goalie Pads", "ac_bonus": 3, "weight": 1, "min_depth": 6 },
+    { "slot": "trinket", "name": "Lucky Eraser", "attack_bonus": 1, "weight": 3, "min_depth": 1 },
+    { "slot": "trinket", "name": "Energy Drink", "damage_bonus": 2, "weight": 2, "min_depth": 3 },
+    { "slot": "trinket", "name": "Honour Roll Pin", "ac_bonus": 1, "attack_bonus": 1, "weight": 1, "min_depth": 5 },
+    { "slot": "consumable", "name": "Juice Box", "effect": "heal", "power": "2d4+2", "weight": 4, "min_depth": 1 },
+    { "slot": "consumable", "name": "Energy Bar", "effect": "heal", "power": "3d4+3", "weight": 2, "min_depth": 3 },
+    { "slot": "consumable", "name": "Hall Pass (Single Use)", "effect": "dash", "power": "0", "weight": 2, "min_depth": 1 },
+    { "slot": "consumable", "name": "Smelling Salts", "effect": "cleanse", "power": "0", "weight": 2, "min_depth": 2 }
+  ]
+}
