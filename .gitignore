@@ -5,7 +5,3 @@ export_credentials.cfg
 # Export output
 /build/
 /dist/
-
-# Raw Midjourney downloads; only the processed sprites are committed
-/assets/source/**
-!/assets/source/.gitkeep
