@@ -25,8 +25,8 @@ const BLOCK_SIZE := Vector2i(64, 64)
 
 ## Per-sprite target heights in pixels, on a scale where a 1.7m figure is 48px —
 ## the same reference the prompts state. Scaling every sprite to one height would
-## make a stool as tall as a bookshelf and a novice as tall as the Rector, which
-## is exactly the consistency the prompt sheets exist to preserve.
+## make a stool as tall as a bookshelf and a novice as tall as the Rector, so this
+## table — not the source images — is what keeps relative scale honest.
 const HEIGHTS := {
 	# props
 	"desk": 30, "chair": 26, "brazier": 40, "podium": 34,

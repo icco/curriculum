@@ -94,8 +94,8 @@ func test_tileset_builds_without_any_art() -> void:
 		Vector2(ArtFactory.TILE_W * ArtFactory.Floor.size(), ArtFactory.TILE_H),
 		"atlas is the expected size")
 
-## Scaling every sprite to one height would flatten the scale relationships the
-## prompt sheets exist to establish.
+## Scaling every sprite to one height would flatten the scale relationships this
+## table exists to establish.
 func test_import_heights_preserve_relative_scale() -> void:
 	var chair := ImportAssets.target_height("props", "chair")
 	var bookshelf := ImportAssets.target_height("props", "bookshelf")
