@@ -85,8 +85,8 @@ half. Get this wrong and walls sink into the floor.
 
 ## Props — `assets/source/props/`
 
-Generate as **one sheet** so the scale agrees, then split. Each is scaled to
-56px tall on import and stands on the tile centre.
+Generate as **one sheet** so the scale agrees, then split. Each stands on the
+tile centre and is scaled to its own target height on import.
 
 ```
 sprite sheet, 3x3 grid, evenly spaced, isometric 2:1 dimetric arcane academy
@@ -102,14 +102,19 @@ magenta #FF00FF background between and behind every object --style raw --ar 1:1
 Split into: `desk.png`, `chair.png`, `brazier.png`, `reliquary.png`,
 `reliquary_looted.png`, `bookshelf.png`, `rune_slate.png`, `podium.png`.
 
+The importer scales each to its own target height from the `HEIGHTS` table in
+`tools/import_assets.gd`, so relative sizes are preserved — a stool comes out
+26px and a bookshelf 62px. Adjust that table rather than resizing by hand.
+
 `reliquary_looted.png` is optional; without it a looted chest reuses
 `reliquary.png` and only loses its glowing seal.
 
 ## Characters — `assets/source/entities/`
 
-Scaled to 48px tall, standing on the tile centre, facing the camera at
-three-quarters. Names match the enemy ids, so the importer wires them up
-automatically.
+Standing on the tile centre, facing the camera at three-quarters. Names match
+the enemy ids, so the importer wires them up automatically. Heights come from
+the `HEIGHTS` table: a person is 48px, a novice 44, the Rector 66 — rank reads
+through size, so do not pre-scale them yourself.
 
 Shared suffix:
 

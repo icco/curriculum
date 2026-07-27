@@ -11,6 +11,9 @@ extends Node2D
 ## Tint applied to explored-but-unseen tiles.
 @export var fog_tint: Color = Color(0.44, 0.48, 0.63)
 
+const PROP_SCENE := preload("res://scenes/PropSprite.tscn")
+const ENTITY_SCENE := preload("res://scenes/EntityView.tscn")
+
 var map: MapData
 
 var floor_lit: TileMapLayer
@@ -84,7 +87,7 @@ func build(new_map: MapData) -> void:
 			var cell := Vector2i(x, y)
 			var prop := map.prop_at(cell)
 			if prop != MapData.Prop.NONE:
-				var sprite := PropSprite.new()
+				var sprite: PropSprite = PROP_SCENE.instantiate()
 				sprite.setup(prop, map.containers.has(cell))
 				sprite.position = grid_to_world(cell)
 				sprite.visible = false
@@ -216,7 +219,7 @@ func _refresh_entity_visibility() -> void:
 # ---------------------------------------------------------------- entities
 
 func add_entity(e: Entity) -> EntityView:
-	var view := EntityView.new()
+	var view: EntityView = ENTITY_SCENE.instantiate()
 	view.setup(e)
 	view.position = grid_to_world(e.grid_pos)
 	world.add_child(view)

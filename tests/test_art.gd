@@ -93,3 +93,22 @@ func test_tileset_builds_without_any_art() -> void:
 	eq(floor_source.texture.get_size(),
 		Vector2(ArtFactory.TILE_W * ArtFactory.Floor.size(), ArtFactory.TILE_H),
 		"atlas is the expected size")
+
+## Scaling every sprite to one height would flatten the scale relationships the
+## prompt sheets exist to establish.
+func test_import_heights_preserve_relative_scale() -> void:
+	var chair := ImportAssets.target_height("props", "chair")
+	var bookshelf := ImportAssets.target_height("props", "bookshelf")
+	truthy(bookshelf > chair * 2, "a bookshelf towers over a stool (%d vs %d)" % [bookshelf, chair])
+	var novice := ImportAssets.target_height("entities", "novice")
+	var rector := ImportAssets.target_height("entities", "rector")
+	truthy(rector > novice, "the Rector is bigger than a novice (%d vs %d)" % [rector, novice])
+	eq(ImportAssets.target_height("entities", "player"), 48, "a person is the 48px reference")
+
+func test_every_expected_sprite_has_a_target_height() -> void:
+	# A missing entry would silently fall back to a generic height.
+	for key: String in ArtLibrary.inventory()["missing"]:
+		var name := key.get_file()
+		if key.begins_with("tiles/"):
+			continue
+		truthy(ImportAssets.HEIGHTS.has(name), "%s has an import height" % name)

@@ -19,12 +19,26 @@ const TOLERANCE := 0.28
 ## Pixels this close to the key are faded rather than cut, to soften edges.
 const FEATHER := 0.12
 
-## Target size per category. Tiles must match the isometric grid exactly;
-## props and entities are scaled to a height and keep their aspect.
+## Tiles must match the isometric grid exactly.
 const TILE_SIZE := Vector2i(64, 32)
 const BLOCK_SIZE := Vector2i(64, 64)
-const PROP_HEIGHT := 56
-const ENTITY_HEIGHT := 48
+
+## Per-sprite target heights in pixels, on a scale where a 1.7m figure is 48px —
+## the same reference the prompts state. Scaling every sprite to one height would
+## make a stool as tall as a bookshelf and a novice as tall as the Rector, which
+## is exactly the consistency the prompt sheets exist to preserve.
+const HEIGHTS := {
+	# props
+	"desk": 30, "chair": 26, "brazier": 40, "podium": 34,
+	"rune_slate": 48, "reliquary": 52, "reliquary_looted": 52, "bookshelf": 62,
+	# entities: a person is 48, rank reads through size
+	"player": 48, "novice": 44, "disputation_adept": 46, "illusionist": 47,
+	"battle_chanter": 50, "proctor": 50, "visiting_lecturer": 50,
+	"senior_warden": 52, "alchemy_master": 52, "drillmaster": 56,
+	"vice_chancellor": 58, "rector": 66,
+}
+const DEFAULT_PROP_HEIGHT := 48
+const DEFAULT_ENTITY_HEIGHT := 48
 
 var _ran: bool = false
 
@@ -90,11 +104,18 @@ func _fit(image: Image, category: String, name: String) -> void:
 		var target := BLOCK_SIZE if name.begins_with("block_") else TILE_SIZE
 		image.resize(target.x, target.y, Image.INTERPOLATE_LANCZOS)
 		return
-	var height: int = PROP_HEIGHT if category == "props" else ENTITY_HEIGHT
+	var height: int = target_height(category, name)
 	if image.get_height() == height:
 		return
 	var scale := float(height) / float(image.get_height())
 	image.resize(maxi(1, int(round(image.get_width() * scale))), height, Image.INTERPOLATE_LANCZOS)
+
+## Target height for a sprite, preserving relative scale across a category.
+static func target_height(category: String, name: String) -> int:
+	if HEIGHTS.has(name):
+		return int(HEIGHTS[name])
+	push_warning("no height for %s/%s; using the category default" % [category, name])
+	return DEFAULT_PROP_HEIGHT if category == "props" else DEFAULT_ENTITY_HEIGHT
 
 # ------------------------------------------------------------- image ops
 
