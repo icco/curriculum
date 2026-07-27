@@ -325,22 +325,29 @@ func _plan_spawns(map: MapData, entry: Vector2i, reach: Dictionary) -> Array:
 		spawns.append({"pos": boss_pos, "role": "boss", "room": map.room_at(boss_pos)})
 		taken[boss_pos] = true
 
-	# Everything else is drawn from one shuffled pool of reachable room tiles,
-	# preferring tiles the player will not open the floor standing next to.
+	# Everything else is drawn from one shuffled pool of reachable tiles,
+	# preferring rooms well away from where the player starts. The later tiers
+	# are fallbacks so a cramped floor plan still gets its full roster.
 	var far_pool: Array = []
 	var near_pool: Array = []
+	var last_resort: Array = []
 	for cell: Vector2i in reach:
-		if taken.has(cell) or map.room_at(cell) == -1:
+		if taken.has(cell):
 			continue
-		if MapData.chebyshev(cell, entry) >= 8:
+		var d: int = MapData.chebyshev(cell, entry)
+		if map.room_at(cell) != -1 and d >= 8:
 			far_pool.append(cell)
-		elif MapData.chebyshev(cell, entry) >= 4:
+		elif map.room_at(cell) != -1 and d >= 4:
 			near_pool.append(cell)
+		elif d >= 3:
+			last_resort.append(cell)
 	var pool: Array = Dice.shuffled(far_pool)
 	pool.append_array(Dice.shuffled(near_pool))
+	pool.append_array(Dice.shuffled(last_resort))
 
-	var grunt_budget: int = 4 + int(depth * 1.5)
-	var elite_budget: int = int(depth / 2) + (1 if depth >= 2 else 0)
+	# One student against a whole wing: keep the crowd survivable.
+	var grunt_budget: int = 2 + int(depth * 0.8)
+	var elite_budget: int = int(depth / 3.0) + (1 if depth >= 3 else 0)
 	var cursor := 0
 	for role: String in ["grunt", "elite"]:
 		var budget: int = grunt_budget if role == "grunt" else elite_budget
@@ -404,14 +411,30 @@ func _adjacent_reachable(map: MapData, p: Vector2i, reach: Dictionary) -> bool:
 			return true
 	return false
 
+## A post for the floor boss: near enough to guard the stairwell, far enough
+## that a fast player can gamble on slipping past instead of fighting.
+const BOSS_MIN_DISTANCE := 3
+const BOSS_MAX_DISTANCE := 6
+
 func _free_near(map: MapData, origin: Vector2i, reach: Dictionary, taken: Dictionary) -> Vector2i:
-	var best := Vector2i(-1, -1)
-	var best_d := 99
+	var in_band: Array = []
+	var fallback := Vector2i(-1, -1)
+	var fallback_d := 999
 	for cell: Vector2i in reach:
 		if taken.has(cell):
 			continue
 		var d: int = MapData.chebyshev(cell, origin)
-		if d > 0 and d < best_d:
-			best_d = d
-			best = cell
-	return best
+		if d >= BOSS_MIN_DISTANCE and d <= BOSS_MAX_DISTANCE:
+			in_band.append(cell)
+		elif d > 0 and d < fallback_d:
+			fallback_d = d
+			fallback = cell
+	if in_band.is_empty():
+		return fallback
+	# Prefer a spot in the stairwell's own room so the guard reads as deliberate.
+	var same_room: Array = []
+	var room := map.room_at(origin)
+	for cell: Vector2i in in_band:
+		if map.room_at(cell) == room:
+			same_room.append(cell)
+	return Dice.pick(same_room if not same_room.is_empty() else in_band)

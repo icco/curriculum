@@ -42,6 +42,10 @@ var bonus_ac: int = 0                 # from conditions/gear, recomputed on dema
 
 # Placement + presentation
 var grid_pos: Vector2i = Vector2i.ZERO
+## Bosses guard a post rather than roaming: they will not chase further than
+## `guard_radius` from `home_pos`. Zero means no leash.
+var home_pos: Vector2i = Vector2i.ZERO
+var guard_radius: int = 0
 var tint: Color = Color(0.8, 0.8, 0.9)
 var xp_value: int = 5
 var loot_table: String = ""

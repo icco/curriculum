@@ -31,7 +31,10 @@ func test_generated_floors_are_playable() -> void:
 		for spawn: Dictionary in spawns:
 			roles[spawn["role"]] = int(roles.get(spawn["role"], 0)) + 1
 		eq(int(roles.get("boss", 0)), 1, "%s exactly one floor boss" % tag)
-		truthy(int(roles.get("grunt", 0)) >= 3, "%s enough grunts" % tag)
+		# Density scales with depth; floor 1 is deliberately a light welcome.
+		var expected_grunts: int = 2 + int(depth * 0.8)
+		truthy(int(roles.get("grunt", 0)) >= mini(expected_grunts, 2),
+			"%s at least a couple of grunts (got %d)" % [tag, int(roles.get("grunt", 0))])
 
 func test_rooms_never_overlap() -> void:
 	for s in 10:

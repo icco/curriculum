@@ -1,0 +1,124 @@
+{
+  "nodes": [
+    {
+      "id": "study_group",
+      "name": "Study Group",
+      "cost": 2,
+      "effect": { "type": "bonus_hp", "value": 4 },
+      "requires": [],
+      "description": "+4 maximum hit points, every loop."
+    },
+    {
+      "id": "gym_credit",
+      "name": "Gym Credit",
+      "cost": 2,
+      "effect": { "type": "bonus_speed", "value": 1 },
+      "requires": [],
+      "description": "+1 tile of movement."
+    },
+    {
+      "id": "hall_savvy",
+      "name": "Hall Savvy",
+      "cost": 3,
+      "effect": { "type": "bonus_ac", "value": 1 },
+      "requires": [],
+      "description": "+1 AC. You learn which lockers swing open."
+    },
+    {
+      "id": "extra_period",
+      "name": "Extra Period",
+      "cost": 3,
+      "effect": { "type": "bonus_slots_1", "value": 1 },
+      "requires": [],
+      "description": "+1 level 1 spell slot."
+    },
+    {
+      "id": "pop_quiz_node",
+      "name": "Remember: Pop Quiz",
+      "cost": 2,
+      "effect": { "type": "unlock_spell", "value": "pop_quiz" },
+      "requires": [],
+      "description": "Learn Pop Quiz. Knowledge survives the reset."
+    },
+    {
+      "id": "detention_node",
+      "name": "Remember: Detention Slip",
+      "cost": 3,
+      "effect": { "type": "unlock_spell", "value": "detention_slip" },
+      "requires": [],
+      "description": "Learn Detention Slip."
+    },
+    {
+      "id": "study_hall_node",
+      "name": "Remember: Study Hall",
+      "cost": 3,
+      "effect": { "type": "unlock_spell", "value": "study_hall" },
+      "requires": [],
+      "description": "Learn Study Hall."
+    },
+    {
+      "id": "slick_node",
+      "name": "Remember: Cafeteria Slick",
+      "cost": 3,
+      "effect": { "type": "unlock_spell", "value": "cafeteria_slick" },
+      "requires": ["study_group"],
+      "description": "Learn Cafeteria Slick."
+    },
+    {
+      "id": "honour_roll",
+      "name": "Honour Roll",
+      "cost": 4,
+      "effect": { "type": "stat", "value": 1, "ability": "int" },
+      "requires": ["pop_quiz_node"],
+      "description": "+1 Intelligence. Sharper spells, higher save DC."
+    },
+    {
+      "id": "second_period",
+      "name": "Second Period",
+      "cost": 5,
+      "effect": { "type": "bonus_slots_2", "value": 1 },
+      "requires": ["extra_period"],
+      "description": "+1 level 2 spell slot."
+    },
+    {
+      "id": "hall_pass_node",
+      "name": "Remember: Hall Pass",
+      "cost": 4,
+      "effect": { "type": "unlock_spell", "value": "hall_pass" },
+      "requires": ["second_period"],
+      "description": "Learn Hall Pass."
+    },
+    {
+      "id": "fire_drill_node",
+      "name": "Remember: Fire Drill",
+      "cost": 5,
+      "effect": { "type": "unlock_spell", "value": "fire_drill" },
+      "requires": ["second_period"],
+      "description": "Learn Fire Drill."
+    },
+    {
+      "id": "tenure",
+      "name": "Tenured Survivor",
+      "cost": 6,
+      "effect": { "type": "bonus_hp", "value": 8 },
+      "requires": ["study_group", "hall_savvy"],
+      "description": "+8 maximum hit points."
+    },
+    {
+      "id": "third_period",
+      "name": "Third Period",
+      "cost": 7,
+      "effect": { "type": "bonus_slots_3", "value": 1 },
+      "requires": ["second_period"],
+      "description": "+1 level 3 spell slot."
+    },
+    {
+      "id": "valedictorian_node",
+      "name": "Remember: Valedictorian",
+      "cost": 6,
+      "effect": { "type": "unlock_spell", "value": "valedictorian" },
+      "requires": ["third_period", "honour_roll"],
+      "description": "Learn Valedictorian, the beam of academic superiority."
+    }
+  ]
+}

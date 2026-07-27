@@ -125,8 +125,42 @@ static func make_enemy_by_id(id: String, depth: int) -> Entity:
 
 # ------------------------------------------------------------------ player
 
+## The spec's example stat block lists 12 hit points. A lone student facing
+## D&D-scaled encounters dies to two hits at that value, so the protagonist gets
+## a deliberately larger pool. Documented in the README.
+const BASE_HP := 20
+const HP_PER_LEVEL := 6
+
+## Spell slots by class level, before GlobalState bonuses.
+static func slots_for_level(level: int) -> Dictionary:
+	return {
+		"level_1": mini(4, 1 + int(ceil(level / 2.0))),
+		"level_2": clampi(level - 2, 0, 3),
+		"level_3": clampi(level - 4, 0, 3),
+	}
+
+## Sets hit points, proficiency and slots for `level`. Returns the hit points
+## gained, which the caller grants as current health on a level up.
+static func apply_level(e: Entity, level: int, global: Dictionary) -> int:
+	var previous_max := e.max_hp
+	e.level = maxi(1, level)
+	e.max_hp = BASE_HP + int(global.get("bonus_hp", 0)) + (e.level - 1) * HP_PER_LEVEL
+	e.proficiency = 2 + int((e.level - 1) / 4.0)
+	var slots := slots_for_level(e.level)
+	slots["level_1"] = int(slots["level_1"]) + int(global.get("bonus_slots_1", 0))
+	slots["level_2"] = int(slots["level_2"]) + int(global.get("bonus_slots_2", 0))
+	slots["level_3"] = int(slots["level_3"]) + int(global.get("bonus_slots_3", 0))
+	for key: String in slots.keys():
+		if int(slots[key]) <= 0:
+			slots.erase(key)
+	e.spell_slots = slots
+	var gained: int = e.max_hp - previous_max
+	if gained > 0:
+		e.current_hp += gained
+	return gained
+
 ## The protagonist, built from GlobalState so time-loop upgrades carry over.
-static func make_player(global: Dictionary = {}) -> Entity:
+static func make_player(global: Dictionary = {}, level: int = 1) -> Entity:
 	load_data()
 	var e := Entity.new()
 	e.id = "player_01"
@@ -139,24 +173,17 @@ static func make_player(global: Dictionary = {}) -> Entity:
 	for a: String in Entity.ABILITIES:
 		e.stats[a] = int(e.stats[a]) + int(bonus_stats.get(a, 0))
 	e.ac_base = 10 + int(global.get("bonus_ac", 0))
-	e.max_hp = 12 + int(global.get("bonus_hp", 0))
-	e.current_hp = e.max_hp
 	e.speed_tiles = 6 + int(global.get("bonus_speed", 0))
-	e.proficiency = 2
 	e.attack_ability = "dex"
 	e.casting_ability = "int"
-	e.weapon_name = "Bare Hands"
-	e.damage_dice = "1d4"
+	# Every loop starts with the textbook you were carrying when the bell rang.
+	e.weapon_name = "Dog-eared Textbook"
+	e.damage_dice = "1d6"
 	e.attack_range = 1
 	e.tint = ArtFactory.TEAM_PLAYER
 	e.xp_value = 0
-
-	var slots: Dictionary = {"level_1": 2 + int(global.get("bonus_slots_1", 0))}
-	if int(global.get("bonus_slots_2", 0)) > 0:
-		slots["level_2"] = int(global.get("bonus_slots_2", 0))
-	if int(global.get("bonus_slots_3", 0)) > 0:
-		slots["level_3"] = int(global.get("bonus_slots_3", 0))
-	e.spell_slots = slots
+	apply_level(e, level, global)
+	e.current_hp = e.max_hp
 
 	var known: Array = global.get("unlocked_spells", []).duplicate()
 	for id: String in starting_spells():

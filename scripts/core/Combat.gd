@@ -98,6 +98,25 @@ static func describe_attack(event: Dictionary) -> String:
 
 # ----------------------------------------------------------------- spells
 
+## Cantrips gain dice at levels 5 and 11, as in 5e. Levelled spells do not.
+static func spell_damage_expr(caster: Entity, spell: Dictionary) -> String:
+	var expr := str(spell.get("damage", "1d6"))
+	if int(spell.get("level", 0)) != 0:
+		return expr
+	var multiplier := 1
+	if caster.level >= 5:
+		multiplier += 1
+	if caster.level >= 11:
+		multiplier += 1
+	if multiplier == 1:
+		return expr
+	var parsed := Dice.parse_expr(expr)
+	if parsed.sides <= 0:
+		return expr
+	var flat: int = parsed.flat
+	var suffix: String = "" if flat == 0 else ("+%d" % flat if flat > 0 else str(flat))
+	return "%dd%d%s" % [parsed.count * multiplier, parsed.sides, suffix]
+
 static func spell_slot_available(caster: Entity, spell: Dictionary) -> bool:
 	var level := int(spell.get("level", 0))
 	return level == 0 or caster.slots_left(level) > 0
@@ -189,7 +208,7 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 				"damage": 0, "killed": false,
 			}
 			if check["success"]:
-				var dmg := roll_damage(str(spell.get("damage", "1d6")), check["crit"])
+				var dmg := roll_damage(spell_damage_expr(caster, spell), check["crit"])
 				event["damage"] = target.take_damage(dmg)
 				event["killed"] = not target.is_alive()
 				var crit_note: String = "CRITICAL! " if bool(check["crit"]) else ""
@@ -205,7 +224,7 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 			var darts := int(spell.get("darts", 1))
 			var total := 0
 			for i in darts:
-				total += roll_damage(str(spell.get("damage", "1d4+1")))
+				total += roll_damage(spell_damage_expr(caster, spell))
 			var dealt := target.take_damage(total)
 			events.append({
 				"type": "spell_auto", "attacker": caster, "target": target, "spell": spell,
@@ -217,7 +236,7 @@ static func _resolve_offensive(caster: Entity, spell: Dictionary, target: Entity
 			var ability := str(spell.get("save_ability", "dex"))
 			var dc := caster.spell_save_dc()
 			var save := saving_throw(target, ability, dc)
-			var base := roll_damage(str(spell.get("damage", "1d6")))
+			var base := roll_damage(spell_damage_expr(caster, spell))
 			var dmg := base
 			if bool(save["success"]):
 				dmg = int(base / 2.0) if str(spell.get("save_effect", "half")) == "half" else 0

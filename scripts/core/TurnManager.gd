@@ -186,8 +186,8 @@ func move_along(e: Entity, path: Array) -> Dictionary:
 		e.grid_pos = to
 		walked.append(to)
 		spend_move(e, 1)
-	if not events.is_empty():
-		events_logged.emit(events)
+	# Events are returned rather than emitted: callers already have them, and
+	# emitting here too would log every reaction twice.
 	return {"steps": walked, "events": events, "stopped_early": stopped}
 
 ## Opportunity attacks: leaving a hostile's reach with its reaction up.

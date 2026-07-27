@@ -31,8 +31,10 @@ static func take_turn(actor: Entity, tm: TurnManager) -> Array:
 	events.append_array(_reposition(actor, tm, target))
 	events.append_array(_attack_if_able(actor, tm, target))
 
-	# Teachers and monitors press the advantage with a bonus-action follow-up.
-	if actor.rank != Entity.Rank.GRUNT and target.is_alive() and tm.has_bonus(actor):
+	# Wounded teachers and monitors get desperate and swing twice. Gating this
+	# on their own health keeps opening rounds survivable for a fresh loop.
+	var enraged: bool = float(actor.current_hp) / maxf(1.0, float(actor.max_hp)) <= 0.5
+	if enraged and actor.rank != Entity.Rank.GRUNT and target.is_alive() and tm.has_bonus(actor):
 		if Combat.can_attack(actor, target, tm.map):
 			tm.spend_bonus(actor)
 			var extra := Combat.weapon_attack(actor, target, tm.map, "attack")
@@ -86,6 +88,8 @@ static func _reposition(actor: Entity, tm: TurnManager, target: Entity) -> Array
 	var best_cell: Vector2i = actor.grid_pos
 	var best_score := -INF
 	for cell: Vector2i in cost:
+		if _off_post(actor, cell):
+			continue
 		var score := _score_cell(actor, cell, target, map)
 		# Nearer options win ties so movement looks purposeful.
 		score -= float(cost[cell]) * 0.05
@@ -94,7 +98,8 @@ static func _reposition(actor: Entity, tm: TurnManager, target: Entity) -> Array
 			best_cell = cell
 
 	# Nothing useful in range: try dashing to close the gap.
-	if best_cell == actor.grid_pos and actor.reach() <= 1 and tm.has_action(actor):
+	if best_cell == actor.grid_pos and actor.reach() <= 1 and tm.has_action(actor) \
+			and actor.guard_radius <= 0:
 		var far_path := map.find_path(actor.grid_pos, target.grid_pos, tm.occupied_tiles(actor), true)
 		if far_path.size() > 2 and tm.dash(actor):
 			reach = tm.reachable(actor)
@@ -115,6 +120,12 @@ static func _reposition(actor: Entity, tm: TurnManager, target: Entity) -> Array
 		"text": "%s moves." % actor.display_name,
 	})
 	return events
+
+## True if `cell` is outside a guard's leash.
+static func _off_post(actor: Entity, cell: Vector2i) -> bool:
+	if actor.guard_radius <= 0:
+		return false
+	return MapData.chebyshev(cell, actor.home_pos) > actor.guard_radius
 
 ## Higher is better: in weapon range, with line of sight, ideally behind cover.
 static func _score_cell(actor: Entity, cell: Vector2i, target: Entity, map: MapData) -> float:
