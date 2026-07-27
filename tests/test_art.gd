@@ -147,13 +147,26 @@ func test_top_face_ignores_the_extrusion_below_it() -> void:
 	between(float(face.size.x) / float(face.size.y), 1.9, 2.1, "the top face comes out 2:1")
 	truthy(face.end.y < 110, "the side walls are left behind (bottom at %d)" % face.end.y)
 
+func test_a_rough_side_wall_does_not_drag_the_face_down() -> void:
+	# Rubble side walls bulge past the face above them. Reading the left and
+	# right vertices off the extreme columns finds the bulge, not the vertex,
+	# and drags a third of the wall into the tile.
+	var img := _slab(200, DUSTY_ROSE, 30, false)
+	for y in range(105, 125):
+		for x in range(14, 20):
+			img.set_pixel(x, y, Color(0.15, 0.17, 0.2))
+	var solid := ExtractTile.flood_backdrop(img, DUSTY_ROSE)
+	var face := ExtractTile.top_face(solid, 200, 200)
+	truthy(face.end.y < 110, "the bulge is not treated as a vertex (bottom at %d)" % face.end.y)
+
 func test_a_cast_shadow_is_not_mistaken_for_the_tile() -> void:
 	# The shadow is darker than the backdrop but shares its hue; the tile does
 	# not. Without this the shadow drags the tile's left edge out with it.
 	var img := _slab(200, DUSTY_ROSE, 30, true)
 	var solid := ExtractTile.flood_backdrop(img, DUSTY_ROSE)
 	var face := ExtractTile.top_face(solid, 200, 200)
-	eq(face.position.x, 20, "the left vertex is the tile's, not the shadow's")
+	# The shadow starts at x=10; the tile's left vertex is at 20.
+	between(face.position.x, 19.0, 22.0, "the left edge is the tile's, not the shadow's")
 
 func test_missing_art_falls_back_rather_than_erroring() -> void:
 	ArtLibrary.clear_cache()

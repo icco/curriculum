@@ -127,42 +127,51 @@ static func _is_backdrop(c: Color, key: Color) -> bool:
 		return false
 	return v.normalized().dot(k.normalized()) >= SHADOW_CHROMA
 
+## Rows within this fraction of the widest count as the widest, so a few stones
+## jutting out of the side wall cannot claim the title.
+const WIDEST_ROW := 0.98
+
 ## The top face of the slab, as a rect.
 ##
-## The top face is a parallelogram, so its fourth corner is fixed by the other
-## three: bottom = left + right - top. Finding those three needs only the
-## silhouette's extremes, which the extrusion below cannot move — it hangs
-## *under* the left and right vertices, never beside or above them. Guessing the
-## extrusion's height directly is what the first attempt got wrong.
+## Found by scanning row widths rather than by locating the left and right
+## vertices directly. A slab widens steadily down to its top face's widest row,
+## then holds roughly that width through the vertical extrusion before closing.
+## So the first row at (near) maximum width *is* the diamond's waist, and the
+## face is symmetric about it: bottom = waist + (waist - top).
+##
+## Reading the vertices off the extreme columns instead — the obvious approach,
+## and the first one tried here — breaks on any render whose side wall is rough
+## enough to bulge past the face above it, which is most of them.
 static func top_face(solid: PackedByteArray, w: int, h: int) -> Rect2i:
-	var min_x := w
-	var max_x := -1
 	var top_y := -1
+	var widest := 0
+	var rows: Array[Vector2i] = []  ## per row: first and last solid column
 	for y in h:
+		var first := -1
+		var last := -1
 		for x in w:
-			if solid[y * w + x] == 0:
-				continue
-			if top_y < 0:
-				top_y = y
-			min_x = mini(min_x, x)
-			max_x = maxi(max_x, x)
-	if max_x < 0:
+			if solid[y * w + x] == 1:
+				if first < 0:
+					first = x
+				last = x
+		rows.append(Vector2i(first, last))
+		if first < 0:
+			continue
+		if top_y < 0:
+			top_y = y
+		widest = maxi(widest, last - first + 1)
+	if top_y < 0:
 		return Rect2i()
 
-	var left_y := _first_row(solid, w, h, min_x)
-	var right_y := _first_row(solid, w, h, max_x)
-	var bottom_y := left_y + right_y - top_y
-	if bottom_y <= top_y:
-		return Rect2i()
-	return Rect2i(min_x, top_y, max_x - min_x + 1, mini(bottom_y, h - 1) - top_y + 1)
-
-## The first row in a column that is part of the subject — the left or right
-## vertex of the top face, where the side wall starts.
-static func _first_row(solid: PackedByteArray, w: int, h: int, x: int) -> int:
-	for y in h:
-		if solid[y * w + x] == 1:
-			return y
-	return 0
+	for y in range(top_y, h):
+		var row := rows[y]
+		if row.x < 0 or row.y - row.x + 1 < int(widest * WIDEST_ROW):
+			continue
+		var half := y - top_y
+		if half <= 0:
+			continue
+		return Rect2i(row.x, top_y, row.y - row.x + 1, mini(y + half, h - 1) - top_y + 1)
+	return Rect2i()
 
 ## Crops to the top face and masks it to a true 2:1 diamond on flat magenta.
 ## Masking rather than trusting the render is the point: the game's grid needs
