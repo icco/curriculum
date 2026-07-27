@@ -18,7 +18,8 @@ rm -f "$OUT"
 "$GODOT" --headless --import --path . >/dev/null 2>&1
 
 LOOPWOOD_SEED="$SEED" LOOPWOOD_SHOT="$OUT" LOOPWOOD_SHOT_AFTER="$DELAY" \
-	LOOPWOOD_SCRIPT="$STEPS" timeout 120 "$GODOT" --path . scenes/Main.tscn >"$LOG" 2>&1
+	LOOPWOOD_SCRIPT="$STEPS" LOOPWOOD_FRESH="${LOOPWOOD_FRESH:-1}" \
+	timeout 120 "$GODOT" --path . scenes/Main.tscn >"$LOG" 2>&1
 status=$?
 
 if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script|Condition .* is true" "$LOG"; then

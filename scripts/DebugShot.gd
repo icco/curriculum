@@ -15,6 +15,9 @@ signal action_requested(action: String, args: Array)
 var shot_path: String = ""
 var shot_after: float = 1.2
 var quit_after_shot: bool = true
+## Optional Callable returning true while the game is animating, so captures
+## land on a settled frame instead of mid-tween.
+var busy_probe: Callable = Callable()
 var _script_steps: Array = []
 
 func _ready() -> void:
@@ -48,13 +51,22 @@ func _run() -> void:
 			await get_tree().create_timer(float(args[0])).timeout
 			continue
 		action_requested.emit(action, args)
-		await get_tree().process_frame
+		await _settle()
 	if shot_path == "":
 		return
 	await get_tree().create_timer(shot_after).timeout
+	await _settle()
 	await capture(shot_path)
 	if quit_after_shot:
 		get_tree().quit(0)
+
+## Waits out any running animation so scripted steps and captures are stable.
+func _settle(timeout: float = 12.0) -> void:
+	await get_tree().process_frame
+	var waited := 0.0
+	while busy_probe.is_valid() and bool(busy_probe.call()) and waited < timeout:
+		await get_tree().create_timer(0.05).timeout
+		waited += 0.05
 
 func capture(path: String) -> void:
 	# A frame must actually be drawn before the backbuffer holds anything.

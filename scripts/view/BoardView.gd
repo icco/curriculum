@@ -289,15 +289,22 @@ func clear_highlights() -> void:
 
 func _draw_highlights() -> void:
 	for cell: Vector2i in move_cells:
-		IsoDraw.tile(highlights, Color(0.31, 0.76, 0.97, 0.22), 0.96, grid_to_world(cell))
+		IsoDraw.tile(highlights, Color(0.36, 0.78, 0.98, 0.30), 0.94, grid_to_world(cell))
+		IsoDraw.tile_outline(highlights, Color(0.45, 0.85, 1.0, 0.35), 1.0, 0.94, grid_to_world(cell))
 	for cell: Vector2i in threat_cells:
 		IsoDraw.tile(highlights, Color(0.94, 0.33, 0.31, 0.16), 0.96, grid_to_world(cell))
 	for cell: Vector2i in target_cells:
 		IsoDraw.tile(highlights, Color(0.94, 0.33, 0.31, 0.34), 0.96, grid_to_world(cell))
 		IsoDraw.tile_outline(highlights, Color(1, 0.45, 0.4, 0.9), 2.0, 0.96, grid_to_world(cell))
+	# Amber footsteps so the route reads clearly on top of the blue move range.
 	for i in path_cells.size():
 		var cell: Vector2i = path_cells[i]
 		var last: bool = i == path_cells.size() - 1
-		IsoDraw.tile(highlights, Color(0.31, 0.76, 0.97, 0.5 if last else 0.34), 0.8, grid_to_world(cell))
+		var pos := grid_to_world(cell)
+		if last:
+			IsoDraw.tile(highlights, Color(1.0, 0.87, 0.42, 0.62), 0.92, pos)
+			IsoDraw.tile_outline(highlights, Color(1.0, 0.95, 0.7, 1.0), 3.0, 0.92, pos)
+		elif i > 0:
+			IsoDraw.tile(highlights, Color(1.0, 0.82, 0.35, 0.42), 0.5, pos)
 	if cursor_cell.x > -900:
 		IsoDraw.tile_outline(highlights, Color(1, 1, 1, 0.95), 2.5, 0.98, grid_to_world(cursor_cell))
