@@ -22,3 +22,6 @@ mono_crash.*.json
 # Export output
 /build/
 /dist/
+
+# Playwright MCP scratch
+/.playwright-mcp/

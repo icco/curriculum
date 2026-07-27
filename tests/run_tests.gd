@@ -5,7 +5,18 @@ extends SceneTree
 
 const TEST_DIR := "res://tests"
 
-func _init() -> void:
+var _ran: bool = false
+
+## Runs on the first frame, not in _init: there the main loop is unregistered
+## and the root window is not live, so tree-dependent tests silently no-op.
+func _process(_delta: float) -> bool:
+	if _ran:
+		return true
+	_ran = true
+	_run_all()
+	return true
+
+func _run_all() -> void:
 	var only: String = ""
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):
@@ -37,6 +48,8 @@ func _init() -> void:
 			if instance.has_method("before_each"):
 				instance.call("before_each")
 			instance.call(n)
+			if instance.has_method("after_each"):
+				instance.call("after_each")
 		total_checks += int(instance.get("checks"))
 		var fails: Array = instance.get("failures")
 		all_failures.append_array(fails)

@@ -52,8 +52,11 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'style: format YAML and JSON with yq'
-          # The default GITHUB_TOKEN cannot edit files under .github/workflows.
-          file_pattern: '*.yml *.yaml *.json :!.github/workflows/*'
+          # Listing globs individually aborts git add with exit 128 as soon as
+          # one matches nothing (e.g. *.yaml). '.' cannot, but it stages whatever
+          # is dirty — fine while the yq passes above are the only prior steps.
+          # Workflows are excluded: the default GITHUB_TOKEN may not edit them.
+          file_pattern: '. :!.github/workflows/*'
           commit_author: GitHub Actions <actions@github.com>
           commit_user_name: github-actions[bot]
           commit_user_email: github-actions[bot]@users.noreply.github.com

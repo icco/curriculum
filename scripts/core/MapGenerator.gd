@@ -325,9 +325,8 @@ func _plan_spawns(map: MapData, entry: Vector2i, reach: Dictionary) -> Array:
 		spawns.append({"pos": boss_pos, "role": "boss", "room": map.room_at(boss_pos)})
 		taken[boss_pos] = true
 
-	# Everything else is drawn from one shuffled pool of reachable tiles,
-	# preferring rooms well away from where the player starts. The later tiers
-	# are fallbacks so a cramped floor plan still gets its full roster.
+	# One shuffled pool of reachable tiles, preferring rooms away from the entry.
+	# Later tiers are fallbacks so cramped floors still fill their roster.
 	var far_pool: Array = []
 	var near_pool: Array = []
 	var last_resort: Array = []
@@ -411,8 +410,7 @@ func _adjacent_reachable(map: MapData, p: Vector2i, reach: Dictionary) -> bool:
 			return true
 	return false
 
-## A post for the floor boss: near enough to guard the stairwell, far enough
-## that a fast player can gamble on slipping past instead of fighting.
+## Close enough to guard the stairwell, far enough to slip past.
 const BOSS_MIN_DISTANCE := 3
 const BOSS_MAX_DISTANCE := 6
 
