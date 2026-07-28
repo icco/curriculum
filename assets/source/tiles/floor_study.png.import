@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3y3vhvbe8wq7"
-path="res://.godot/imported/floor_hall.png-828bc2c623352bc52a3d444620fe551c.ctex"
+uid="uid://708aitk8i12y"
+path="res://.godot/imported/floor_study.png-af14a1a6ad615bfdc360ac3d0d68969d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/tiles/floor_hall.png"
-dest_files=["res://.godot/imported/floor_hall.png-828bc2c623352bc52a3d444620fe551c.ctex"]
+source_file="res://assets/source/tiles/floor_study.png"
+dest_files=["res://.godot/imported/floor_study.png-af14a1a6ad615bfdc360ac3d0d68969d.ctex"]
 
 [params]
 

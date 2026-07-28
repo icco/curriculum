@@ -5,3 +5,11 @@ export_credentials.cfg
 # Export output
 /build/
 /dist/
+
+# Raw generator output, including rejected variants — over a megabyte each.
+# tools/make_tile.gd keeps the accepted texture beside them as a 512px .png,
+# which IS committed, so the projection can be redone without regenerating art.
+/assets/source/textures/*.webp
+/assets/source/textures/*.webp.import
+/assets/source/textures/*.jpg
+/assets/source/textures/*.jpg.import
