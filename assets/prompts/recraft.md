@@ -15,8 +15,13 @@ python3 tools/recraft.py texture floor_hall --n 4    # four flat textures
 python3 tools/recraft.py cutout props desk --n 4     # four objects, backgrounds removed
 ```
 
-Output lands in `assets/source/`, which is gitignored. It is reproducible from the
-manifest, and only `assets/sprites/` is committed.
+Raw output lands in `assets/source/textures/`, which is gitignored — it includes
+every rejected variant, at over a megabyte each. What gets committed is the
+accepted work: the projected diamond in `assets/source/tiles/` (or the cutout in
+`assets/source/props/`…) and the imported sprite in `assets/sprites/`. Keeping the
+projected tile matters because generation is not deterministic: regenerating gives
+*different* art, so that file is the only way to re-derive a sprite at a new size
+without changing how the game looks.
 
 ## Two shapes of asset
 

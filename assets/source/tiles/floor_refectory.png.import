@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwcjxh4vb1x07"
-path="res://.godot/imported/floor_lecture_hall-1.webp-db7ea4f0b47328e2830fd3c558b368b9.ctex"
+uid="uid://b6pyvwxjup2je"
+path="res://.godot/imported/floor_refectory.png-ad8452dead6c6f77e4170f5375c0a647.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/textures/floor_lecture_hall-1.webp"
-dest_files=["res://.godot/imported/floor_lecture_hall-1.webp-db7ea4f0b47328e2830fd3c558b368b9.ctex"]
+source_file="res://assets/source/tiles/floor_refectory.png"
+dest_files=["res://.godot/imported/floor_refectory.png-ad8452dead6c6f77e4170f5375c0a647.ctex"]
 
 [params]
 

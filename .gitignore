@@ -5,3 +5,7 @@ export_credentials.cfg
 # Export output
 /build/
 /dist/
+
+# Raw generator output, including rejected variants. The accepted, projected
+# tiles under assets/source/tiles/ are committed; these are scratch.
+/assets/source/textures/

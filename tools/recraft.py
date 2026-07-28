@@ -97,11 +97,12 @@ def cmd_texture(manifest, args):
     subject = manifest["tiles"].get(args.name)
     if subject is None:
         die("no tile named %r in the manifest" % args.name)
-    prompt = "%s. A flat top-down seamless texture of %s. %s" % (
-        manifest["style"],
-        subject,
-        manifest["texture_rules"],
-    )
+    # Most tiles are a repeating material. A few are one-off features — a stair
+    # opening is not something six of across the frame — so they carry their own
+    # framing rules and skip the seamless-texture clause, which otherwise turns
+    # them into ornament.
+    rules = manifest.get("tile_rules", {}).get(args.name, manifest["texture_rules"])
+    prompt = "%s. %s. %s" % (manifest["style"], subject, rules)
     print("texture %s" % args.name)
     urls = generate(manifest, prompt, manifest["texture_size"], args.n)
     for i, url in enumerate(urls):
