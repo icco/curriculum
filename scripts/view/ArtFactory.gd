@@ -9,7 +9,7 @@ const TILE_H := 32
 const BLOCK_H := 32  ## how far a wall/door block rises above its floor diamond
 
 ## Floor tile ids inside the floor atlas (one column each).
-enum Floor { HALL, LECTURE_HALL, ALCHEMY, SCRIPTORIUM, REFECTORY, TRAINING_YARD, CHEST, STUDY, STAIRS }
+enum Floor { HALL, LECTURE_HALL, ALCHEMY, SCRIPTORIUM, REFECTORY, TRAINING_YARD, VAULT, STUDY, STAIRS }
 ## Block tile ids inside the block atlas.
 enum Block { WALL, DOOR_CLOSED, DOOR_OPEN }
 
@@ -19,7 +19,7 @@ const ROOM_FLOOR := {
 	"scriptorium": Floor.SCRIPTORIUM,
 	"refectory": Floor.REFECTORY,
 	"training_yard": Floor.TRAINING_YARD,
-	"chest_row": Floor.CHEST,
+	"vault_row": Floor.VAULT,
 	"proctors_study": Floor.STUDY,
 }
 
@@ -30,7 +30,7 @@ const FLOOR_STYLE := {
 	Floor.SCRIPTORIUM: {"base": Color("6b3f42"), "alt": Color("6b3f42"), "line": Color("532f33"), "pattern": "plain"},
 	Floor.REFECTORY: {"base": Color("5e6b44"), "alt": Color("6a7850"), "line": Color("4a5436"), "pattern": "checker"},
 	Floor.TRAINING_YARD: {"base": Color("8a6a3a"), "alt": Color("8a6a3a"), "line": Color("6d5330"), "pattern": "planks"},
-	Floor.CHEST: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
+	Floor.VAULT: {"base": Color("4f5560"), "alt": Color("4f5560"), "line": Color("3c414a"), "pattern": "plain"},
 	Floor.STUDY: {"base": Color("3f5749"), "alt": Color("3f5749"), "line": Color("31443a"), "pattern": "plain"},
 	Floor.STAIRS: {"base": Color("2f6b8a"), "alt": Color("3a7ea1"), "line": Color("235268"), "pattern": "stairs"},
 }

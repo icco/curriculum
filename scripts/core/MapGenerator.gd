@@ -11,7 +11,7 @@ const ROOM_KINDS := {
 	"scriptorium": {"label": "Scriptorium", "weight": 1.5, "min": Vector2i(8, 7), "max": Vector2i(13, 10)},
 	"refectory": {"label": "Refectory", "weight": 1.0, "min": Vector2i(9, 8), "max": Vector2i(14, 11)},
 	"training_yard": {"label": "Training Yard", "weight": 1.0, "min": Vector2i(10, 8), "max": Vector2i(14, 11)},
-	"chest_row": {"label": "Chest Row", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
+	"vault_row": {"label": "Vault Row", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
 	"proctors_study": {"label": "Proctor's Study", "weight": 1.5, "min": Vector2i(5, 4), "max": Vector2i(8, 6)},
 }
 
@@ -173,7 +173,7 @@ func _furnish(map: MapData) -> void:
 			"scriptorium": _furnish_scriptorium(map, room)
 			"refectory": _furnish_refectory(map, room)
 			"training_yard": _furnish_training_yard(map, room)
-			"chest_row": _furnish_chests(map, room)
+			"vault_row": _furnish_chests(map, room)
 			"proctors_study": _furnish_study(map, room)
 	_scatter_hall_props(map)
 	_clear_thresholds(map)

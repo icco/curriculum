@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8x4liq0uvx3j"
-path="res://.godot/imported/floor_chest.png-01587dfcb7c3aa52d1b3b76b02bc3628.ctex"
+uid="uid://31uymwv3yule"
+path="res://.godot/imported/floor_vault.png-7c42b930ce02562347d938b1d2dabfe3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/tiles/floor_chest.png"
-dest_files=["res://.godot/imported/floor_chest.png-01587dfcb7c3aa52d1b3b76b02bc3628.ctex"]
+source_file="res://assets/source/tiles/floor_vault.png"
+dest_files=["res://.godot/imported/floor_vault.png-7c42b930ce02562347d938b1d2dabfe3.ctex"]
 
 [params]
 
