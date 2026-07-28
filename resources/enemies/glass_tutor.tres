@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_glass"]
+
+[resource]
+script = ExtResource("1_glass")
+id = &"glass_tutor"
+display_name = "Glass Tutor"
+role = 1
+min_depth = 5
+max_depth = 10
+score_str = 10
+score_dex = 15
+score_con = 12
+score_int = 16
+score_wis = 13
+armour_class = 14
+hit_dice = "4d8+8"
+speed_tiles = 6
+proficiency = 3
+attack_ability = 1
+weapon_name = "Splinter Volley"
+damage_dice = "2d6"
+attack_range = 8
+xp_value = 30
+tint = Color(0.4, 0.75, 0.72, 1)

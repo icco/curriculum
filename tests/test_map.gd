@@ -127,3 +127,50 @@ func test_fov_marks_visible_and_explored() -> void:
 	m.recompute_fov(Vector2i(2, 2), 3)
 	falsy(m.is_visible(Vector2i(7, 10)), "no longer in sight")
 	truthy(m.is_explored(Vector2i(7, 10)), "but stays explored")
+
+## The doorway cases the basic door test does not reach: standing in one, and a
+## lock being distinguishable from a plain shut door.
+func test_standing_in_an_open_doorway_sees_both_sides() -> void:
+	var m := MapData.new()
+	m.setup(12, 12)
+	for x in range(1, 11):
+		m.set_tile(Vector2i(x, 5), MapData.Tile.FLOOR)
+	for y in range(1, 11):
+		m.set_tile(Vector2i(6, y), MapData.Tile.WALL)
+	var d := Vector2i(6, 5)
+	m.set_tile(d, MapData.Tile.DOOR)
+	m.doors[d] = {"open": true, "locked": false}
+	truthy(m.has_line_of_sight(d, Vector2i(2, 5)), "sees back the way it came")
+	truthy(m.has_line_of_sight(d, Vector2i(9, 5)), "and through to the far side")
+
+func test_a_lock_is_not_just_a_shut_door() -> void:
+	var m := MapData.new()
+	m.setup(8, 8)
+	m.set_tile(Vector2i(4, 4), MapData.Tile.DOOR)
+	m.doors[Vector2i(4, 4)] = {"open": false, "locked": false}
+	truthy(m.is_openable_door(Vector2i(4, 4)), "a shut door can be opened")
+	falsy(m.is_locked_door(Vector2i(4, 4)), "and is not locked")
+	m.doors[Vector2i(4, 4)]["locked"] = true
+	falsy(m.is_openable_door(Vector2i(4, 4)), "a locked door cannot just be opened")
+	truthy(m.is_locked_door(Vector2i(4, 4)), "and reports as locked")
+	m.doors[Vector2i(4, 4)] = {"open": true, "locked": true}
+	falsy(m.is_locked_door(Vector2i(4, 4)), "an open door is not a lock in the way")
+
+func test_pathing_can_be_told_to_route_through_shut_doors() -> void:
+	# What lets an enemy plan to open a door instead of giving up.
+	var m := MapData.new()
+	m.setup(12, 12)
+	for x in range(1, 11):
+		m.set_tile(Vector2i(x, 5), MapData.Tile.FLOOR)
+	for y in range(1, 11):
+		m.set_tile(Vector2i(6, y), MapData.Tile.WALL)
+	var d := Vector2i(6, 5)
+	m.set_tile(d, MapData.Tile.DOOR)
+	m.doors[d] = {"open": false, "locked": false}
+	truthy(m.find_path(Vector2i(2, 5), Vector2i(9, 5)).is_empty(), "normally there is no way through")
+	var through: Array = m.find_path(Vector2i(2, 5), Vector2i(9, 5), {}, false, true)
+	truthy(not through.is_empty(), "with through_doors there is a route")
+	eq(MapData.closed_door_on(m, through), d, "and the door on it is found")
+	m.doors[d]["locked"] = true
+	truthy(m.find_path(Vector2i(2, 5), Vector2i(9, 5), {}, false, true).is_empty(),
+		"a locked door is still a wall to pathing")

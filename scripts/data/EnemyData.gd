@@ -33,6 +33,10 @@ enum Role { GRUNT, ELITE, BOSS }
 @export var weapon_name: String = "Fists"
 @export var damage_dice: String = "1d4"
 @export_range(1, 12) var attack_range: int = 1
+## Shuts a door between itself and its target, to cut off the way you came.
+@export var shuts_doors: bool = false
+## Shouts once on first contact, sending one idle ally your way.
+@export var calls_allies: bool = false
 
 @export_group("Rewards")
 @export_range(0, 1000) var xp_value: int = 5

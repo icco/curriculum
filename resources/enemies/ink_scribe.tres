@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1_ink_s"]
+
+[resource]
+script = ExtResource("1_ink_s")
+id = &"ink_scribe"
+display_name = "Ink Scribe"
+min_depth = 2
+max_depth = 6
+score_str = 8
+score_dex = 14
+score_con = 10
+score_int = 13
+score_wis = 11
+armour_class = 12
+hit_dice = "2d6+2"
+speed_tiles = 5
+proficiency = 2
+attack_ability = 1
+weapon_name = "Flicked Nib"
+damage_dice = "1d6"
+attack_range = 6
+xp_value = 7
+tint = Color(0.35, 0.45, 0.72, 1)

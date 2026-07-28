@@ -108,6 +108,25 @@ func open_door(p: Vector2i) -> bool:
 	doors[p] = d
 	return true
 
+## A shut door that is not locked, so anything with hands can open it.
+func is_openable_door(p: Vector2i) -> bool:
+	if tile_at(p) != Tile.DOOR or is_door_open(p):
+		return false
+	return not bool((doors.get(p, {}) as Dictionary).get("locked", false))
+
+func is_locked_door(p: Vector2i) -> bool:
+	if tile_at(p) != Tile.DOOR or is_door_open(p):
+		return false
+	return bool((doors.get(p, {}) as Dictionary).get("locked", false))
+
+## First shut door along `path`, or (-1, -1). What stands between an actor and
+## where it wanted to go.
+static func closed_door_on(map: MapData, path: Array) -> Vector2i:
+	for cell: Vector2i in path:
+		if map.is_openable_door(cell):
+			return cell
+	return Vector2i(-1, -1)
+
 func close_door(p: Vector2i) -> bool:
 	if not doors.has(p):
 		return false
@@ -271,7 +290,11 @@ static func reconstruct_path(came_from: Dictionary, target: Vector2i) -> Array:
 ## Shortest path from -> to ignoring a step budget. Returns [] when unreachable.
 ## `to` may itself be blocked when `allow_blocked_goal` is set (used to walk up
 ## to an enemy rather than onto it).
-func find_path(from: Vector2i, to: Vector2i, blocked: Dictionary = {}, allow_blocked_goal: bool = false) -> Array:
+## `through_doors` lets the path run through closed but unlocked doors, for
+## actors that can open one. The door still costs them a turn to open, so the
+## caller has to notice it is there — see closed_door_on().
+func find_path(from: Vector2i, to: Vector2i, blocked: Dictionary = {},
+		allow_blocked_goal: bool = false, through_doors: bool = false) -> Array:
 	if from == to:
 		return [from]
 	var goal_blocked: bool = blocked.has(to) or not is_walkable(to)
@@ -291,12 +314,16 @@ func find_path(from: Vector2i, to: Vector2i, blocked: Dictionary = {}, allow_blo
 			if seen.has(nxt):
 				continue
 			var passable: bool = is_walkable(nxt) and not blocked.has(nxt)
+			if through_doors and not passable and not blocked.has(nxt) and is_openable_door(nxt):
+				passable = true
 			if not passable and not (nxt == to and allow_blocked_goal):
 				continue
 			if dir.x != 0 and dir.y != 0:
 				var a := Vector2i(cur.x + dir.x, cur.y)
 				var b := Vector2i(cur.x, cur.y + dir.y)
-				if not is_walkable(a) or not is_walkable(b):
+				var corner_ok: bool = is_walkable(a) or (through_doors and is_openable_door(a))
+				corner_ok = corner_ok and (is_walkable(b) or (through_doors and is_openable_door(b)))
+				if not corner_ok:
 					continue
 			seen[nxt] = true
 			came_from[nxt] = cur

@@ -408,3 +408,75 @@ func test_action_economy_is_enforced_for_the_player() -> void:
 	session.player_cast(&"grimoire_ward", session.player.grid_pos)
 	falsy(session.has_bonus(), "the bonus action spell consumed it")
 	truthy(session.player.has_condition("shielded"), "and it took effect")
+
+# ------------------------------------------------------------ locked doors
+
+## Puts the player next to a locked door on a built floor, so forcing is tested
+## against real session state rather than a hand-made map.
+func _locked_door_beside_player(session: FloorSession) -> Vector2i:
+	# Doors are reached orthogonally, and the interaction needs the player's turn.
+	for guard in 40:
+		if session.is_player_turn() or session.is_over():
+			break
+		session.run_enemy_turn()
+	# If the floor already put a door beside the player, lock that one: the
+	# session interacts with the first door it finds, not necessarily ours.
+	var existing := session.adjacent_door()
+	if existing != Vector2i(-1, -1):
+		session.map.doors[existing] = {"open": false, "locked": true}
+		return existing
+	var p: Vector2i = session.player.grid_pos
+	for dir: Vector2i in MapData.DIRS_4:
+		var cell: Vector2i = p + dir
+		if session.map.tile_at(cell) != MapData.Tile.FLOOR:
+			continue
+		if session.entity_at(cell) != null:
+			continue
+		session.map.set_tile(cell, MapData.Tile.DOOR)
+		session.map.doors[cell] = {"open": false, "locked": true}
+		return cell
+	return Vector2i(-1, -1)
+
+func test_a_locked_door_can_be_forced_rather_than_being_a_wall() -> void:
+	var state := GameState.new()
+	var session := FloorSession.new(state)
+	session.build(1)
+	var cell := _locked_door_beside_player(session)
+	truthy(cell != Vector2i(-1, -1), "the fixture found somewhere for a door")
+
+	# Forcing is a check, so drive it until it gives; each attempt is a turn.
+	var opened := false
+	for attempt in 40:
+		session._interacted_this_turn = false
+		var events := session.player_toggle_door()
+		for e: Dictionary in events:
+			if e.get("type", "") == "door":
+				opened = true
+		if opened:
+			break
+	truthy(opened, "a locked door gives way to repeated forcing")
+	truthy(session.map.is_door_open(cell), "and it is open afterwards")
+
+func test_a_failed_force_still_spends_the_interaction() -> void:
+	var state := GameState.new()
+	var session := FloorSession.new(state)
+	session.build(1)
+	var cell := _locked_door_beside_player(session)
+	truthy(cell != Vector2i(-1, -1), "the fixture found somewhere for a door")
+	# A hopeless roll: no strength, and the deepest lock.
+	session.player.stats["str"] = 1
+	session.player.proficiency = 1
+	session.depth = 12
+	session._interacted_this_turn = false
+	session.player_toggle_door()
+	truthy(session._interacted_this_turn, "the attempt cost the turn's interaction")
+	falsy(session.map.is_door_open(cell), "and the door held")
+
+func test_the_force_dc_rises_with_depth() -> void:
+	var state := GameState.new()
+	var session := FloorSession.new(state)
+	session.depth = 1
+	var shallow := session.force_door_dc()
+	session.depth = 12
+	truthy(session.force_door_dc() > shallow,
+		"deeper locks are stiffer (%d -> %d)" % [shallow, session.force_door_dc()])

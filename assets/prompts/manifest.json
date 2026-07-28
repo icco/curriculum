@@ -39,7 +39,13 @@
     "alchemy_master": "an alchemy master in stained deep purple robes with a bandolier of flasks and goggles",
     "drillmaster": "a scarred yard drillmaster in dark red training leathers swinging bound stones on a rope",
     "vice_chancellor": "an imposing vice-chancellor in heavy violet ceremonial robes carrying a great ledger",
-    "rector": "the Rector, a towering figure in deep indigo and gold robes beneath a crown of floating runes"
+    "rector": "the Rector, a towering figure in deep indigo and gold robes beneath a crown of floating runes",
+    "hall_monitor": "a brisk hall monitor in olive-green uniform robes with a rolled timetable under one arm",
+    "ink_scribe": "a stooped ink scribe in slate-blue robes flicking a loaded pen, ink stains to the elbow",
+    "porter": "a night porter in muted grey work robes carrying a heavy ring of keys and a shuttered lantern",
+    "bell_warden": "a bell warden in brass-trimmed amber robes raising a hand bell mid-swing",
+    "glass_tutor": "a glass tutor in pale teal robes, shards of mirrored glass orbiting one raised hand",
+    "head_of_discipline": "the Head of Discipline, a tall severe figure in deep red robes holding a black cane"
   },
   "rules": {
     "floor_stairs": "Orthographic straight-down view with no perspective. One staircase only, centred and filling the frame, the treads as four or five bold parallel bands of glowing cyan alternating with near-black, unmistakable at 64 pixels wide. Cyan and blue dominate the whole image. Almost no fine detail, no grey stone border, no railings, no cast shadows, no vignette, no people, no text.",

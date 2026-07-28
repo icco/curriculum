@@ -234,3 +234,89 @@ func test_full_enemy_round_never_crashes_on_generated_floors() -> void:
 				EnemyAI.take_turn(actor, tm)
 			truthy(map.is_walkable(actor.grid_pos) or actor == hero,
 				"actor %s stands on legal ground at %s" % [actor.display_name, str(actor.grid_pos)])
+
+# ----------------------------------------------------------------- doors
+
+## A wall of closed doors with one gap, so the only way through is to open one.
+func _room_split_by_doors(gap_open: bool = false) -> MapData:
+	var m := _room()
+	for y in range(1, 23):
+		m.set_tile(Vector2i(12, y), MapData.Tile.WALL)
+	m.set_tile(Vector2i(12, 12), MapData.Tile.DOOR)
+	m.doors[Vector2i(12, 12)] = {"open": gap_open, "locked": false}
+	return m
+
+func test_an_enemy_opens_a_door_that_is_in_its_way() -> void:
+	# Before this, a shut door was an absolute wall to enemies and closing one in
+	# a chaser's face made the player permanently safe. A closed door also blocks
+	# sight, so the enemy acts on where it last saw the hero.
+	var m := _room_split_by_doors()
+	var hero := _hero(Vector2i(14, 12))
+	var brute := _brute(Vector2i(11, 12))
+	brute.alerted_to = hero.grid_pos
+	var tm := _manager([hero, brute], m)
+	_give_turn(tm, brute)
+	var events: Array = EnemyAI.take_turn(brute, tm)
+	truthy(m.is_door_open(Vector2i(12, 12)), "the door is open")
+	var kinds: Array = []
+	for e: Dictionary in events:
+		kinds.append(e.get("type", ""))
+	truthy(kinds.has("door"), "the turn reports the door event (got %s)" % str(kinds))
+
+func test_opening_a_door_costs_the_enemy_its_action() -> void:
+	var m := _room_split_by_doors()
+	var hero := _hero(Vector2i(14, 12))
+	var brute := _brute(Vector2i(11, 12))
+	brute.alerted_to = hero.grid_pos
+	var tm := _manager([hero, brute], m)
+	_give_turn(tm, brute)
+	EnemyAI.take_turn(brute, tm)
+	falsy(tm.has_action(brute), "the action went on the door, so no free swing after it")
+
+func test_a_locked_door_stays_shut_against_enemies() -> void:
+	var m := _room_split_by_doors()
+	m.doors[Vector2i(12, 12)]["locked"] = true
+	var hero := _hero(Vector2i(14, 12))
+	var brute := _brute(Vector2i(11, 12))
+	brute.alerted_to = hero.grid_pos
+	var tm := _manager([hero, brute], m)
+	_give_turn(tm, brute)
+	EnemyAI.take_turn(brute, tm)
+	falsy(m.is_door_open(Vector2i(12, 12)), "enemies do not force locks")
+
+func test_a_porter_shuts_the_door_between_you() -> void:
+	var m := _room_split_by_doors(true)
+	var hero := _hero(Vector2i(14, 12))
+	var porter := _brute(Vector2i(11, 12))
+	porter.shuts_doors = true
+	porter.speed_tiles = 0  # holding the doorway, not charging through it
+	var tm := _manager([hero, porter], m)
+	_give_turn(tm, porter)
+	EnemyAI.take_turn(porter, tm)
+	falsy(m.is_door_open(Vector2i(12, 12)), "the door between them is pulled shut")
+
+func test_a_shout_sends_one_idle_ally_toward_the_trouble() -> void:
+	var m := _room()
+	# The ally has to be out of the fight already, or there is nothing to tell it.
+	for y in range(1, 23):
+		m.set_tile(Vector2i(10, y), MapData.Tile.WALL)
+	var hero := _hero(Vector2i(4, 4))
+	var caller := _brute(Vector2i(6, 4))
+	caller.calls_allies = true
+	var idle := _brute(Vector2i(16, 16))
+	var tm := _manager([hero, caller, idle], m)
+	_give_turn(tm, caller)
+	EnemyAI.take_turn(caller, tm)
+	eq(idle.alerted_to, hero.grid_pos, "the idle ally is sent to where the hero was")
+
+func test_an_alerted_enemy_walks_toward_the_shout_rather_than_drifting() -> void:
+	var m := _room()
+	var hero := _hero(Vector2i(2, 2))
+	var idle := _brute(Vector2i(18, 18))
+	idle.alerted_to = Vector2i(10, 18)
+	var tm := _manager([hero, idle], m)
+	_give_turn(tm, idle)
+	var before: int = MapData.chebyshev(idle.grid_pos, Vector2i(10, 18))
+	EnemyAI.take_turn(idle, tm)
+	truthy(MapData.chebyshev(idle.grid_pos, Vector2i(10, 18)) < before,
+		"it closed on the shout (%d -> %d)" % [before, MapData.chebyshev(idle.grid_pos, Vector2i(10, 18))])

@@ -184,8 +184,13 @@ func _stage_interaction(cell: Vector2i) -> bool:
 		mode = Mode.PREVIEW
 		board.set_cursor(cell)
 		var open: bool = session.map.is_door_open(cell)
-		hud.show_confirm("Close" if open else "Open")
-		hud.set_hint("%s the door. Tap again or Confirm." % ("Close" if open else "Open"))
+		if session.map.is_locked_door(cell):
+			# Forcing can fail, so say what it takes before the turn is spent.
+			hud.show_confirm("Force")
+			hud.set_hint("Force the lock (DC %d). Tap again or Confirm." % session.force_door_dc())
+		else:
+			hud.show_confirm("Close" if open else "Open")
+			hud.set_hint("%s the door. Tap again or Confirm." % ("Close" if open else "Open"))
 		return true
 	return false
 
