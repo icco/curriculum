@@ -16,6 +16,10 @@ extends SceneTree
 ## time and the model only has to paint.
 
 const OUT_DIR := "res://assets/source/tiles"
+## Where the accepted texture is kept, at KEEP_WIDTH square, so the projection can
+## be redone later without regenerating the art.
+const TEXTURE_DIR := "res://assets/source/textures"
+const KEEP_WIDTH := 512
 ## Output width; height is always half of it. Larger than the final 64x32 so the
 ## importer's downscale still has detail to work with.
 const WIDTH := 512
@@ -45,6 +49,17 @@ func _build(source: String, name: String) -> bool:
 		push_error("could not read %s" % source)
 		return false
 	texture.convert(Image.FORMAT_RGBA8)
+
+	# Keep a copy of the accepted texture next to the rejects, which are ignored.
+	# Everything this tool bakes in — the rim darkening above all — is impossible
+	# to retune from the projected tile alone, and regenerating gives different
+	# art, so without this the rim is a one-way door. 512 is ample for a 64px
+	# destination and a fraction of the original's weight.
+	var keep := texture.duplicate()
+	if keep.get_width() > KEEP_WIDTH:
+		keep.resize(KEEP_WIDTH, KEEP_WIDTH, Image.INTERPOLATE_LANCZOS)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(TEXTURE_DIR))
+	keep.save_png(ProjectSettings.globalize_path("%s/%s.png" % [TEXTURE_DIR, name]))
 
 	var tile := project(texture, WIDTH)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT_DIR))

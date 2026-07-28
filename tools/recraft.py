@@ -38,6 +38,12 @@ SOURCE = ROOT / "assets" / "source"
 # loader from the extension, so the file has to be named for what it actually is.
 MAGIC = {b"\x89PNG": ".png", b"RIFF": ".webp", b"\xff\xd8\xff": ".jpg"}
 
+# Wall and door blocks are part of the tile atlas — ArtLibrary.block_key() looks
+# them up under "tiles/" — and tools/import_assets.gd only walks tiles, props and
+# entities. Writing them to assets/source/blocks/ would leave them unimported and
+# silently absent from the game.
+OUT_DIR_FOR = {"props": "props", "entities": "entities", "blocks": "tiles"}
+
 
 def die(message):
     sys.exit("recraft: " + message)
@@ -131,7 +137,7 @@ def cmd_cutout(manifest, args):
         name = args.name if len(urls) == 1 else "%s-%d" % (args.name, i + 1)
         cut = post("/images/removeBackground", {"image_url": url})
         print("  %d credits (cutout)" % cut.get("credits", 0))
-        stem = SOURCE / args.category / name
+        stem = SOURCE / OUT_DIR_FOR[args.category] / name
         print("  %s" % download(cut["image"]["url"], stem).relative_to(ROOT))
 
 

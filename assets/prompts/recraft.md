@@ -15,13 +15,18 @@ python3 tools/recraft.py texture floor_hall --n 4    # four flat textures
 python3 tools/recraft.py cutout props desk --n 4     # four objects, backgrounds removed
 ```
 
-Raw output lands in `assets/source/textures/`, which is gitignored — it includes
-every rejected variant, at over a megabyte each. What gets committed is the
-accepted work: the projected diamond in `assets/source/tiles/` (or the cutout in
-`assets/source/props/`…) and the imported sprite in `assets/sprites/`. Keeping the
-projected tile matters because generation is not deterministic: regenerating gives
-*different* art, so that file is the only way to re-derive a sprite at a new size
-without changing how the game looks.
+Raw output lands in `assets/source/textures/` as WebP and is gitignored — it
+includes every rejected variant, at over a megabyte each. Committed instead:
+
+- the accepted texture, which `make_tile.gd` keeps beside the rejects as a 512px
+  `.png`
+- the projected diamond in `assets/source/tiles/`, or the cutout in
+  `assets/source/props/` and friends
+- the imported sprite in `assets/sprites/`
+
+Keeping the accepted texture matters because generation is not deterministic:
+regenerating gives *different* art. Without it, anything the projection bakes in —
+`RIM_DARKEN` above all — becomes a one-way door.
 
 ## Two shapes of asset
 
@@ -44,7 +49,9 @@ projection is exact every time and the model only has to paint.
 
 **Everything else is a cutout.** Props, figures and blocks are generated as a
 single object on a plain backdrop and passed through Recraft's `removeBackground`,
-which yields real alpha. `tools/import_assets.gd` trims and scales to the
+which yields real alpha. Blocks are written to `assets/source/tiles/`, not a
+`blocks/` directory: they live in the tile atlas, and `ArtLibrary.block_key()`
+looks them up under `tiles/`. `tools/import_assets.gd` trims and scales to the
 `HEIGHTS` table. It refuses a source with no transparency, because a baked-in
 backdrop looks fine in the atlas and wrong on screen.
 

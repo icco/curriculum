@@ -62,7 +62,9 @@ func _import_category(category: String) -> int:
 	dir.list_dir_begin()
 	var file := dir.get_next()
 	while file != "":
-		if file.to_lower().ends_with(".png") or file.to_lower().ends_with(".jpg"):
+		# .webp matters: Recraft returns WebP whatever the URL says, so cutouts
+		# arrive in that format and were being skipped without a word.
+		if file.get_extension().to_lower() in ["png", "jpg", "jpeg", "webp"]:
 			if _import_one(category, file):
 				count += 1
 		file = dir.get_next()

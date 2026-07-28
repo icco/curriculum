@@ -53,13 +53,28 @@ func test_projection_samples_the_whole_texture() -> void:
 				c = Color.BLUE if x < 32 else Color.WHITE
 			tex.set_pixel(x, y, c)
 	var tile: Image = MakeTile.project(tex, 256)
-	var seen := {}
+	# Count by dominant channel rather than bucketing the colour: the rim shading
+	# darkens every pixel it touches, so naive buckets would report four distinct
+	# "colours" from a single flat one and the test would pass on anything.
+	var found := {"red": 0, "green": 0, "blue": 0, "white": 0}
 	for y in tile.get_height():
 		for x in tile.get_width():
 			var c := tile.get_pixel(x, y)
-			if c.a > 0.9:
-				seen[Vector3i(int(c.r * 4), int(c.g * 4), int(c.b * 4))] = true
-	truthy(seen.size() >= 4, "all four texture quadrants land on the tile (saw %d)" % seen.size())
+			if c.a < 0.9:
+				continue
+			var high := maxf(c.r, maxf(c.g, c.b))
+			var low := minf(c.r, minf(c.g, c.b))
+			if high - low < 0.15:
+				found["white"] += 1
+			elif c.r == high:
+				found["red"] += 1
+			elif c.g == high:
+				found["green"] += 1
+			else:
+				found["blue"] += 1
+	for quadrant: String in found:
+		truthy(found[quadrant] > 200, "the %s quadrant lands on the tile (%d px)"
+			% [quadrant, found[quadrant]])
 
 func test_projection_darkens_the_rim_so_cells_stay_separate() -> void:
 	# A seamless texture has no edge of its own; without this the isometric grid
