@@ -81,11 +81,11 @@ file in `assets/source/`, run `./tools/import-assets.sh`, and that one sprite
 switches over while everything else stays procedural.
 
 Art is generated through the Recraft API from
-[`assets/prompts/manifest.json`](assets/prompts/manifest.json) — see
-[`assets/prompts/recraft.md`](assets/prompts/recraft.md) for the pipeline. Floor
-tiles come from flat top-down textures that `tools/make_tile.gd` projects onto
-the 2:1 diamond, so the grid geometry is derived rather than drawn; everything
-else is generated as a cutout with an alpha channel.
+[`assets/prompts/manifest.json`](assets/prompts/manifest.json); the nine floor
+tiles are done and everything else is still procedural. Floor tiles come from
+flat top-down textures projected onto the 2:1 diamond, so the grid geometry is
+derived rather than drawn. See
+[`assets/prompts/recraft.md`](assets/prompts/recraft.md).
 
 ## Deviations from the original spec
 

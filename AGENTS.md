@@ -12,6 +12,8 @@ runtime, so the repo stays text-only.
 | `godot --headless --path . --script tools/simulate.gd -- 12 6 [aggressive] [verbose]` | Plays N headless runs and reports how deep they got. Use for balance work. |
 | `./tools/export-web.sh` | Produces `build/web`, which the Docker image serves. |
 | `./tools/import-assets.sh [--status]` | Processes `assets/source` into `assets/sprites` and re-imports. `--status` lists art still drawn procedurally. |
+| `python3 tools/recraft.py texture <tile> --n 4` | Generates tile textures through the Recraft API from `assets/prompts/manifest.json`. `cutout <category> <name>` for props, figures and blocks. |
+| `godot --headless --path . --script tools/make_tile.gd -- <texture> <tile>` | Projects a flat texture onto the 2:1 diamond, into `assets/source/tiles/`. |
 | `godot --headless --path . --script tools/generate_theme.gd` | Regenerates `resources/ui_theme.tres` after changing UI styling. |
 | `godot --headless --path . --script tools/generate_input_map.gd` | Rewrites the input actions in `project.godot`. |
 | `godot --headless --path . --script tools/generate_scenes.gd` | Packs a code-built tree into a `.tscn`, verifying no nodes were dropped. |

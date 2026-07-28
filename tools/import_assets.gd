@@ -4,11 +4,10 @@ extends SceneTree
 ##
 ##   godot --headless --path . --script tools/import_assets.gd -- [--status]
 ##
-## Reads assets/source/<category>/<name>.png, trims the transparent margin,
-## scales to the slot's target size and writes assets/sprites/<category>/<name>.png.
-## Input is expected to already carry an alpha channel — tools/recraft.py asks the
-## generator for a cutout, and tools/make_tile.gd builds tile alpha from geometry.
-## See assets/prompts/recraft.md.
+## Reads assets/source/<category>/<name>, trims the transparent margin, scales to
+## the slot's target size and writes assets/sprites/<category>/<name>.png. Input
+## must already carry alpha: tools/recraft.py asks for a cutout, tools/make_tile.gd
+## builds tile alpha from geometry. See assets/prompts/recraft.md.
 
 const SOURCE_DIR := "res://assets/source"
 const OUT_DIR := "res://assets/sprites"
@@ -62,8 +61,8 @@ func _import_category(category: String) -> int:
 	dir.list_dir_begin()
 	var file := dir.get_next()
 	while file != "":
-		# .webp matters: Recraft returns WebP whatever the URL says, so cutouts
-		# arrive in that format and were being skipped without a word.
+		# .webp matters: it is what Recraft actually returns, and cutouts in that
+		# format were being skipped without a word.
 		if file.get_extension().to_lower() in ["png", "jpg", "jpeg", "webp"]:
 			if _import_one(category, file):
 				count += 1
@@ -109,13 +108,10 @@ func _fit(image: Image, category: String, name: String) -> void:
 	var scale := float(height) / float(image.get_height())
 	resize_without_halo(image, maxi(1, int(round(image.get_width() * scale))), height)
 
-## Downscales without dragging the keyed-out background back in.
-##
-## Keying only zeroes alpha; the transparent pixels keep their original colour,
-## and a filtered resize happily averages that colour into the edge. Shrinking a
-## 1000px tile to 64px samples far enough to fringe the whole silhouette with
-## the key. Weighting colour by alpha first, then dividing it back out, means
-## invisible pixels contribute nothing. Exposed for tests.
+## Downscales without dragging invisible colour back in. Transparent pixels keep
+## their RGB, and a filtered resize averages it into the edge — enough to fringe a
+## whole silhouette when shrinking 1000px to 64px. Weighting by alpha first and
+## dividing it back out means invisible pixels contribute nothing. For tests.
 static func resize_without_halo(image: Image, width: int, height: int) -> void:
 	for y in image.get_height():
 		for x in image.get_width():
@@ -140,10 +136,9 @@ static func target_height(category: String, name: String) -> int:
 
 # ------------------------------------------------------------- image ops
 
-## True when nothing in the image is transparent, which means the cutout step was
-## skipped. Trimming and scaling such an image produces a rectangle of art with
-## its backdrop baked in, and it is not obvious in the atlas until it is on
-## screen — so refuse it instead. Exposed for tests.
+## True when nothing is transparent, meaning the cutout step was skipped. Such an
+## image imports as a rectangle with its backdrop baked in, which does not look
+## wrong until it is on screen, so the caller refuses it. Exposed for tests.
 static func is_fully_opaque(image: Image) -> bool:
 	for y in image.get_height():
 		for x in image.get_width():
@@ -169,4 +164,4 @@ func _report_status() -> void:
 	if not missing.is_empty():
 		print("missing (drawn procedurally until supplied):")
 		for key: String in missing:
-			print("  assets/source/%s.png" % key)
+			print("  assets/source/%s" % key)

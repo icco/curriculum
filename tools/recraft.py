@@ -5,20 +5,12 @@
     tools/recraft.py cutout props desk [--n 2]
     tools/recraft.py list
 
-Prompts live in assets/prompts/manifest.json, not in this file, so the asset set
-has one machine-readable source of truth — see assets/prompts/recraft.md.
+Prompts live in assets/prompts/manifest.json rather than here, so the asset set has
+one source of truth. Textures are flat squares that tools/make_tile.gd projects
+onto the isometric diamond; cutouts are single objects passed through
+removeBackground for an alpha channel. See assets/prompts/recraft.md.
 
-Two shapes of asset, because the geometry problem differs:
-
-* *textures* are flat top-down squares. tools/make_tile.gd projects them onto the
-  isometric diamond, so the generator never has to draw a shape it gets wrong.
-* *cutouts* are single objects, run through Recraft's removeBackground to get an
-  alpha channel, which tools/import_assets.gd then trims and scales.
-
-Output lands in assets/source/, which is gitignored: the generated intermediates
-are reproducible from the manifest, and only assets/sprites/ is committed.
-
-Needs RECRAFT_API_KEY in the environment.
+Needs RECRAFT_API_KEY.
 """
 
 import argparse
@@ -34,14 +26,12 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "assets" / "prompts" / "manifest.json"
 SOURCE = ROOT / "assets" / "source"
 
-# Recraft serves WebP whatever the URL extension says, and Godot picks its image
-# loader from the extension, so the file has to be named for what it actually is.
+# Recraft serves WebP whatever the URL says, and Godot picks its loader from the
+# extension, so files must be named for what they actually are.
 MAGIC = {b"\x89PNG": ".png", b"RIFF": ".webp", b"\xff\xd8\xff": ".jpg"}
 
-# Wall and door blocks are part of the tile atlas — ArtLibrary.block_key() looks
-# them up under "tiles/" — and tools/import_assets.gd only walks tiles, props and
-# entities. Writing them to assets/source/blocks/ would leave them unimported and
-# silently absent from the game.
+# Blocks belong to the tile atlas: ArtLibrary.block_key() looks them up under
+# "tiles/", and the importer only walks tiles, props and entities.
 OUT_DIR_FOR = {"props": "props", "entities": "entities", "blocks": "tiles"}
 
 
@@ -103,10 +93,8 @@ def cmd_texture(manifest, args):
     subject = manifest["tiles"].get(args.name)
     if subject is None:
         die("no tile named %r in the manifest" % args.name)
-    # Most tiles are a repeating material. A few are one-off features — a stair
-    # opening is not something six of across the frame — so they carry their own
-    # framing rules and skip the seamless-texture clause, which otherwise turns
-    # them into ornament.
+    # A few tiles are one-off features rather than repeating material — there is no
+    # such thing as six stair openings across a frame — so they override the rules.
     rules = manifest.get("tile_rules", {}).get(args.name, manifest["texture_rules"])
     prompt = "%s. %s. %s" % (manifest["style"], subject, rules)
     print("texture %s" % args.name)
