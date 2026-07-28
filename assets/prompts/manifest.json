@@ -15,7 +15,7 @@
     "floor_training_yard": "A flat top-down surface of packed tan sand and dirt of a training yard, raked lines and scattered pebbles",
     "floor_reliquary": "A flat top-down surface of cold grey granite paving with a bold brass inlay strip across it",
     "floor_study": "A flat top-down surface of dark green study carpet with a subtle woven pattern",
-    "floor_stairs": "A single spiral stone staircase descending into the floor, seen from directly above, with cold blue arcane light glowing up out of the shaft"
+    "floor_stairs": "A flight of stone steps descending into a shaft below the floor, seen from directly above, every tread washed in bright cyan arcane light rising from the shaft with near-black risers between them, so the tile is mostly glowing blue"
   },
   "props": {
     "desk": "a plain wooden writing desk of an arcane academy",
@@ -47,6 +47,6 @@
     "block_door_open": "an open arched stone doorway, the oak door swung inward, dark passage beyond"
   },
   "tile_rules": {
-    "floor_stairs": "Orthographic straight-down view with no perspective. One staircase only, centred and filling the frame, surrounded by plain dark stone floor. Bold simple shapes with almost no fine detail, because this is shown 64 pixels wide. Evenly lit apart from the glow, no cast shadows, no vignette, no people, no text."
+    "floor_stairs": "Orthographic straight-down view with no perspective. One staircase only, centred and filling the frame, the treads as four or five bold parallel bands of glowing cyan alternating with near-black, unmistakable at 64 pixels wide. Cyan and blue dominate the whole image. Almost no fine detail, no grey stone border, no railings, no cast shadows, no vignette, no people, no text."
   }
 }

@@ -70,6 +70,13 @@ is gorgeous at 1024px is often mush at 64.
   frame" was read as *draw four or five objects*, and produced floors with random
   dark squiggles painted on them. `texture_rules` now says "one repeating
   surface: no separate objects, props, symbols, letters or drawings".
+- **A special tile is recognised by its colour, not by what it depicts.** At
+  64×32 there is no room to draw a staircase legibly: a top-down spiral reads as
+  a circle, and grey steps read as a drain grate. What made the procedural
+  placeholder work was that it was bright teal among greys and browns. So
+  `floor_stairs` asks for glowing cyan treads with near-black risers — bold
+  parallel bands, blue-dominant — and reads as "something you can descend"
+  because nothing else on the floor looks like it.
 - **Colour belongs to the subject, not the style clause.** A shared clause that
   named a palette turned oak floorboards blue-grey, and a lighting-based rewrite
   turned them plum. The style clause now covers treatment only — painterly, muted,
