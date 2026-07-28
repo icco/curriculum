@@ -1,33 +1,17 @@
 extends SceneTree
 
-## Turns raw Midjourney output into game-ready sprites.
+## Turns generated art into game-ready sprites.
 ##
 ##   godot --headless --path . --script tools/import_assets.gd -- [--status]
 ##
-## Reads assets/source/<category>/<name>.png, keys out the flat background,
-## trims the transparent margin, scales to the slot's target size and writes
-## assets/sprites/<category>/<name>.png. Midjourney cannot output transparency,
-## so every prompt asks for a flat chroma background — see assets/prompts/midjourney.md.
+## Reads assets/source/<category>/<name>.png, trims the transparent margin,
+## scales to the slot's target size and writes assets/sprites/<category>/<name>.png.
+## Input is expected to already carry an alpha channel — tools/recraft.py asks the
+## generator for a cutout, and tools/make_tile.gd builds tile alpha from geometry.
+## See assets/prompts/recraft.md.
 
 const SOURCE_DIR := "res://assets/source"
 const OUT_DIR := "res://assets/sprites"
-
-## The key colour is read from the image's corners rather than assumed. The
-## prompts ask for magenta, but Midjourney ignores hex codes and a style
-## reference recolours the whole frame — one real generation came back with a
-## #844352 background, 0.87 away from magenta, which a fixed key cannot touch.
-## What it does deliver is a *uniform* background, so sampling it is reliable.
-const CHROMA := Color(1.0, 0.0, 1.0)
-## Because the key is measured rather than guessed, the cut can be tight: the
-## corners of a real generation agree to within ~0.012. Anything looser starts
-## eating the dark blue-greys and violets this art direction is built from.
-const TOLERANCE := 0.05
-## Pixels this close to the key are faded rather than cut, to soften edges.
-const FEATHER := 0.03
-## Corners disagreeing by more than this mean the background is not flat.
-const CORNER_AGREEMENT := 0.05
-## Size of the patch sampled at each corner, as a fraction of the short side.
-const CORNER_PATCH := 0.02
 
 ## Tiles must match the isometric grid exactly.
 const TILE_SIZE := Vector2i(64, 32)
@@ -94,14 +78,13 @@ func _import_one(category: String, file: String) -> bool:
 		return false
 	image.convert(Image.FORMAT_RGBA8)
 
-	var key := sample_background(image)
-	if key.a < 1.0:
-		push_warning("%s/%s has no flat background to key; corners disagree" % [category, file])
+	if is_fully_opaque(image):
+		push_warning("%s/%s has no transparency; run it through tools/recraft.py cutout"
+			% [category, file])
 		return false
-	key_out_background(image, key, TOLERANCE, FEATHER)
 	var trimmed := trim_transparent(image)
 	if trimmed == null:
-		push_warning("%s/%s is entirely background after keying" % [category, file])
+		push_warning("%s/%s is entirely transparent" % [category, file])
 		return false
 	_fit(trimmed, category, name)
 
@@ -155,67 +138,16 @@ static func target_height(category: String, name: String) -> int:
 
 # ------------------------------------------------------------- image ops
 
-## Reads the background colour out of the image's four corners. Returns it with
-## alpha 1, or a fully transparent colour if the corners disagree — a subject
-## bleeding into a corner or a shadow cast onto the backdrop should stop the
-## import, not silently key out the wrong colour.
-##
-## Picks whichever corner sits closest to the other three rather than averaging
-## them, so one bad corner shifts nothing. Exposed for tests.
-static func sample_background(image: Image) -> Color:
-	var patch := maxi(2, int(mini(image.get_width(), image.get_height()) * CORNER_PATCH))
-	var corners: Array[Color] = []
-	for origin: Vector2i in [
-		Vector2i(0, 0),
-		Vector2i(image.get_width() - patch, 0),
-		Vector2i(0, image.get_height() - patch),
-		Vector2i(image.get_width() - patch, image.get_height() - patch),
-	]:
-		corners.append(_patch_average(image, origin, patch))
-
-	var best := corners[0]
-	var best_spread := INF
-	for candidate: Color in corners:
-		var spread := 0.0
-		for other: Color in corners:
-			spread += _rgb_distance(candidate, other)
-		if spread < best_spread:
-			best_spread = spread
-			best = candidate
-
-	var agreeing := 0
-	for corner: Color in corners:
-		if _rgb_distance(corner, best) <= CORNER_AGREEMENT:
-			agreeing += 1
-	if agreeing < 3:
-		return Color(0.0, 0.0, 0.0, 0.0)
-	return Color(best.r, best.g, best.b, 1.0)
-
-static func _patch_average(image: Image, origin: Vector2i, size: int) -> Color:
-	var total := Vector3.ZERO
-	for y in range(origin.y, origin.y + size):
-		for x in range(origin.x, origin.x + size):
-			var c := image.get_pixel(x, y)
-			total += Vector3(c.r, c.g, c.b)
-	total /= float(size * size)
-	return Color(total.x, total.y, total.z)
-
-static func _rgb_distance(a: Color, b: Color) -> float:
-	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
-
-## Makes pixels near `key` transparent, feathering the boundary so edges do not
-## alias. Exposed for tests.
-static func key_out_background(image: Image, key: Color, tolerance: float, feather: float) -> void:
+## True when nothing in the image is transparent, which means the cutout step was
+## skipped. Trimming and scaling such an image produces a rectangle of art with
+## its backdrop baked in, and it is not obvious in the atlas until it is on
+## screen — so refuse it instead. Exposed for tests.
+static func is_fully_opaque(image: Image) -> bool:
 	for y in image.get_height():
 		for x in image.get_width():
-			var c := image.get_pixel(x, y)
-			var distance := Vector3(c.r - key.r, c.g - key.g, c.b - key.b).length()
-			if distance <= tolerance:
-				image.set_pixel(x, y, Color(c.r, c.g, c.b, 0.0))
-			elif distance <= tolerance + feather:
-				var alpha: float = (distance - tolerance) / feather
-				# Pull the key's hue out of the fringe so it does not glow.
-				image.set_pixel(x, y, Color(c.r, c.g, c.b, c.a * alpha))
+			if image.get_pixel(x, y).a < 1.0:
+				return false
+	return true
 
 ## Crops fully transparent rows and columns. Returns null if nothing is left.
 static func trim_transparent(image: Image) -> Image:

@@ -1,0 +1,49 @@
+{
+  "model": "recraftv4_1",
+  "style": "Hand-painted game art for an arcane academy, painterly rather than photoreal, muted desaturated colour, dark values, crisp readable shapes",
+  "texture_rules": "Flat top-down seamless texture of the bare material itself, orthographic straight-down view with no perspective and no horizon, evenly lit with no cast shadows and no vignette. The material fills the whole frame as one repeating surface: no separate objects, props, symbols, letters or drawings on it. Keep the pattern coarse, roughly six repeats across the frame, so it stays legible when the tile is shown 64 pixels wide.",
+  "cutout_rules": "A single object alone and centred on a plain flat mid-grey backdrop, lit evenly from above with no cast shadow, drawn in full with nothing cropped. Simple bold shapes and a strong silhouette that still reads when shrunk to 48 pixels tall. No ground, no room, no other objects, no text.",
+  "texture_size": "1024x1024",
+  "cutout_size": "1024x1024",
+  "figure_size": "768x1536",
+  "tiles": {
+    "floor_hall": "worn grey flagstone corridor paving, four or five big irregular slabs, faint chalk ward marks",
+    "floor_lecture_hall": "dark warm brown polished oak floorboards, straight parallel planks, subtle grain",
+    "floor_alchemy": "stained dark slate laboratory paving, a few large tiles, pale etched blotches",
+    "floor_scriptorium": "deep crimson patterned scriptorium carpet with a bold muted gold geometric motif",
+    "floor_refectory": "scrubbed pale grey refectory flagstones, a few large worn slabs",
+    "floor_training_yard": "packed tan sand and dirt of a training yard, raked lines and scattered pebbles",
+    "floor_reliquary": "cold grey granite paving with a bold brass inlay strip across it",
+    "floor_study": "dark green study carpet, subtle woven pattern, one worn pale patch",
+    "floor_stairs": "descending spiral stone stair seen from directly above, blue arcane light glowing from the shaft"
+  },
+  "props": {
+    "desk": "a plain wooden writing desk of an arcane academy",
+    "chair": "a simple wooden stool",
+    "brazier": "a lit iron brazier on a tripod, coals glowing warm",
+    "podium": "a carved wooden reading podium with an open book on it",
+    "rune_slate": "a dark slate lecture board on a stand, glowing blue runes on its face",
+    "reliquary": "a closed warded oak chest bound in iron, a glowing arcane seal across the lid",
+    "reliquary_looted": "an open empty oak chest bound in iron, its arcane seal dark and broken",
+    "bookshelf": "a tall bookshelf crammed with grimoires and rolled scrolls"
+  },
+  "entities": {
+    "player": "a young apprentice in a patched blue-grey robe with a satchel of scrolls, chalk-dusted hands, determined",
+    "novice": "a nervous first-year novice in a plain undyed robe clutching an oversized grimoire",
+    "battle_chanter": "a broad-shouldered battle chanter in reinforced crimson robes, a shield strapped to one arm",
+    "disputation_adept": "a thin disputation adept in violet scholar robes with a hovering quill and open ledger",
+    "illusionist": "a theatrical illusionist in teal robes wearing a mirrored mask, a faint duplicate afterimage",
+    "proctor": "a corridor proctor in amber uniform robes with a brass badge, carrying a ledger and a spike",
+    "senior_warden": "a senior warden in ornate orange and gold robes with a warding horn at the belt",
+    "visiting_lecturer": "a severe visiting lecturer in purple academic robes holding a red quill",
+    "alchemy_master": "an alchemy master in stained deep purple robes with a bandolier of flasks and goggles",
+    "drillmaster": "a scarred yard drillmaster in dark red training leathers swinging bound stones on a rope",
+    "vice_chancellor": "an imposing vice-chancellor in heavy violet ceremonial robes carrying a great ledger",
+    "rector": "the Rector, a towering figure in deep indigo and gold robes beneath a crown of floating runes"
+  },
+  "blocks": {
+    "block_wall": "a carved granite academy wall block",
+    "block_door_closed": "a closed arched oak door with iron banding in a carved stone frame",
+    "block_door_open": "an open arched stone doorway, the oak door swung inward, dark passage beyond"
+  }
+}
