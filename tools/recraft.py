@@ -90,12 +90,12 @@ def generate(manifest, prompt, size, n):
 
 
 def cmd_texture(manifest, args):
-    subject = manifest["tiles"].get(args.name)
+    subject = manifest["tiles"].get(args.name) or manifest["block_textures"].get(args.name)
     if subject is None:
-        die("no tile named %r in the manifest" % args.name)
-    # A few tiles are one-off features rather than repeating material — there is no
-    # such thing as six stair openings across a frame — so they override the rules.
-    rules = manifest.get("tile_rules", {}).get(args.name, manifest["texture_rules"])
+        die("no texture named %r in the manifest" % args.name)
+    # Some are not repeating material: a stair opening is not something you have six
+    # of across a frame, and a door face is an elevation rather than a surface.
+    rules = manifest.get("rules", {}).get(args.name, manifest["texture_rules"])
     prompt = "%s. %s. %s" % (manifest["style"], subject, rules)
     print("texture %s" % args.name)
     urls = generate(manifest, prompt, manifest["texture_size"], args.n)
@@ -130,7 +130,7 @@ def cmd_cutout(manifest, args):
 
 
 def cmd_list(manifest, _args):
-    for category in ("tiles", "blocks", "props", "entities"):
+    for category in ("tiles", "block_textures", "props", "entities"):
         names = sorted(manifest.get(category, {}))
         print("%s (%d): %s" % (category, len(names), " ".join(names)))
 

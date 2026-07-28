@@ -41,12 +41,14 @@
     "vice_chancellor": "an imposing vice-chancellor in heavy violet ceremonial robes carrying a great ledger",
     "rector": "the Rector, a towering figure in deep indigo and gold robes beneath a crown of floating runes"
   },
-  "blocks": {
-    "block_wall": "a carved granite academy wall block",
-    "block_door_closed": "a closed arched oak door with iron banding in a carved stone frame",
-    "block_door_open": "an open arched stone doorway, the oak door swung inward, dark passage beyond"
+  "rules": {
+    "floor_stairs": "Orthographic straight-down view with no perspective. One staircase only, centred and filling the frame, the treads as four or five bold parallel bands of glowing cyan alternating with near-black, unmistakable at 64 pixels wide. Cyan and blue dominate the whole image. Almost no fine detail, no grey stone border, no railings, no cast shadows, no vignette, no people, no text.",
+    "door_closed_face": "Draw it straight on as a flat front elevation, orthographic with no perspective and no floor, the subject filling the frame edge to edge. Bold simple shapes and almost no fine detail, because this is shown about 30 pixels across. Evenly lit, no cast shadows, no vignette, no people, no text.",
+    "door_open_face": "Draw it straight on as a flat front elevation, orthographic with no perspective and no floor, the subject filling the frame edge to edge. Bold simple shapes and almost no fine detail, because this is shown about 30 pixels across. Evenly lit, no cast shadows, no vignette, no people, no text."
   },
-  "tile_rules": {
-    "floor_stairs": "Orthographic straight-down view with no perspective. One staircase only, centred and filling the frame, the treads as four or five bold parallel bands of glowing cyan alternating with near-black, unmistakable at 64 pixels wide. Cyan and blue dominate the whole image. Almost no fine detail, no grey stone border, no railings, no cast shadows, no vignette, no people, no text."
+  "block_textures": {
+    "wall_stone": "A flat top-down surface of carved grey granite academy wall blocks with mortar lines",
+    "door_closed_face": "A closed arched oak door with iron banding, set in a carved stone wall",
+    "door_open_face": "An open arched doorway in a carved stone wall, the oak door swung inward, dark passage beyond"
   }
 }
