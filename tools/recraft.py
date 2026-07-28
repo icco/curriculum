@@ -112,12 +112,14 @@ def cmd_cutout(manifest, args):
     if subject is None:
         die("no %s named %r in the manifest" % (args.category, args.name))
 
-    facing = ""
+    # Figures carry an extra clause: at 44-66 pixels tall a dark robe on a dark
+    # floor is a smudge, so they are asked for a lighter value and a rim light.
+    extra = ""
     size = manifest["cutout_size"]
     if args.category == "entities":
-        facing = " Shown full body standing and facing three-quarters toward the viewer."
+        extra = " " + manifest["figure_rules"]
         size = manifest["figure_size"]
-    prompt = "%s. %s.%s %s" % (manifest["style"], subject, facing, manifest["cutout_rules"])
+    prompt = "%s. %s.%s %s" % (manifest["style"], subject, extra, manifest["cutout_rules"])
 
     print("cutout %s/%s" % (args.category, args.name))
     urls = generate(manifest, prompt, size, args.n)

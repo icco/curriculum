@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7w51a1pqlmjn"
-path="res://.godot/imported/reliquary.webp-1c0c627af6649cc9b6c10329850398f8.ctex"
+uid="uid://dh8xo6j7yvilq"
+path="res://.godot/imported/battle_chanter-3.png-7af2d6f861a6ebb14d31ed2f425d926f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/props/reliquary.webp"
-dest_files=["res://.godot/imported/reliquary.webp-1c0c627af6649cc9b6c10329850398f8.ctex"]
+source_file="res://assets/sprites/entities/battle_chanter-3.png"
+dest_files=["res://.godot/imported/battle_chanter-3.png-7af2d6f861a6ebb14d31ed2f425d926f.ctex"]
 
 [params]
 

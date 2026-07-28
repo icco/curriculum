@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxf2kyccyyduq"
-path="res://.godot/imported/floor_reliquary.png-ced87a4ee8610af83e7edf9aaabfba5b.ctex"
+uid="uid://n6t4a4eyqekr"
+path="res://.godot/imported/battle_chanter-4.png-979c8f462b800d3b0e27678e43f7331e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/textures/floor_reliquary.png"
-dest_files=["res://.godot/imported/floor_reliquary.png-ced87a4ee8610af83e7edf9aaabfba5b.ctex"]
+source_file="res://assets/sprites/entities/battle_chanter-4.png"
+dest_files=["res://.godot/imported/battle_chanter-4.png-979c8f462b800d3b0e27678e43f7331e.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cm6057cqx6ws"
-path="res://.godot/imported/reliquary_looted.webp-67619967544233e895a1ca6aa3e5b622.ctex"
+uid="uid://giqaw3sl8pyt"
+path="res://.godot/imported/desk-3.png-e5dbfd5d66de850031613cf8f481cb89.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/props/reliquary_looted.webp"
-dest_files=["res://.godot/imported/reliquary_looted.webp-67619967544233e895a1ca6aa3e5b622.ctex"]
+source_file="res://assets/sprites/props/desk-3.png"
+dest_files=["res://.godot/imported/desk-3.png-e5dbfd5d66de850031613cf8f481cb89.ctex"]
 
 [params]
 

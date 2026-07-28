@@ -55,7 +55,7 @@ func test_low_props_grant_half_cover_without_blocking() -> void:
 
 func test_tall_props_give_three_quarters_when_hugged() -> void:
 	var m := _open_room()
-	m.set_prop(Vector2i(7, 5), MapData.Prop.RELIQUARY)
+	m.set_prop(Vector2i(7, 5), MapData.Prop.CHEST)
 	# Locker sits directly in front of the defender at (8,5).
 	truthy(m.has_line_of_sight(Vector2i(2, 5), Vector2i(8, 5)), "adjacent locker still allows the shot")
 	eq(m.cover_between(Vector2i(2, 5), Vector2i(8, 5)), MapData.Cover.THREE_QUARTERS, "locker = 3/4 cover")

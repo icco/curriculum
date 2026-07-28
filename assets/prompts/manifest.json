@@ -13,7 +13,7 @@
     "floor_scriptorium": "A flat top-down surface of deep crimson patterned scriptorium carpet with a bold muted gold geometric motif",
     "floor_refectory": "A flat top-down surface of scrubbed pale grey refectory flagstones, a few large worn slabs",
     "floor_training_yard": "A flat top-down surface of packed tan sand and dirt of a training yard, raked lines and scattered pebbles",
-    "floor_reliquary": "A flat top-down surface of cold grey granite paving with a bold brass inlay strip across it",
+    "floor_chest": "A flat top-down surface of cold grey granite paving with a bold brass inlay strip across it",
     "floor_study": "A flat top-down surface of dark green study carpet with a subtle woven pattern",
     "floor_stairs": "A flight of stone steps descending into a shaft below the floor, seen from directly above, every tread washed in bright cyan arcane light rising from the shaft with near-black risers between them, so the tile is mostly glowing blue"
   },
@@ -23,8 +23,8 @@
     "brazier": "a lit iron brazier on a tripod, coals glowing warm",
     "podium": "a carved wooden reading podium with an open book on it",
     "rune_slate": "a dark slate lecture board on a stand, glowing blue runes on its face",
-    "reliquary": "a closed warded oak chest bound in iron, a glowing arcane seal across the lid",
-    "reliquary_looted": "an open empty oak chest bound in iron, its arcane seal dark and broken",
+    "chest": "a closed warded oak chest bound in iron, a glowing arcane seal across the lid",
+    "chest_looted": "an open empty oak chest bound in iron, its arcane seal dark and broken",
     "bookshelf": "a tall bookshelf crammed with grimoires and rolled scrolls"
   },
   "entities": {
@@ -50,5 +50,6 @@
     "wall_stone": "A flat top-down surface of carved grey granite academy wall blocks with mortar lines",
     "door_closed_face": "A closed arched oak door with iron banding, set in a carved stone wall",
     "door_open_face": "An open arched doorway in a carved stone wall, the oak door swung inward, dark passage beyond"
-  }
+  },
+  "figure_rules": "Shown full body standing and facing three-quarters toward the viewer. Keep the figure clearly lighter in value than a dark stone floor, with a bright rim of light along the head and shoulders so the silhouette separates from the background at 48 pixels tall."
 }

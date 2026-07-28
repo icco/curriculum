@@ -23,7 +23,7 @@ const BLOCK_SIZE := Vector2i(64, 64)
 const HEIGHTS := {
 	# props
 	"desk": 30, "chair": 26, "brazier": 40, "podium": 34,
-	"rune_slate": 48, "reliquary": 52, "reliquary_looted": 52, "bookshelf": 62,
+	"rune_slate": 48, "chest": 52, "chest_looted": 52, "bookshelf": 62,
 	# entities: a person is 48, rank reads through size
 	"player": 48, "novice": 44, "disputation_adept": 46, "illusionist": 47,
 	"battle_chanter": 50, "proctor": 50, "visiting_lecturer": 50,

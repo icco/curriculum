@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl8o6ujqhns2u"
-path="res://.godot/imported/floor_reliquary.png-0bee159754c630645f7a7602d1da4043.ctex"
+uid="uid://0umlpmm806p3"
+path="res://.godot/imported/disputation_adept-3.png-28cab1f29eb8173adabfbf2a2ca03124.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tiles/floor_reliquary.png"
-dest_files=["res://.godot/imported/floor_reliquary.png-0bee159754c630645f7a7602d1da4043.ctex"]
+source_file="res://assets/sprites/entities/disputation_adept-3.png"
+dest_files=["res://.godot/imported/disputation_adept-3.png-28cab1f29eb8173adabfbf2a2ca03124.ctex"]
 
 [params]
 

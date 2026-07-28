@@ -133,7 +133,7 @@ func test_missing_art_falls_back_rather_than_erroring() -> void:
 	falsy(ArtLibrary.has("entities/nobody"), "has() reports absence")
 
 func test_art_keys_match_the_enum_names() -> void:
-	eq(ArtLibrary.prop_key(MapData.Prop.RELIQUARY), "props/reliquary", "prop key from enum")
+	eq(ArtLibrary.prop_key(MapData.Prop.CHEST), "props/chest", "prop key from enum")
 	eq(ArtLibrary.prop_key(MapData.Prop.RUNE_SLATE), "props/rune_slate", "underscored prop key")
 	eq(ArtLibrary.floor_key(ArtFactory.Floor.SCRIPTORIUM), "tiles/floor_scriptorium", "floor key")
 	eq(ArtLibrary.block_key(ArtFactory.Block.DOOR_OPEN), "tiles/block_door_open", "block key")
