@@ -136,15 +136,16 @@ func test_art_keys_match_the_enum_names() -> void:
 	eq(ArtLibrary.prop_key(MapData.Prop.CHEST), "props/chest", "prop key from enum")
 	eq(ArtLibrary.prop_key(MapData.Prop.RUNE_SLATE), "props/rune_slate", "underscored prop key")
 	eq(ArtLibrary.floor_key(ArtFactory.Floor.SCRIPTORIUM), "tiles/floor_scriptorium", "floor key")
-	eq(ArtLibrary.block_key(ArtFactory.Block.DOOR_OPEN), "tiles/block_door_open", "block key")
+	eq(ArtLibrary.block_key(ArtFactory.Block.DOOR), "tiles/block_door", "block key")
 	eq(ArtLibrary.entity_key("rector"), "entities/rector", "entity key")
 
 func test_inventory_lists_every_sprite_the_game_can_use() -> void:
 	var inventory := ArtLibrary.inventory()
 	var total: int = (inventory["tiles"] as Array).size() + (inventory["props"] as Array).size() \
 		+ (inventory["entities"] as Array).size() + (inventory["missing"] as Array).size()
-	# 9 floors + 3 blocks + 7 props + player + every enemy archetype.
-	eq(total, 9 + 3 + 7 + 1 + Roster.enemies().size(), "inventory covers the full art set")
+	# 9 floors + 1 door block + 7 props + player + every enemy archetype. Walls are
+	# not drawn at all, and an open doorway is floor, so neither has a sprite.
+	eq(total, 9 + 1 + 7 + 1 + Roster.enemies().size(), "inventory covers the full art set")
 	for key: String in inventory["missing"]:
 		falsy(ArtLibrary.has(key), "%s really is missing" % key)
 

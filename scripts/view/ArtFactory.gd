@@ -11,7 +11,7 @@ const BLOCK_H := 32  ## how far a wall/door block rises above its floor diamond
 ## Floor tile ids inside the floor atlas (one column each).
 enum Floor { HALL, LECTURE_HALL, ALCHEMY, SCRIPTORIUM, REFECTORY, TRAINING_YARD, VAULT, STUDY, STAIRS }
 ## Block tile ids inside the block atlas.
-enum Block { WALL, DOOR_CLOSED, DOOR_OPEN }
+enum Block { DOOR }
 
 const ROOM_FLOOR := {
 	"lecture_hall": Floor.LECTURE_HALL,
@@ -64,14 +64,8 @@ static func build_tileset() -> Dictionary:
 	var block_img := Image.create(TILE_W * block_count, block_h, false, Image.FORMAT_RGBA8)
 	block_img.fill(Color(0, 0, 0, 0))
 	var block_size := Vector2i(TILE_W, block_h)
-	if not _blit_art(block_img, ArtLibrary.block_key(Block.WALL), Block.WALL * TILE_W, 0, block_size):
-		_paint_wall(block_img, Block.WALL * TILE_W)
-	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_CLOSED),
-			Block.DOOR_CLOSED * TILE_W, 0, block_size):
-		_paint_door(block_img, Block.DOOR_CLOSED * TILE_W, false)
-	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR_OPEN),
-			Block.DOOR_OPEN * TILE_W, 0, block_size):
-		_paint_door(block_img, Block.DOOR_OPEN * TILE_W, true)
+	if not _blit_art(block_img, ArtLibrary.block_key(Block.DOOR), Block.DOOR * TILE_W, 0, block_size):
+		_paint_door(block_img, Block.DOOR * TILE_W)
 	var block_src := TileSetAtlasSource.new()
 	block_src.texture = ImageTexture.create_from_image(block_img)
 	block_src.texture_region_size = Vector2i(TILE_W, block_h)
@@ -140,28 +134,7 @@ static func _paint_floor(img: Image, x0: int, kind: int) -> void:
 			col = _jitter(col, x0 + x, y, 0.03)
 			img.set_pixel(x0 + x, y, col)
 
-static func _paint_wall(img: Image, x0: int) -> void:
-	var top := Color("8d93a3")
-	var left := Color("656b7a")
-	var right := Color("4a4f5c")
-	_paint_block(img, x0, top, left, right, "brick")
-
-static func _paint_door(img: Image, x0: int, open: bool) -> void:
-	if open:
-		# Open doorway: floor plus two short posts, so sight lines read clearly.
-		var frame := Color("7a5a3a")
-		for y in TILE_H:
-			var half := _diamond_half(y)
-			for x in range(TILE_W / 2 - half, TILE_W / 2 + half):
-				img.set_pixel(x0 + x, y + BLOCK_H, Color("5a4b3a"))
-		for post_x: int in [2, TILE_W - 3]:
-			for dy in range(BLOCK_H + 6):
-				var base_y: int = TILE_H / 2 + BLOCK_H - dy
-				for w in 3:
-					var px: int = clampi(post_x + w - 1, 0, TILE_W - 1)
-					if base_y >= 0 and base_y < img.get_height():
-						img.set_pixel(x0 + px, base_y, frame)
-		return
+static func _paint_door(img: Image, x0: int) -> void:
 	_paint_block(img, x0, Color("9a7448"), Color("7d5c37"), Color("5c4228"), "panel")
 
 ## Draws an isometric cube: top diamond plus the two visible side faces.
@@ -182,15 +155,8 @@ static func _paint_block(img: Image, x0: int, top: Color, left: Color, right: Co
 			if y < 0 or y >= h:
 				continue
 			var col := face
-			match style:
-				"brick":
-					var row := int((y) / 6)
-					var brick_x := x + (4 if row % 2 == 0 else 0)
-					if y % 6 == 0 or brick_x % 12 == 0:
-						col = Color(face.r * 0.82, face.g * 0.82, face.b * 0.85)
-				"panel":
-					if x % 16 < 2 or dy < 2 or dy > BLOCK_H - 4:
-						col = Color(face.r * 0.8, face.g * 0.8, face.b * 0.8)
+			if style == "panel" and (x % 16 < 2 or dy < 2 or dy > BLOCK_H - 4):
+				col = Color(face.r * 0.8, face.g * 0.8, face.b * 0.8)
 			# Vertical falloff gives the block some volume.
 			var shade: float = 1.0 - float(dy) / float(BLOCK_H) * 0.25
 			col = Color(col.r * shade, col.g * shade, col.b * shade)
@@ -199,8 +165,6 @@ static func _paint_block(img: Image, x0: int, top: Color, left: Color, right: Co
 		var half := _diamond_half(y)
 		for x in range(TILE_W / 2 - half, TILE_W / 2 + half):
 			var col: Color = top
-			if style == "brick" and ((x / 8) + (y / 4)) % 2 == 0:
-				col = Color(top.r * 0.94, top.g * 0.94, top.b * 0.96)
 			if x <= TILE_W / 2 - half + 1 or x >= TILE_W / 2 + half - 2:
 				col = Color(top.r * 0.78, top.g * 0.78, top.b * 0.82)
 			img.set_pixel(x0 + x, y, _jitter(col, x0 + x, y, 0.02))

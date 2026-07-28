@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x8thipkei6o8"
-path="res://.godot/imported/block_door_open.png-2b6a646d5a4fe75b8bb2bbb89e330b3c.ctex"
+uid="uid://7abds688ja8"
+path="res://.godot/imported/block_door.png-c51e6f1fcece08a8a118478149c60223.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/tiles/block_door_open.png"
-dest_files=["res://.godot/imported/block_door_open.png-2b6a646d5a4fe75b8bb2bbb89e330b3c.ctex"]
+source_file="res://assets/source/tiles/block_door.png"
+dest_files=["res://.godot/imported/block_door.png-c51e6f1fcece08a8a118478149c60223.ctex"]
 
 [params]
 
