@@ -2,7 +2,7 @@
   "model": "recraftv4_1",
   "style": "Hand-painted game art for an arcane academy, painterly rather than photoreal, muted desaturated colour, dark values, crisp readable shapes",
   "texture_rules": "Draw it as a flat top-down seamless texture, orthographic straight-down view with no perspective and no horizon, evenly lit with no cast shadows and no vignette. The material fills the whole frame as one repeating surface: no separate objects, props, symbols, letters or drawings on it. Keep the pattern coarse, roughly six repeats across the frame, so it stays legible when the tile is shown 64 pixels wide.",
-  "cutout_rules": "A single object alone and centred on a plain flat mid-grey backdrop, lit evenly from above with no cast shadow, drawn in full with nothing cropped. Simple bold shapes and a strong silhouette that still reads when shrunk to 48 pixels tall. No ground, no room, no other objects, no text.",
+  "cutout_rules": "Seen from slightly above at a three-quarter angle, the view a 2:1 isometric game camera gives, with the top surfaces visible. A single object alone and centred on a plain flat mid-grey backdrop, lit evenly from above with no cast shadow, drawn in full with nothing cropped. Simple bold shapes and a strong silhouette that still reads when shrunk to 48 pixels tall. No ground, no room, no other objects, no text.",
   "texture_size": "1024x1024",
   "cutout_size": "1024x1024",
   "figure_size": "768x1536",
@@ -18,8 +18,8 @@
     "floor_stairs": "A flight of stone steps descending into a shaft below the floor, seen from directly above, every tread washed in bright cyan arcane light rising from the shaft with near-black risers between them, so the tile is mostly glowing blue"
   },
   "props": {
-    "desk": "a plain wooden writing desk of an arcane academy",
-    "chair": "a simple wooden stool",
+    "desk": "a plain writing desk of warm honey-brown wood, pale enough to read against a dark floor",
+    "chair": "a simple stool of warm honey-brown wood, pale enough to read against a dark floor",
     "brazier": "a lit iron brazier on a tripod, coals glowing warm",
     "podium": "a carved wooden reading podium with an open book on it",
     "rune_slate": "a dark slate lecture board on a stand, glowing blue runes on its face",
