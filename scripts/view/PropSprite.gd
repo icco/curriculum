@@ -47,7 +47,7 @@ func _draw() -> void:
 			IsoDraw.shadow(self, 0.4, 0.26)
 			IsoDraw.box(self, 0.36, 20, Color("6b4a2f"))
 			IsoDraw.box(self, 0.5, 3, Color("8a6440"), Vector2(0, -20))
-		MapData.Prop.RELIQUARY:
+		MapData.Prop.CHEST:
 			IsoDraw.shadow(self, 0.6, 0.32)
 			var body: Color = Color("6a4f38") if not looted else Color("4a392b")
 			IsoDraw.box(self, 0.62, 38, body)
@@ -78,7 +78,7 @@ func _draw() -> void:
 		_:
 			pass
 
-## Warded seal: this reliquary still holds something.
+## Warded seal: this chest still holds something.
 func _draw_seal() -> void:
 	draw_circle(Vector2(0, -45), 5.0, Color(1.0, 0.84, 0.35, 0.35))
 	draw_arc(Vector2(0, -45), 4.0, 0, TAU, 12, Color("ffd54f"), 1.6)

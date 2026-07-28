@@ -3,7 +3,7 @@ extends RefCounted
 
 ## NetHack-flavoured floor plan generator dressed up as an academy wing:
 ## rejection-sampled rectangular rooms joined by one-tile hallways, then
-## furnished with cover props, warded reliquaries, doors and a stairwell.
+## furnished with cover props, warded chests, doors and a stairwell.
 
 const ROOM_KINDS := {
 	"lecture_hall": {"label": "Lecture Hall", "weight": 4.0, "min": Vector2i(6, 5), "max": Vector2i(11, 8)},
@@ -11,7 +11,7 @@ const ROOM_KINDS := {
 	"scriptorium": {"label": "Scriptorium", "weight": 1.5, "min": Vector2i(8, 7), "max": Vector2i(13, 10)},
 	"refectory": {"label": "Refectory", "weight": 1.0, "min": Vector2i(9, 8), "max": Vector2i(14, 11)},
 	"training_yard": {"label": "Training Yard", "weight": 1.0, "min": Vector2i(10, 8), "max": Vector2i(14, 11)},
-	"reliquary_row": {"label": "Reliquary Row", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
+	"vault_row": {"label": "Vault Row", "weight": 2.0, "min": Vector2i(5, 4), "max": Vector2i(9, 7)},
 	"proctors_study": {"label": "Proctor's Study", "weight": 1.5, "min": Vector2i(5, 4), "max": Vector2i(8, 6)},
 }
 
@@ -173,7 +173,7 @@ func _furnish(map: MapData) -> void:
 			"scriptorium": _furnish_scriptorium(map, room)
 			"refectory": _furnish_refectory(map, room)
 			"training_yard": _furnish_training_yard(map, room)
-			"reliquary_row": _furnish_reliquaries(map, room)
+			"vault_row": _furnish_chests(map, room)
 			"proctors_study": _furnish_study(map, room)
 	_scatter_hall_props(map)
 	_clear_thresholds(map)
@@ -214,7 +214,7 @@ func _furnish_alchemy_lab(map: MapData, room: Dictionary) -> void:
 				_try_prop(map, Vector2i(x, y), MapData.Prop.DESK)
 	for i in 3:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.BOOKSHELF)
-	_try_prop(map, map.random_floor_in_room(room), MapData.Prop.RELIQUARY)
+	_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHEST)
 
 func _furnish_scriptorium(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
@@ -238,21 +238,21 @@ func _furnish_training_yard(map: MapData, room: Dictionary) -> void:
 	for i in 5:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHAIR)
 	for i in 2:
-		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.RELIQUARY)
+		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHEST)
 
-func _furnish_reliquaries(map: MapData, room: Dictionary) -> void:
+func _furnish_chests(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	for x in range(rect.position.x, rect.end.x):
 		if Dice.chance(0.7):
-			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.RELIQUARY)
+			_try_prop(map, Vector2i(x, rect.position.y), MapData.Prop.CHEST)
 		if Dice.chance(0.7):
-			_try_prop(map, Vector2i(x, rect.end.y - 1), MapData.Prop.RELIQUARY)
+			_try_prop(map, Vector2i(x, rect.end.y - 1), MapData.Prop.CHEST)
 
 func _furnish_study(map: MapData, room: Dictionary) -> void:
 	var rect: Rect2i = room["rect"]
 	_try_prop(map, rect.position, MapData.Prop.DESK)
 	_try_prop(map, Vector2i(rect.end.x - 1, rect.position.y), MapData.Prop.BOOKSHELF)
-	_try_prop(map, Vector2i(rect.position.x, rect.end.y - 1), MapData.Prop.RELIQUARY)
+	_try_prop(map, Vector2i(rect.position.x, rect.end.y - 1), MapData.Prop.CHEST)
 	for i in 2:
 		_try_prop(map, map.random_floor_in_room(room), MapData.Prop.CHAIR)
 
@@ -271,7 +271,7 @@ func _scatter_hall_props(map: MapData) -> void:
 			if wall_neighbors >= 2:
 				continue
 			if Dice.chance(0.03):
-				_try_prop(map, p, MapData.Prop.RELIQUARY)
+				_try_prop(map, p, MapData.Prop.CHEST)
 			elif Dice.chance(0.03):
 				_try_prop(map, p, MapData.Prop.BRAZIER)
 
@@ -369,7 +369,7 @@ func _place_containers(map: MapData, reach: Dictionary) -> void:
 	for y in height:
 		for x in width:
 			var p := Vector2i(x, y)
-			if map.prop_at(p) == MapData.Prop.RELIQUARY and _adjacent_reachable(map, p, reach):
+			if map.prop_at(p) == MapData.Prop.CHEST and _adjacent_reachable(map, p, reach):
 				locker_cells.append(p)
 
 	for p: Vector2i in Dice.shuffled(locker_cells).slice(0, loot_target):
@@ -396,7 +396,7 @@ func _place_containers(map: MapData, reach: Dictionary) -> void:
 	for p: Vector2i in Dice.shuffled(candidates):
 		if map.containers.size() >= loot_target:
 			break
-		map.set_prop(p, MapData.Prop.RELIQUARY)
+		map.set_prop(p, MapData.Prop.CHEST)
 		var after: Dictionary = map.flood_fill(map.entry_pos, width * height)["cost"]
 		if after.size() < baseline - 1:
 			map.set_prop(p, MapData.Prop.NONE)  # would have sealed something off

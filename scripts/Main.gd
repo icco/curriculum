@@ -171,13 +171,13 @@ func _stage_interaction(cell: Vector2i) -> bool:
 	var container: Dictionary = session.map.containers.get(cell, {})
 	if not container.is_empty() and not bool(container.get("looted", false)):
 		if not session.has_action():
-			hud.set_hint("No action left to open that reliquary.")
+			hud.set_hint("No action left to open that chest.")
 			return true
 		pending = {"kind": "loot", "cell": cell}
 		mode = Mode.PREVIEW
 		board.set_cursor(cell)
 		hud.show_confirm("Open")
-		hud.set_hint("Open the reliquary. Tap again or Confirm.")
+		hud.set_hint("Open the chest. Tap again or Confirm.")
 		return true
 	if session.map.doors.has(cell):
 		pending = {"kind": "door", "cell": cell}

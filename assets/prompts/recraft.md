@@ -28,9 +28,17 @@ Deriving the geometry is the point. No generator reliably draws a diamond exactl
 twice as wide as it is tall; a square texture has nothing to get wrong, so the
 projection is exact and the model only has to paint.
 
-**Everything else is a cutout** — one object on a plain backdrop, run through
-`removeBackground` for real alpha. Blocks go to `assets/source/tiles/`, since they
-live in the tile atlas and `ArtLibrary.block_key()` looks them up there.
+**Blocks are constructed too.** `tools/make_block.gd` shears the same flat texture
+onto the three visible faces of a cube and shades them differently, which is the
+standard isometric technique and keeps the footprint on the grid. An optional
+second texture covers the front-left face; that is how a door gets into a wall.
+
+```sh
+godot --headless --path . --script tools/make_block.gd -- textures/wall_stone-3.webp block_door_closed textures/door_closed_face-2.webp
+```
+
+**Props and figures are cutouts** — one object on a plain backdrop, run through
+`removeBackground` for real alpha, trimmed and scaled to the `HEIGHTS` table.
 
 ## Judging output
 
@@ -44,6 +52,12 @@ gorgeous at 1024px is often mush at 64.
 - **Avoid the word "features".** It is read as *draw some objects*.
 - **Colour belongs to the subject line,** not the shared style clause, which
   otherwise overrides every material's own colour.
+- **Ask for the camera.** Cutouts came back at mixed angles, some straight-on and
+  some from above, which reads as unrelated objects on one floor. `cutout_rules`
+  names the three-quarter overhead view.
+- **Check contrast against the floor it will sit on.** Dark props on the dark
+  alchemy tile disappear. Keep the rejected variants until the sprite has been seen
+  in-game, not just in the atlas.
 - **A special tile is recognised by its colour, not by what it depicts.** There is
   no room to draw a staircase at 64×32 — a spiral reads as a circle, grey steps as a
   drain grate. `floor_stairs` is glowing cyan because nothing else is.

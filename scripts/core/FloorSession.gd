@@ -252,14 +252,14 @@ func player_loot() -> Array:
 		return []
 	var cell := adjacent_container()
 	if cell == Vector2i(-1, -1):
-		return [{"type": "info", "text": "No reliquary within reach."}]
+		return [{"type": "info", "text": "No chest within reach."}]
 	if not tm.spend_action(player):
 		return [{"type": "info", "text": "No action left this turn."}]
 	(map.containers[cell] as Dictionary)["looted"] = true
 	var item := Roster.roll_loot(depth)
 	if item == null:
 		return [{"type": "loot", "cell": cell, "item": null,
-			"text": "The reliquary is empty. Someone got here first."}]
+			"text": "The chest is empty. Someone got here first."}]
 	return [{"type": "loot", "cell": cell, "item": item, "text": _take_item(item)}]
 
 ## Auto-equips upgrades so mobile play needs no inventory screen.

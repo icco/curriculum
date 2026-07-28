@@ -123,7 +123,7 @@ func _build_action_bar(root: Control) -> void:
 		["spells", "Spells", &""],
 		["items", "Items", &""],
 		["dash", "Dash", &""],
-		["loot", "Reliquary", &""],
+		["loot", "Chest", &""],
 		["door", "Door", &""],
 		["descend", "Stairs", &""],
 		["end_turn", "End Turn", &"DangerButton"],

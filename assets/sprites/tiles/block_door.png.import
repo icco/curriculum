@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dakn4tovddfbo"
-path="res://.godot/imported/floor_reliquary.png-28cf3efdf00f7d52c40e5de054d4c1b2.ctex"
+uid="uid://ccc41xfpj7lso"
+path="res://.godot/imported/block_door.png-829f261b2c4271e46f9698959c95efa7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/tiles/floor_reliquary.png"
-dest_files=["res://.godot/imported/floor_reliquary.png-28cf3efdf00f7d52c40e5de054d4c1b2.ctex"]
+source_file="res://assets/sprites/tiles/block_door.png"
+dest_files=["res://.godot/imported/block_door.png-829f261b2c4271e46f9698959c95efa7.ctex"]
 
 [params]
 

@@ -13,3 +13,6 @@ export_credentials.cfg
 /assets/source/textures/*.webp.import
 /assets/source/textures/*.jpg
 /assets/source/textures/*.jpg.import
+
+# Rejected variants, kept locally until the sprite has been seen in-game.
+/assets/source/rejects/

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxf2kyccyyduq"
-path="res://.godot/imported/floor_reliquary.png-ced87a4ee8610af83e7edf9aaabfba5b.ctex"
+uid="uid://qdxtdcrbk1ox"
+path="res://.godot/imported/rune_slate.webp-7fcdf02652676dbcbb14ae150c33c3b8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/source/textures/floor_reliquary.png"
-dest_files=["res://.godot/imported/floor_reliquary.png-ced87a4ee8610af83e7edf9aaabfba5b.ctex"]
+source_file="res://assets/source/props/rune_slate.webp"
+dest_files=["res://.godot/imported/rune_slate.webp-7fcdf02652676dbcbb14ae150c33c3b8.ctex"]
 
 [params]
 

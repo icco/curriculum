@@ -171,11 +171,18 @@ func _paint_cell(cell: Vector2i, state: int) -> void:
 
 	match tile:
 		MapData.Tile.WALL:
-			block_layer.set_cell(cell, _block_source, Vector2i(ArtFactory.Block.WALL, 0))
+			# Deliberately nothing. Full-height wall cubes on the near side of a
+			# room hid the room you were standing in, and a wall cell is already
+			# indistinguishable from void for movement and sight, so the floor's
+			# silhouette carries the boundary instead.
+			pass
 		MapData.Tile.DOOR:
+			# Only a closed door gets a block. Now that walls are not drawn,
+			# standing geometry means impassable, so an open doorway is floor you
+			# can walk over — which is also what it is.
 			floor_layer.set_cell(cell, _floor_source, Vector2i(ArtFactory.Floor.HALL, 0))
-			var art: int = ArtFactory.Block.DOOR_OPEN if map.is_door_open(cell) else ArtFactory.Block.DOOR_CLOSED
-			block_layer.set_cell(cell, _block_source, Vector2i(art, 0))
+			if not map.is_door_open(cell):
+				block_layer.set_cell(cell, _block_source, Vector2i(ArtFactory.Block.DOOR, 0))
 		MapData.Tile.STAIRS:
 			floor_layer.set_cell(cell, _floor_source, Vector2i(ArtFactory.Floor.STAIRS, 0))
 		_:

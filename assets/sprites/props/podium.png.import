@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dl8o6ujqhns2u"
-path="res://.godot/imported/floor_reliquary.png-0bee159754c630645f7a7602d1da4043.ctex"
+uid="uid://cib23qhjx4cah"
+path="res://.godot/imported/podium.png-aa6afd470d4b135c7e7be5d8efa500d6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tiles/floor_reliquary.png"
-dest_files=["res://.godot/imported/floor_reliquary.png-0bee159754c630645f7a7602d1da4043.ctex"]
+source_file="res://assets/sprites/props/podium.png"
+dest_files=["res://.godot/imported/podium.png-aa6afd470d4b135c7e7be5d8efa500d6.ctex"]
 
 [params]
 

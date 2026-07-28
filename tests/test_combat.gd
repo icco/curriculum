@@ -85,7 +85,7 @@ func test_cover_raises_effective_ac() -> void:
 	eq(int(half["ac"]), bare + 2, "half cover adds 2 AC")
 
 	m.set_prop(Vector2i(5, 5), MapData.Prop.NONE)
-	m.set_prop(Vector2i(7, 5), MapData.Prop.RELIQUARY)
+	m.set_prop(Vector2i(7, 5), MapData.Prop.CHEST)
 	var three := Combat.defended_ac(defender, attacker.grid_pos, m)
 	eq(int(three["ac"]), bare + 5, "three-quarters cover adds 5 AC")
 
