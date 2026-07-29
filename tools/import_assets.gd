@@ -29,6 +29,8 @@ const HEIGHTS := {
 	"battle_chanter": 50, "proctor": 50, "visiting_lecturer": 50,
 	"senior_warden": 52, "alchemy_master": 52, "drillmaster": 56,
 	"vice_chancellor": 58, "rector": 66,
+	"hall_monitor": 46, "ink_scribe": 45, "porter": 48,
+	"bell_warden": 51, "glass_tutor": 49, "head_of_discipline": 60,
 }
 const DEFAULT_PROP_HEIGHT := 48
 const DEFAULT_ENTITY_HEIGHT := 48

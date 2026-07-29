@@ -58,6 +58,10 @@ var grid_pos: Vector2i = Vector2i.ZERO
 ## `guard_radius` from `home_pos`. Zero means no leash.
 var home_pos: Vector2i = Vector2i.ZERO
 var guard_radius: int = 0
+## Somewhere a shout came from. A wandering enemy heads here instead of drifting.
+var alerted_to: Vector2i = Vector2i(-1, -1)
+var shuts_doors: bool = false
+var calls_allies: bool = false
 var tint: Color = Color(0.8, 0.8, 0.9)
 var xp_value: int = 5
 
@@ -238,6 +242,8 @@ func to_dict() -> Dictionary:
 		"weapon_name": weapon_name,
 		"damage_dice": damage_dice,
 		"attack_range": attack_range,
+		"shuts_doors": shuts_doors,
+		"calls_allies": calls_allies,
 		"spell_slots": spell_slots.duplicate(),
 		"slots_used": slots_used.duplicate(),
 		"unlocked_spells": unlocked_spells.duplicate(),
@@ -269,6 +275,8 @@ static func from_dict(data: Dictionary) -> Entity:
 	e.weapon_name = str(data.get("weapon_name", "Fists"))
 	e.damage_dice = str(data.get("damage_dice", "1d4"))
 	e.attack_range = int(data.get("attack_range", 1))
+	e.shuts_doors = bool(data.get("shuts_doors", false))
+	e.calls_allies = bool(data.get("calls_allies", false))
 	e.spell_slots = (data.get("spell_slots", {}) as Dictionary).duplicate()
 	e.slots_used = (data.get("slots_used", {}) as Dictionary).duplicate()
 	e.unlocked_spells = (data.get("unlocked_spells", []) as Array).duplicate()

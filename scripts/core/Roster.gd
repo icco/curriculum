@@ -124,6 +124,8 @@ static func make_enemy_by_id(id: StringName, depth: int) -> Entity:
 	e.weapon_name = def.weapon_name
 	e.damage_dice = def.damage_dice
 	e.attack_range = def.attack_range
+	e.shuts_doors = def.shuts_doors
+	e.calls_allies = def.calls_allies
 	e.xp_value = def.xp_value + scale
 	e.tint = def.tint
 	e.level = maxi(1, depth)

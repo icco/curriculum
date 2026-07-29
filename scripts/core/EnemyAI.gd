@@ -7,6 +7,8 @@ extends RefCounted
 
 const AGGRO_RANGE := 13
 const FLEE_THRESHOLD := 0.25
+## How far a shout carries.
+const SHOUT_RANGE := 12
 
 ## Runs the whole turn for `actor`. Returns events in the order they happened.
 static func take_turn(actor: Entity, tm: TurnManager) -> Array:
@@ -21,11 +23,21 @@ static func take_turn(actor: Entity, tm: TurnManager) -> Array:
 		return events
 
 	var target: Entity = _pick_target(actor, hostiles, map)
+	# Remember where they were. Shut a door in its face and it comes after this.
+	actor.alerted_to = target.grid_pos
+	if actor.calls_allies:
+		events.append_array(_shout(actor, tm, target))
 	var hurt: bool = float(actor.current_hp) / maxf(1.0, float(actor.max_hp)) <= FLEE_THRESHOLD
 
 	if hurt and actor.rank == Entity.Rank.GRUNT:
 		events.append_array(_retreat(actor, tm, hostiles))
 		return events
+
+	# A gatekeeper would rather hold the door than close the distance.
+	if actor.shuts_doors:
+		var shut := _shut_a_door(actor, tm, target)
+		if not shut.is_empty():
+			return shut
 
 	# Reposition, then swing. Ranged fighters look for a spot with cover.
 	events.append_array(_reposition(actor, tm, target))
@@ -121,6 +133,67 @@ static func _reposition(actor: Entity, tm: TurnManager, target: Entity) -> Array
 	})
 	return events
 
+## Opens the first shut door between the actor and its target, when one is what
+## stands in the way. Returns [] if there is no such door or no action left.
+static func _open_the_way(actor: Entity, tm: TurnManager, goal: Vector2i) -> Array:
+	if not tm.has_action(actor) or actor.guard_radius > 0:
+		return []
+	var map: MapData = tm.map
+	var path: Array = map.find_path(actor.grid_pos, goal,
+		tm.occupied_tiles(actor), true, true)
+	if path.is_empty():
+		return []
+	var door: Vector2i = MapData.closed_door_on(map, path)
+	if door == Vector2i(-1, -1) or MapData.chebyshev(actor.grid_pos, door) > 1:
+		return []
+	if not map.open_door(door):
+		return []
+	tm.spend_action(actor)
+	return [{"type": "door", "cell": door, "open": true,
+		"text": "%s opens the door." % actor.display_name}]
+
+## Shuts an open door the target would have to come through, cutting the line
+## between them. Costs the bonus, so it never replaces the attack.
+static func _shut_a_door(actor: Entity, tm: TurnManager, target: Entity) -> Array:
+	if not tm.has_bonus(actor):
+		return []
+	var map: MapData = tm.map
+	for dir: Vector2i in MapData.DIRS_8:
+		var cell: Vector2i = actor.grid_pos + dir
+		if map.tile_at(cell) != MapData.Tile.DOOR or not map.is_door_open(cell):
+			continue
+		if tm.entity_at(cell) != null:
+			continue
+		# Only worth a turn if it actually breaks the line between them; a door
+		# behind the actor changes nothing.
+		map.close_door(cell)
+		if map.has_line_of_sight(actor.grid_pos, target.grid_pos):
+			map.open_door(cell)
+			continue
+		tm.spend_bonus(actor)
+		return [{"type": "door", "cell": cell, "open": false,
+			"text": "%s pulls the door shut." % actor.display_name}]
+	return []
+
+## Sends one unaware ally toward the trouble. Once only, and it costs the bonus.
+static func _shout(actor: Entity, tm: TurnManager, target: Entity) -> Array:
+	if not tm.has_bonus(actor):
+		return []
+	for ally: Entity in tm.allies_of(actor):
+		if ally == actor or not ally.is_alive():
+			continue
+		if ally.alerted_to != Vector2i(-1, -1):
+			continue
+		if MapData.chebyshev(ally.grid_pos, actor.grid_pos) > SHOUT_RANGE:
+			continue
+		if tm.map.has_line_of_sight(ally.grid_pos, target.grid_pos):
+			continue  # already in the fight
+		ally.alerted_to = target.grid_pos
+		tm.spend_bonus(actor)
+		return [{"type": "info",
+			"text": "%s shouts for help." % actor.display_name}]
+	return []
+
 ## True if `cell` is outside a guard's leash.
 static func _off_post(actor: Entity, cell: Vector2i) -> bool:
 	if actor.guard_radius <= 0:
@@ -174,7 +247,14 @@ static func _retreat(actor: Entity, tm: TurnManager, hostiles: Array) -> Array:
 
 ## No one in sight: drift a few tiles so floors do not feel like statues.
 static func _wander(actor: Entity, tm: TurnManager) -> Array:
-	if not Dice.chance(0.45):
+	var summoned: bool = actor.alerted_to != Vector2i(-1, -1)
+	if summoned:
+		# Whoever we are following went somewhere. If a shut door is what stands
+		# in the way, opening it is the turn.
+		var opened := _open_the_way(actor, tm, actor.alerted_to)
+		if not opened.is_empty():
+			return opened
+	if not summoned and not Dice.chance(0.45):
 		return []
 	var reach := tm.reachable(actor)
 	var cells: Array = (reach["cost"] as Dictionary).keys()
@@ -182,6 +262,16 @@ static func _wander(actor: Entity, tm: TurnManager) -> Array:
 	if cells.is_empty():
 		return []
 	var destination: Vector2i = Dice.pick(cells)
+	if summoned:
+		# Head for the shout, and stop chasing it once we get there.
+		var best := INF
+		for cell: Vector2i in cells:
+			var d := float(MapData.chebyshev(cell, actor.alerted_to))
+			if d < best:
+				best = d
+				destination = cell
+		if MapData.chebyshev(destination, actor.alerted_to) <= 1:
+			actor.alerted_to = Vector2i(-1, -1)
 	var path: Array = MapData.reconstruct_path(reach["came_from"], destination)
 	var result := tm.move_along(actor, path)
 	var events: Array = (result["events"] as Array).duplicate()

@@ -297,6 +297,10 @@ func player_use_item(index: int) -> Array:
 			return [{"type": "info", "text": "%s clears your head." % item.display_name}]
 	return [{"type": "info", "text": "%s does nothing useful." % item.display_name}]
 
+## What a locked door on this floor takes to force. Deeper floors are stiffer.
+func force_door_dc() -> int:
+	return 10 + depth
+
 ## Doors are a free object interaction, once per turn.
 func player_toggle_door() -> Array:
 	if not is_player_turn():
@@ -313,9 +317,24 @@ func player_toggle_door() -> Array:
 			return [{"type": "info", "text": "Something is standing in the doorway."}]
 		map.close_door(cell)
 		opened = false
+	elif map.is_locked_door(cell):
+		# Shouldering a lock spends the interaction whether or not it gives, so a
+		# lock costs turns rather than closing the route off entirely.
+		_interacted_this_turn = true
+		var dc := force_door_dc()
+		var roll := Dice.d20()
+		var total: int = roll + player.mod("str") + player.proficiency
+		if total < dc:
+			return [{"type": "info",
+				"text": "The lock holds. (STR %d vs DC %d)" % [total, dc]}]
+		map.doors[cell]["locked"] = false
+		map.open_door(cell)
+		update_fov()
+		return [{"type": "door", "cell": cell, "open": true,
+			"text": "You force the lock. (STR %d vs DC %d)" % [total, dc]}]
 	else:
 		if not map.open_door(cell):
-			return [{"type": "info", "text": "The door is locked. You need another way round."}]
+			return [{"type": "info", "text": "The door will not budge."}]
 		opened = true
 	_interacted_this_turn = true
 	update_fov()

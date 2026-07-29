@@ -222,6 +222,20 @@ func hostiles_of(e: Entity) -> Array:
 			out.append(other)
 	return out
 
+## Everyone alive on the same side, the actor included.
+func allies_of(e: Entity) -> Array:
+	var out: Array = []
+	for other: Entity in entities:
+		if other.is_alive() and not other.is_hostile_to(e):
+			out.append(other)
+	return out
+
+func entity_at(cell: Vector2i) -> Entity:
+	for e: Entity in entities:
+		if e.is_alive() and e.grid_pos == cell:
+			return e
+	return null
+
 func team_alive(team: int) -> bool:
 	for e: Entity in entities:
 		if e.is_alive() and e.team == team:
