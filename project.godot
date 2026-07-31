@@ -24,6 +24,12 @@ window/handheld/orientation="portrait"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[autoload]
+
+GameManager="*res://scripts/auto/GameManager.gd"
+DeckManager="*res://scripts/auto/DeckManager.gd"
+GradeManager="*res://scripts/auto/GradeManager.gd"
+
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true

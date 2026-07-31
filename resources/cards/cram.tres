@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/all_nighter.tres" id="1_iikrf"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ys5dd"]
+
+[resource]
+script = ExtResource("2_ys5dd")
+card_name = "Cram"
+school = 2
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "mana_next"
+}])
+evolved_card = ExtResource("1_iikrf")
+art_id = "cards/cram"

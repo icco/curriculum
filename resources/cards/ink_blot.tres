@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/spilled_ledger.tres" id="1_hgqg6"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_4ae71"]
+
+[resource]
+script = ExtResource("2_4ae71")
+card_name = "Ink Blot"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 1,
+"kind": "status",
+"status": 2
+}])
+evolved_card = ExtResource("1_hgqg6")
+art_id = "cards/ink_blot"

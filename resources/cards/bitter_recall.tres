@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/bitter_mastery.tres" id="1_6ud3f"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_0mvm6"]
+
+[resource]
+script = ExtResource("2_0mvm6")
+card_name = "Bitter Recall"
+school = 3
+effects = Array[Dictionary]([{
+"amount": 3,
+"kind": "self_damage"
+}, {
+"amount": 12,
+"kind": "damage"
+}])
+evolved_card = ExtResource("1_6ud3f")
+art_id = "cards/bitter_recall"

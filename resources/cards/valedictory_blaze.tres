@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_7jxnv"]
+
+[resource]
+script = ExtResource("1_7jxnv")
+card_name = "Valedictory Blaze"
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 30,
+"kind": "damage"
+}])
+art_id = "cards/final_recitation"
+exhaust = true

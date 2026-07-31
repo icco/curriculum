@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/valedictory_blaze.tres" id="1_3ne7y"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_kyve6"]
+
+[resource]
+script = ExtResource("2_kyve6")
+card_name = "Final Recitation"
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 20,
+"kind": "damage"
+}])
+evolved_card = ExtResource("1_3ne7y")
+art_id = "cards/final_recitation"
+exhaust = true

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/bulwark.tres" id="1_sm2ba"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_mt06r"]
+
+[resource]
+script = ExtResource("2_mt06r")
+card_name = "Guard"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 6,
+"kind": "block"
+}])
+evolved_card = ExtResource("1_sm2ba")
+art_id = "cards/guard"

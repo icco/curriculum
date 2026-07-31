@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/blightseed.tres" id="1_3o4vd"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_bbp4v"]
+
+[resource]
+script = ExtResource("2_bbp4v")
+card_name = "Rot Seed"
+school = 3
+effects = Array[Dictionary]([{
+"amount": 4,
+"kind": "status",
+"status": 3
+}])
+evolved_card = ExtResource("1_3o4vd")
+art_id = "cards/rot_seed"

@@ -108,7 +108,7 @@ Nothing else in this plan can be verified until `./tools/check.sh` runs. This ta
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `Schools.School` enum with values `CINDER`, `FROST`, `INK`, `ROT`, `WARD`; `Schools.display_name(school: School) -> String`; `Schools.colour(school: School) -> Color`; `Schools.ALL: Array[School]`. `TestCase` base class with `check(condition: bool, message: String)`, `eq(actual, expected, message := "")`, `neq`, `almost(actual: float, expected: float, message := "")`, and `var failures: Array[String]`, `var checks: int`, `func suite_name() -> String`, `func run() -> void`. `tests/run_tests.gd` runs every suite listed in its `SUITES` constant.
+- Produces: `Schools.School` enum with values `CINDER`, `FROST`, `INK`, `ROT`, `WARD`; `Schools.display_name(school: School) -> String`; `Schools.colour(school: School) -> Color`; `Schools.ALL: Array[School]`. `TestCase` base class with `check(condition: bool, message: String)`, `eq(actual, expected, message := "")`, `neq`, `almost(actual: float, expected: float, message := "")`, and `var failures: Array[String]`, `var checks: int`, `func suite_name() -> String`, `func run() -> void`. `tests/run_tests.gd` auto-discovers and runs every `tests/test_*.gd`, so a new suite needs no registration and concurrent branches never collide on a shared constant.
 
 - [ ] **Step 1: Create the branch**
 
@@ -277,17 +277,43 @@ A `SceneTree` script's `_init()` has no tree — `Engine.get_main_loop()` is nul
 ```gdscript
 extends SceneTree
 
-## Headless suite runner. Add every new suite to SUITES.
+## Headless suite runner. Discovers every tests/test_*.gd automatically — there is no
+## list to keep in step, so a new suite cannot be silently left unregistered, and
+## parallel branches adding suites never collide on a shared constant.
+##
+## A SceneTree script's _init() has no tree — Engine.get_main_loop() is null and the
+## root window is not live — so everything runs from _process(), which quits by
+## returning true.
 
-const SUITES := [
-	"res://tests/test_schools.gd",
-]
+const TESTS_DIR := "res://tests"
+
+
+func _discover() -> Array[String]:
+	var found: Array[String] = []
+	var dir := DirAccess.open(TESTS_DIR)
+	if dir == null:
+		printerr("FAIL  cannot open %s" % TESTS_DIR)
+		return found
+	for file in dir.get_files():
+		# .gd in a source checkout, .gdc once exported.
+		var name := file.trim_suffix(".remap").trim_suffix("c")
+		if name.begins_with("test_") and name.ends_with(".gd"):
+			found.append("%s/%s" % [TESTS_DIR, name])
+	found.sort()
+	return found
 
 
 func _process(_delta: float) -> bool:
+	var suites := _discover()
+	if suites.is_empty():
+		printerr("FAIL  no test suites found in %s" % TESTS_DIR)
+		quit(1)
+		return true
+
 	var total_checks := 0
 	var total_failures := 0
-	for path in SUITES:
+
+	for path in suites:
 		var script: GDScript = load(path)
 		if script == null:
 			printerr("FAIL  could not load suite %s" % path)
@@ -299,8 +325,12 @@ func _process(_delta: float) -> bool:
 		for failure in suite.failures:
 			printerr("FAIL  %s: %s" % [suite.suite_name(), failure])
 			total_failures += 1
-		print("  %-16s %d checks, %d failures" % [suite.suite_name(), suite.checks, suite.failures.size()])
-	print("%d checks, %d failures" % [total_checks, total_failures])
+		print(
+			"  %-16s %d checks, %d failures"
+			% [suite.suite_name(), suite.checks, suite.failures.size()]
+		)
+
+	print("%d suites, %d checks, %d failures" % [suites.size(), total_checks, total_failures])
 	quit(1 if total_failures > 0 else 0)
 	return true
 ```
@@ -473,9 +503,9 @@ func run() -> void:
 	check(_text("res://docker/nginx.conf").contains("application/wasm"), "nginx types wasm")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_tooling.gd"` to `SUITES` in `tests/run_tests.gd`, then:
+The runner discovers the new suite automatically. Then:
 
 ```bash
 ./tools/check.sh
@@ -816,9 +846,13 @@ func run() -> void:
 	neq(lance, lance.evolved_card, "no self-evolution")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_content.gd"` to `SUITES`, then run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `spark loads` fails because the resource does not exist.
 
 - [ ] **Step 3: Write `scripts/data/CardData.gd`**
@@ -995,9 +1029,13 @@ func run() -> void:
 	eq(evolved.progress(), "mastered", "terminal card reads mastered")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_evolution.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `CardInstance` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/CardInstance.gd`**
@@ -1159,9 +1197,13 @@ func run() -> void:
 	eq(play_deck.total(), 2, "exhausted cards still count toward the total")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_deck.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Deck` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Deck.gd`**
@@ -1338,9 +1380,13 @@ func run() -> void:
 	eq(round.amount(Statuses.Kind.BLOT), 3, "survives a round trip")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_statuses.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Statuses` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Statuses.gd`**
@@ -1514,9 +1560,13 @@ func run() -> void:
 	eq(body.display_name, "Novice", "combatant carries the name")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_combatant.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Combatant` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Combatant.gd`**
@@ -1724,9 +1774,13 @@ func run() -> void:
 	eq(round.knows_ward("Novice"), true, "ward survives a round trip")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_schools_multiplier.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Bestiary` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Bestiary.gd`**
@@ -2017,9 +2071,13 @@ func run() -> void:
 	eq(doomed.player.is_down(), true, "player is down")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_battle.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Battle` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Battle.gd`**
@@ -2288,7 +2346,9 @@ func _apply(
 
 	match kind:
 		CardData.DAMAGE:
-			var dealt := int(roundf(float(scaled) * chill_scale))
+			# One rounding over the combined product. Rounding `scaled` first and then
+			# again after chill_scale double-rounds and drifts off the intended number.
+			var dealt := int(roundf(float(raw) * scale * chill_scale))
 			target.take_damage(dealt)
 			return [
 				{"type": "damage", "target": target_label, "amount": dealt, "text": "%d damage" % dealt}
@@ -2296,7 +2356,7 @@ func _apply(
 		CardData.BONUS_IF_CHILLED:
 			if target.statuses.amount(Statuses.Kind.CHILL) <= 0:
 				return []
-			var bonus := int(roundf(float(scaled) * chill_scale))
+			var bonus := int(roundf(float(raw) * scale * chill_scale))
 			target.take_damage(bonus)
 			return [
 				{"type": "damage", "target": target_label, "amount": bonus, "text": "+%d, chilled" % bonus}
@@ -2504,9 +2564,13 @@ func run() -> void:
 	almost(Grading.score(_params({"xp_par": 0}))["learning"], 25.0, "zero xp par does not divide")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_grading.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Grading` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Grading.gd`**
@@ -2732,9 +2796,13 @@ func run() -> void:
 	eq(found_xp, 1, "the earned xp survived")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_draft.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Draft` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Draft.gd`**
@@ -2836,7 +2904,7 @@ git push
 
 **Interfaces:**
 - Consumes: `EnemyData` (7), `CardData` (3), `Grading` (10).
-- Produces: `CourseData` with `course_name: String`, `tier: int`, `prerequisites: Array[CourseData]`, `prerequisites_required: int` (0 means all), `examiner: EnemyData`, `par_turns: int`, `xp_par: int`, `guaranteed_card_drop: CardData`, `is_honors: bool`, `honors_of: CourseData`; and `Catalog.new(courses: Array)` with `available(grades: Dictionary) -> Array`, `is_available(course, grades) -> bool`, `is_passed(course, grades) -> bool`, `revealed(grades) -> Array`, `validate() -> Array` returning a list of problem strings.
+- Produces: `CourseData` with `course_name: String`, `tier: int`, `prerequisites: Array[CourseData]`, `prerequisites_required: int` (0 means all), `examiner: EnemyData`, `par_turns: int`, `xp_par: int`, `guaranteed_card_drop: CardData`, `is_honors: bool`, `is_final: bool`; and `Catalog.new(courses: Array)` with `available(grades: Dictionary) -> Array`, `is_available(course, grades) -> bool`, `is_passed(course, grades) -> bool`, `revealed(grades) -> Array`, `validate() -> Array` returning a list of problem strings.
 
 `grades` maps course name → `Grading.Grade`. A course is passed at C or better.
 `validate()` asserts the two structural rules: no honors node is a prerequisite of any
@@ -2946,9 +3014,13 @@ func run() -> void:
 		check(not problem.contains("Proctor"), "gates are exempt from the repeat rule")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_catalog.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `CourseData` is not declared.
 
 - [ ] **Step 3: Write `scripts/data/CourseData.gd`**
@@ -3197,9 +3269,13 @@ func run() -> void:
 	eq(long_run.bestiary is Bestiary, true, "run owns a bestiary")
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_run.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `Run` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/Run.gd`**
@@ -3365,9 +3441,13 @@ func run() -> void:
 	SaveGame.delete()
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_save.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `SaveGame` is not declared.
 
 - [ ] **Step 3: Write `scripts/core/SaveGame.gd`**
@@ -3551,9 +3631,13 @@ func run() -> void:
 	GameManager.abandon()
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_autoloads.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `ContentLibrary` and the autoloads do not exist.
 
 - [ ] **Step 3: Write `scripts/data/ContentLibrary.gd`**
@@ -4525,9 +4609,9 @@ func run() -> void:
 	print("    playthrough: %d battles, %d strikes, won=%s" % [battles, game.strikes, game.won])
 ```
 
-- [ ] **Step 6: Register the suite, run and watch it pass**
+- [ ] **Step 6: Run the suite and watch it pass**
 
-Add `"res://tests/test_playthrough.gd"` to `SUITES`, run `./tools/check.sh`.
+Run `./tools/check.sh`; the runner finds the new suite automatically.
 Expected: PASS. A hang means `Battle.end_turn` is not advancing — the `guard` counters
 exist to fail rather than spin, so a `battle terminated` failure points at the bug.
 
@@ -4718,9 +4802,13 @@ func run() -> void:
 	print("    art: %d of %d keys still procedural" % [still_missing.size(), keys.size()])
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_art.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `ArtLibrary` is not declared.
 
 - [ ] **Step 3: Write `scripts/view/ArtFactory.gd`**
@@ -5111,9 +5199,13 @@ func run() -> void:
 	box.free()
 ```
 
-- [ ] **Step 2: Register the suite and watch it fail**
+- [ ] **Step 2: Run the suite and watch it fail**
 
-Add `"res://tests/test_ui.gd"` to `SUITES`, run `./tools/check.sh`.
+The runner discovers `tests/test_*.gd` automatically, so there is nothing to register.
+
+```bash
+./tools/check.sh
+```
 Expected: FAIL — `HandFan` is not declared.
 
 - [ ] **Step 3: Write `scripts/ui/UIKit.gd`**

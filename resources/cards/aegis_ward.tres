@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_6lhnp"]
+
+[resource]
+script = ExtResource("1_6lhnp")
+card_name = "Aegis Ward"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 8,
+"kind": "block"
+}])
+art_id = "cards/rimeward"
+retain = true

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_3k7xp"]
+
+[resource]
+script = ExtResource("1_3k7xp")
+card_name = "Bulwark"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 10,
+"kind": "block"
+}])
+art_id = "cards/guard"
