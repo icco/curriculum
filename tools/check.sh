@@ -1,31 +1,38 @@
 #!/usr/bin/env bash
-# Full verification pass: refresh Godot's script-class cache, then run the
-# headless suite. Fails on a non-zero exit *or* on any engine-level error in
-# the output, because Godot happily exits 0 while spewing SCRIPT ERROR.
+# The gate. Refreshes Godot's script-class cache, runs the headless suite, and fails on
+# engine errors as well as on failed assertions — Godot exits 0 while printing
+# SCRIPT ERROR every frame, so the exit code alone proves nothing.
 set -uo pipefail
 
-cd "$(dirname "$0")/.."
 GODOT="${GODOT:-godot}"
-LOG="${TMPDIR:-/tmp}/curriculum-check.log"
+cd "$(dirname "$0")/.."
 
-echo "== refreshing script class cache =="
-"$GODOT" --headless --import --path . >"$LOG" 2>&1
-if grep -qE "^(SCRIPT )?ERROR: (Parse|Compile)" "$LOG"; then
-	echo "!! parse errors during import"
-	grep -E "^(SCRIPT )?ERROR|^ +at: " "$LOG" | head -40
-	exit 1
+if ! command -v "$GODOT" >/dev/null 2>&1 && [ ! -x "$GODOT" ]; then
+  echo "check: godot not found (set \$GODOT)" >&2
+  exit 127
 fi
 
-echo "== running tests =="
-"$GODOT" --headless --path . --script tests/run_tests.gd 2>&1 | tee "$LOG"
-status=${PIPESTATUS[0]}
+# class_name globals are unresolvable until this has built
+# .godot/global_script_class_cache.cfg at least once.
+#
+# The import output is checked, not discarded: content is generated into .tres by
+# tools/generate_*.gd, and a bad ext_resource path or an unparseable typed array is
+# reported HERE. Swallowing it turns a broken resource into a null load and an
+# assertion failure somewhere unrelated.
+import_output=$("$GODOT" --headless --import --path . 2>&1)
+if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_output"; then
+  echo "$import_output" >&2
+  echo "check: import reported errors" >&2
+  exit 1
+fi
 
-if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script" "$LOG"; then
-	echo "!! engine errors detected in test output"
-	exit 1
+output=$("$GODOT" --headless --path . --script tests/run_tests.gd 2>&1)
+status=$?
+echo "$output"
+
+if grep -qE 'SCRIPT ERROR|Parse Error|Cannot open file|not declared in the current scope' <<<"$output"; then
+  echo "check: engine reported script errors" >&2
+  exit 1
 fi
-if [ "$status" -ne 0 ]; then
-	echo "!! test runner exited $status"
-	exit "$status"
-fi
-echo "== check passed =="
+
+exit "$status"
