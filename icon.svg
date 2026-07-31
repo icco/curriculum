@@ -1,12 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect width="128" height="128" rx="20" fill="#11141c"/>
-  <!-- isometric floor tile -->
-  <path d="M64 74 L108 96 L64 118 L20 96 Z" fill="#3d4657"/>
-  <path d="M64 66 L100 84 L64 102 L28 84 Z" fill="#4a5566"/>
-  <!-- looping clock hand over the tile -->
-  <circle cx="64" cy="48" r="30" fill="none" stroke="#4fc3f7" stroke-width="8"/>
-  <path d="M64 48 L64 28" stroke="#e8eaf0" stroke-width="7" stroke-linecap="round"/>
-  <path d="M64 48 L80 58" stroke="#e8eaf0" stroke-width="7" stroke-linecap="round"/>
-  <!-- arrowhead closing the loop -->
-  <path d="M88 26 L102 30 L92 41 Z" fill="#4fc3f7"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#F7EADD"/>
+  <rect x="30" y="18" width="68" height="92" rx="6" fill="#498BAD"/>
+  <circle cx="64" cy="52" r="18" fill="#E0A51F"/>
+  <path d="M40 88h48v8H40z" fill="#000000"/>
 </svg>
