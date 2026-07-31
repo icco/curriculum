@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_dexl2"]
+[ext_resource type="Resource" path="res://resources/cards/bulwark.tres" id="2_tcirc"]
+[ext_resource type="Resource" path="res://resources/cards/aegis_ward.tres" id="3_d66lf"]
+[ext_resource type="Resource" path="res://resources/cards/rime_lance.tres" id="4_l4rev"]
+[ext_resource type="Resource" path="res://resources/cards/still_the_hall.tres" id="5_ddolo"]
+[ext_resource type="Resource" path="res://resources/cards/restorative_study.tres" id="6_ko50w"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_gi2ng"]
+
+[resource]
+script = ExtResource("7_gi2ng")
+enemy_name = "Proctor"
+max_hp = 60
+mana_per_turn = 3
+deck = Array[ExtResource("1_dexl2")]([ExtResource("2_tcirc"), ExtResource("3_d66lf"), ExtResource("4_l4rev"), ExtResource("5_ddolo"), ExtResource("6_ko50w")])
+warded_school = 4
+art_id = "entities/proctor"
+is_gate = true

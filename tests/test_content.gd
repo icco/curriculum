@@ -130,3 +130,36 @@ func run() -> void:
 	eq(starting.get("Spark", 0), 4, "four sparks")
 	eq(starting.get("Guard", 0), 4, "four guards")
 	eq(starting.get("Ink Blot", 0), 2, "two ink blots")
+
+	# Examiners: six regular plus two gates plus the final.
+	eq(library.enemies.size(), 9, "nine examiners")
+	var gates := 0
+	for enemy in library.enemies:
+		check(enemy.enemy_name != "", "every examiner is named")
+		check(enemy.max_hp > 0, "%s has hit points" % enemy.enemy_name)
+		check(enemy.mana_per_turn > 0, "%s has mana" % enemy.enemy_name)
+		check(enemy.deck.size() >= 3, "%s has a deck of at least three" % enemy.enemy_name)
+		check(enemy.art_id != "", "%s declares art" % enemy.enemy_name)
+		neq(enemy.weak_school, enemy.warded_school, "%s weak != warded" % enemy.enemy_name)
+		for card in enemy.deck:
+			check(card != null, "%s deck has no holes" % enemy.enemy_name)
+			# An examiner must be able to afford at least one card, or it hesitates
+			# forever and the battle cannot end.
+		var affordable := false
+		for card in enemy.deck:
+			if card != null and card.cost <= enemy.mana_per_turn:
+				affordable = true
+		check(affordable, "%s can afford something in its own deck" % enemy.enemy_name)
+		if enemy.is_gate:
+			gates += 1
+	eq(gates, 2, "two gate examiners")
+
+	# Every school is somebody's weakness and somebody's ward, so no school is dead
+	# weight and none is a universal answer.
+	var weak_schools := {}
+	var warded_schools := {}
+	for enemy in library.enemies:
+		weak_schools[enemy.weak_school] = true
+		warded_schools[enemy.warded_school] = true
+	eq(weak_schools.size(), 5, "all five schools are somebody's weakness")
+	eq(warded_schools.size(), 5, "all five schools are somebody's ward")
