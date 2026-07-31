@@ -150,7 +150,7 @@ never the same one. The multiplier applies to **every number on a card of that
 school** — ×1.5 when weak, ×0.5 when warded — not to damage alone.
 
 That generalisation is deliberate. If the multiplier only touched damage, Ward could
-never be a weakness, because Ward deals none: three of the ten examiners below would
+never be a weakness, because Ward deals none: three of the nine examiners below would
 have had a weakness no card could exploit. Applying it to the card's numbers keeps all
 five schools symmetric, so weak-to-Ward means your Block and healing land 50% harder
 against that examiner, and blind-guessing stays an honest 1 in 5.
@@ -177,8 +177,19 @@ under a pure efficiency score is to never learn. The score therefore has four te
 | --- | --- | --- |
 | **Efficiency** | 0–25 | `25 × clamp(par_turns / turns_taken, 0, 1)` |
 | **Survival** | 0–25 | `25 × (hp_end / hp_start)` |
-| **Learning** | 0–25 | `25 × clamp(xp_banked_this_battle / deck_cap, 0, 1)` — playing through your deck once is full marks |
+| **Learning** | 0–25 | `25 × clamp(xp_banked_this_battle / xp_par, 0, 1)` |
 | **Discovery** | 0–25 | `15` if the examiner's weak school is known by end of battle (revealed now *or* already in the Bestiary) `+ 10 × distinct_schools_played / 5` |
+
+`xp_par` is authored per course alongside `par_turns`, guideline `3 × par_turns` — the
+number of cards a 3-mana player can actually play in a par-length battle.
+
+It must **not** be `deck_cap`. Scoring Learning against deck size demands ~10 cards
+played for full marks, roughly 4–5 turns, while a tier-1 examiner dies in fewer turns
+than that — so Efficiency and Learning would be directly anticorrelated and S would be
+unreachable in tier 1. Tying both terms to the same authored par makes them
+simultaneously satisfiable by design, which is the whole point of the four-term score.
+Note that `test_grading` exercises the terms in isolation and so cannot catch this
+class of error; the balance check belongs in `tools/simulate.gd`.
 
 | Grade | Score |
 | --- | --- |
@@ -210,12 +221,20 @@ Deck size is capped. After each battle your deck is restored in full — nothing
 lost in combat — then it and the defeated examiner's deck are pooled, and you keep
 exactly **`deck_cap`** cards.
 
-| Tiers cleared | `deck_cap` |
-| --- | --- |
-| 0 (start) | 10 |
-| 1 | 12 |
-| 2 | 14 |
-| 3 | 16 |
+```
+deck_cap = min(10 + courses_passed, 16)
+```
+
+The cap grows by one per course passed, so the starting deck of 10 becomes 11 after
+the first course and tops out at 16.
+
+It must grow **per course, not per tier.** With a per-tier cap the deck already equals
+the cap when the first Registration screen opens, so the screen can only swap — and
+at grade C that is one card, at F nothing at all. Five of the fifteen courses are
+tier 1, so a per-tier cap makes the game's central mechanic inert for the first third
+of every run. Growing per course means every Registration is a real build-up decision
+early, and once the cap saturates at 16 the decision becomes what to cut — which is
+the more interesting version, and by then you have a deck worth cutting from.
 
 Your grade decides how much of the examiner's deck is unlocked in the pool:
 
@@ -245,28 +264,61 @@ The starting deck is 10 cards: 4× Spark (Cinder), 4× Guard (Ward), 2× Ink Blo
 is passed at **C or better**. An **S or A** additionally reveals adjacent honors
 nodes, which hold the strongest examiners and the richest decks.
 
-| Tier | Courses |
-| --- | --- |
-| 1 | Basic Arcana 101, Cantrips 101, Wardcraft 101, *Tutorial 150* (honors), **Proctor's Inspection** (gate) |
-| 2 | Pyromancy 201, Cryomancy 201, Necrology 201, Marginalia 201, *Fieldwork 250* (honors), **Midterm Review** (gate) |
-| 3 | Thesis 301, Applied Wardcraft 301, *Viva Voce 350* (honors), **Comprehensive Exam** (final) |
+Five nodes in tier 1, six in tier 2, four in tier 3; the full catalog is §8.1. A run is
+8–10 battles, roughly 20–30 minutes. Passing the Comprehensive Exam breaks the
+curriculum and wins the run.
 
-A run is 8–10 battles, roughly 20–30 minutes. Passing the Comprehensive Exam breaks
-the curriculum and wins the run.
+**Examiners repeat, and that is a requirement rather than a shortcut:** a Bestiary
+entry granting knowledge "against every examiner of that type for the rest of the run"
+is worthless if you never meet the type twice.
 
-**Ten examiners cover fifteen courses, so examiners repeat.** That is a requirement
-rather than a shortcut: a Bestiary entry that grants knowledge "against every examiner
-of that type for the rest of the run" is worthless if you never meet the type twice.
-Each examiner type must appear in at least two courses, and no course pairs an
-examiner with a course whose syllabus card is its own warded school.
+This constrains the roster arithmetic, so the roster is sized to it. Twelve of the
+fifteen courses are ordinary (the other three are the two gates and the final, which
+are one-off encounters by nature). Twelve slots divided by **six** regular examiners
+is exactly two appearances each. An earlier draft of this spec called for ten
+examiners with the same rule, which is infeasible — ten types needing two appearances
+each requires twenty slots, and there are twelve.
 
-### 8.1 The reachability constraint
+Gates and the final are exempt from the repeat rule. Their weakness still matters
+inside the single fight you get, since probing is what the Discovery term pays for.
 
-Prerequisites at C-or-better plus two-F permadeath means the catalog must guarantee
-a survivable path exists from any legal state. The generator (or, for a hand-authored
-catalog, a content test) must assert that every tier has at least one course whose
-prerequisites are satisfiable without an honors grade. Noted here as a requirement on
-the content-integrity suite; not solved in this spec.
+### 8.1 The catalog
+
+| Course | Tier | Prerequisites | Examiner | Syllabus card |
+| --- | --- | --- | --- | --- |
+| Basic Arcana 101 | 1 | — | Novice | Spark |
+| Cantrips 101 | 1 | — | Glass Tutor | Marginalia |
+| Wardcraft 101 | 1 | — | Hall Monitor | Guard |
+| *Tutorial 150* (honors) | 1 | A+ in any 101 | Drillmaster | Hoarfrost |
+| **Proctor's Inspection** (gate) | 1 | any two 101s | Proctor | Rimeward |
+| Pyromancy 201 | 2 | Proctor's Inspection | Battle Chanter | Cinder Burst |
+| Cryomancy 201 | 2 | Proctor's Inspection | Drillmaster | Frost Lance |
+| Necrology 201 | 2 | Proctor's Inspection | Alchemy Master | Rot Seed |
+| Marginalia 201 | 2 | Proctor's Inspection | Glass Tutor | Ink Blot |
+| *Fieldwork 250* (honors) | 2 | A+ in any 201 | Battle Chanter | Final Recitation |
+| **Midterm Review** (gate) | 2 | any two 201s | Vice-Chancellor | Cram |
+| Thesis 301 | 3 | Midterm Review | Alchemy Master | Thesis Statement |
+| Applied Wardcraft 301 | 3 | Midterm Review | Hall Monitor | Honours Sigil |
+| *Viva Voce 350* (honors) | 3 | A+ in any 301 | Novice | Winter Term |
+| **Comprehensive Exam** (final) | 3 | both 301s | Rector | — |
+
+Each of the six regular examiners appears exactly twice: Novice (101, 350), Glass
+Tutor (101, 201), Hall Monitor (101, 301), Drillmaster (150, 201), Battle Chanter
+(201, 250), Alchemy Master (201, 301). Most pairs straddle a tier, so you learn a
+weakness early and cash it in later — the Novice you beat in your first week returns
+to sit your viva.
+
+### 8.2 The reachability constraint
+
+Prerequisites at C-or-better plus two-F permadeath means a legal path must exist from
+any reachable state. The catalog in §8.1 guarantees this by construction, via one rule:
+
+> **No honors node is a prerequisite of any required node.**
+
+Honors courses are pure upside, reachable only with an A or better and never blocking.
+Everything on the critical path — three 101s with no prerequisites, a gate needing any
+two of them, four 201s, a gate needing any two, two 301s, the final — is satisfiable at
+C throughout. `test_catalog` asserts the rule directly rather than searching the graph.
 
 ---
 
@@ -329,13 +381,13 @@ the script.
 | Subject group | Count |
 | --- | --- |
 | Base-card illustrations | 24 |
-| Examiner portraits | 10 |
+| Examiner portraits | 9 |
 | School sigils | 5 |
 | Tier backdrops | 3 |
 | Course medallions | 3 |
 | Ornament / card back / grain plates | ~4 |
 
-~49 subjects at 4 variants ≈ **$7 of Recraft credit** (~35 credits ≈ $0.035 per
+~48 subjects at 4 variants ≈ **$7 of Recraft credit** (~35 credits ≈ $0.035 per
 generation). Needs `RECRAFT_API_KEY`, which is present in the developer's
 environment.
 
@@ -392,7 +444,7 @@ parse.
 Core resolution functions return arrays of event dictionaries
 (`{"type": …, "amount": …, "text": …}`) rather than touching the scene tree. The UI
 replays them as animation. Tests and the running game therefore exercise the same
-code path, which is the only way a 48-card × 10-examiner interaction surface stays
+code path, which is the only way a 48-card × 9-examiner interaction surface stays
 honest.
 
 ### 10.3 Autoloads
@@ -500,22 +552,24 @@ balance passes, not final.
 
 ### Examiners
 
-Seven regular, three gates. Each weak to one school and warded against another;
-gate decks contain **evolved** forms, so a boss visibly plays cards you do not have
-yet.
+Six regular examiners, each appearing in exactly two courses per §8.1, plus two gates
+and the final. Gate and final decks contain **evolved** forms, so a boss visibly plays
+cards you do not have yet.
 
-| Examiner | Tier | Deck leans | Weak | Warded |
-| --- | --- | --- | --- | --- |
-| Novice | 1 | Ink | Cinder | Ink |
-| Hall Monitor | 1 | Ward | Rot | Cinder |
-| Ink Scribe | 1 | Ink | Ward | Ink |
-| **Proctor** | 1 gate | Ward / Frost | Cinder | Ward |
-| Drillmaster | 2 | Frost | Cinder | Frost |
-| Glass Tutor | 2 | Frost | Cinder | Frost |
-| Alchemy Master | 2 | Rot | Ward | Rot |
-| Battle Chanter | 2 | Cinder | Frost | Cinder |
-| **Vice-Chancellor** | 2 gate | Ink / Rot | Frost | Ink |
-| **Rector** | 3 final | all five | Rot | Ward |
+| Examiner | Deck leans | Weak | Warded |
+| --- | --- | --- | --- |
+| Novice | Cinder | Ink | Frost |
+| Glass Tutor | Ink | Cinder | Ink |
+| Hall Monitor | Ward | Rot | Ward |
+| Drillmaster | Frost | Cinder | Frost |
+| Alchemy Master | Rot | Ward | Rot |
+| Battle Chanter | Cinder | Frost | Cinder |
+| **Proctor** (gate) | Ward / Frost | Cinder | Ward |
+| **Vice-Chancellor** (gate) | Ink / Rot | Frost | Ink |
+| **Rector** (final) | all five | Rot | Ward |
+
+All five schools appear as some examiner's weakness and all five as some examiner's
+ward, so no school is dead weight and none is a universal answer.
 
 ---
 
@@ -531,7 +585,7 @@ yet.
 | `test_schools` | ×1.5 / ×0.5 multipliers, reveal on first hit, Bestiary persistence across battles |
 | `test_grading` | Each of the four terms in isolation, thresholds, loss ⇒ F |
 | `test_draft` | Cap enforcement, pool gating by grade, syllabus card always present, XP destroyed on cut |
-| `test_catalog` | Prerequisite gating, honors reveal on S/A, reachability assertion (§8.1), every examiner type used by ≥2 courses (§8) |
+| `test_catalog` | Prerequisite gating, honors reveal on S/A, reachability assertion (§8.2), every examiner type used by ≥2 courses (§8) |
 | `test_run` | Strikes, F on 0 HP with HP restored, expulsion on the second F |
 | `test_save` | Round-trip including card XP and Bestiary state |
 | `test_content` | Every `.tres` loads, every `evolved_card` resolves, no card is its own evolution, every examiner deck is legal and non-empty, every course's prerequisites exist |
@@ -571,5 +625,5 @@ Places the brief was silent and this spec chose:
 4. `par_turns` is authored per course rather than derived.
 5. A course may be attempted only once per run, pass or fail.
 6. Losing a battle costs an F and restores HP, rather than ending the run (§6.1).
-7. The catalog is hand-authored rather than procedurally generated, so §8.1's
+7. The catalog is hand-authored rather than procedurally generated, so §8.2's
    reachability requirement is a content test rather than a generator constraint.
