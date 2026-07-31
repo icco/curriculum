@@ -1784,3 +1784,801 @@ git add -A
 git commit -m "feat(battle): add the bestiary and school multipliers"
 git push
 ```
+
+---
+
+### Task 9: `Battle` — turn resolution and the event log
+
+The core of the game. Returns arrays of event dictionaries; the UI in Task 21 replays
+them. Nothing here touches the scene tree.
+
+**Files:**
+- Create: `scripts/core/Battle.gd`
+- Test: `tests/test_battle.gd`
+
+**Interfaces:**
+- Consumes: `Deck` (5), `Statuses` (6), `Combatant`/`EnemyData` (7), `Bestiary` (8), `CardData` (3), `CardInstance` (4).
+- Produces: `Battle.new(player_cards: Array, enemy: EnemyData, bestiary, rng: RandomNumberGenerator = null)`; `var player: Combatant`, `examiner: Combatant`, `player_deck: Deck`, `examiner_intent: CardInstance`, `turns: int`, `xp_banked: int`, `finished: bool`, `player_won: bool`; `schools_played() -> int`; `start() -> Array`; `can_play(card) -> bool`; `play_card(card) -> Array`; `end_turn() -> Array`.
+
+Event dictionaries always carry `type`, and `text` for the log. Types used:
+`turn_start`, `draw`, `card_played`, `damage`, `block`, `heal`, `status`, `pay_hp`,
+`evolved`, `revealed`, `intent`, `illegal`, `battle_end`.
+
+**Resolution order**, fixed here so the tests and the UI agree:
+
+1. `play_card` — mana check, then scale = school multiplier × Blot reduction; Chill is consumed once per card if the card deals any damage; effects apply in list order; then XP, then bestiary reveal, then the card leaves the hand.
+2. `end_turn` — discard hand → player Decay ticks → examiner block expires, mana refills, examiner Burn ticks, examiner plays its intent, examiner Decay ticks, next intent is chosen → player block expires, mana refills (plus any banked bonus), player Burn ticks, draw 5, `turns += 1`.
+
+- [ ] **Step 1: Write the failing test `tests/test_battle.gd`**
+
+```gdscript
+extends TestCase
+
+## Turn resolution. Every test builds its cards inline so a content change cannot
+## break the rules suite.
+
+
+func suite_name() -> String:
+	return "battle"
+
+
+func _card(name: String, school, cost: int, effects: Array) -> CardData:
+	var d := CardData.new()
+	d.card_name = name
+	d.school = school
+	d.cost = cost
+	var typed: Array[Dictionary] = []
+	for e in effects:
+		typed.append(e)
+	d.effects = typed
+	return d
+
+
+func _enemy(hp: int, weak, warded, deck: Array) -> EnemyData:
+	var e := EnemyData.new()
+	e.enemy_name = "Dummy"
+	e.max_hp = hp
+	e.mana_per_turn = 2
+	var typed: Array[CardData] = []
+	for c in deck:
+		typed.append(c)
+	e.deck = typed
+	e.weak_school = weak
+	e.warded_school = warded
+	return e
+
+
+func _battle(player_cards: Array, enemy: EnemyData) -> Battle:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	var instances := []
+	for c in player_cards:
+		instances.append(CardInstance.new(c))
+	return Battle.new(instances, enemy, Bestiary.new(), rng)
+
+
+func run() -> void:
+	var S := Schools.School
+	var strike := _card("Strike", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 10}])
+	var guard := _card("Guard", S.WARD, 1, [{"kind": CardData.BLOCK, "amount": 6}])
+	var poke := _card("Poke", S.INK, 0, [{"kind": CardData.DAMAGE, "amount": 1}])
+
+	# A neutral card deals its face value.
+	var b := _battle([strike, strike, strike, strike, strike], _enemy(100, S.ROT, S.FROST, [poke]))
+	b.start()
+	eq(b.player.hp, 60, "player starts at 60")
+	eq(b.player.mana, 3, "three mana")
+	eq(b.player_deck.hand.size(), 5, "drew five")
+	var events := b.play_card(b.player_deck.hand[0])
+	eq(b.examiner.hp, 90, "neutral card dealt 10")
+	eq(b.player.mana, 2, "mana spent")
+	check(events.size() > 0, "play produced events")
+
+	# Mana is enforced.
+	var broke := _battle([_card("Big", S.CINDER, 9, [{"kind": CardData.DAMAGE, "amount": 5}])], _enemy(50, S.ROT, S.FROST, [poke]))
+	broke.start()
+	eq(broke.can_play(broke.player_deck.hand[0]), false, "cannot afford it")
+	var refused := broke.play_card(broke.player_deck.hand[0])
+	eq(refused[0]["type"], "illegal", "refused as illegal")
+	eq(broke.examiner.hp, 50, "no damage dealt")
+
+	# The weak school multiplies by 1.5, the warded school halves — and the very
+	# first hit already gets the bonus.
+	var weak := _battle([strike], _enemy(100, S.CINDER, S.WARD, [poke]))
+	weak.start()
+	weak.play_card(weak.player_deck.hand[0])
+	eq(weak.examiner.hp, 85, "weak school dealt 15")
+
+	var warded := _battle([strike], _enemy(100, S.ROT, S.CINDER, [poke]))
+	warded.start()
+	warded.play_card(warded.player_deck.hand[0])
+	eq(warded.examiner.hp, 95, "warded school dealt 5")
+
+	# The multiplier scales non-damage numbers too, which is what lets Ward be a
+	# weakness at all.
+	var ward_weak := _battle([guard], _enemy(100, S.WARD, S.ROT, [poke]))
+	ward_weak.start()
+	ward_weak.play_card(ward_weak.player_deck.hand[0])
+	eq(ward_weak.player.block, 9, "block scaled by the weakness")
+
+	# Playing a card banks XP and evolves it in place at the threshold.
+	var evo_base := _card("Seed", S.INK, 0, [{"kind": CardData.DAMAGE, "amount": 1}])
+	var evo_top := _card("Bloom", S.INK, 0, [{"kind": CardData.DAMAGE, "amount": 9}])
+	evo_base.evolved_card = evo_top
+	evo_base.xp_to_evolve = 2
+	var evo := _battle([evo_base, evo_base, evo_base], _enemy(100, S.ROT, S.FROST, [poke]))
+	evo.start()
+	var first: CardInstance = evo.player_deck.hand[0]
+	evo.play_card(first)
+	eq(evo.xp_banked, 1, "one xp banked")
+	eq(first.data.card_name, "Seed", "not yet evolved")
+	var second: CardInstance = evo.player_deck.hand[0]
+	var evo_events := evo.play_card(second)
+	eq(second.data.card_name, "Bloom", "evolved at the threshold")
+	var saw_evolution := false
+	for e in evo_events:
+		if e["type"] == "evolved":
+			saw_evolution = true
+	eq(saw_evolution, true, "emitted an evolved event")
+
+	# A hit with the weak school reveals it and says so.
+	var reveal := _battle([strike], _enemy(100, S.CINDER, S.WARD, [poke]))
+	reveal.start()
+	var reveal_events := reveal.play_card(reveal.player_deck.hand[0])
+	var saw_reveal := false
+	for e in reveal_events:
+		if e["type"] == "revealed":
+			saw_reveal = true
+	eq(saw_reveal, true, "reveal emitted")
+
+	# Distinct schools played is what the Discovery term counts.
+	var variety := _battle([strike, guard, poke], _enemy(100, S.ROT, S.FROST, [poke]))
+	variety.start()
+	for card in variety.player_deck.hand.duplicate():
+		if variety.can_play(card):
+			variety.play_card(card)
+	check(variety.schools_played() >= 2, "counted distinct schools")
+
+	# Ending the turn discards, runs the examiner, and comes back with a new hand.
+	var turn := _battle([strike, strike, strike, strike, strike, strike, strike], _enemy(100, S.ROT, S.FROST, [_card("Jab", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 4}])]))
+	turn.start()
+	eq(turn.turns, 1, "first turn")
+	check(turn.examiner_intent != null, "intent telegraphed before the player acts")
+	turn.end_turn()
+	eq(turn.player.hp, 56, "examiner hit for four")
+	eq(turn.turns, 2, "second turn")
+	eq(turn.player_deck.hand.size(), 5, "redrew five")
+	eq(turn.player.mana, 3, "mana refilled")
+
+	# Burn ticks at the start of the bearer's turn and decrements.
+	var burn_card := _card("Kindle", S.CINDER, 1, [{"kind": CardData.STATUS, "status": Statuses.Kind.BURN, "amount": 3}])
+	var burn := _battle([burn_card, strike, strike, strike, strike], _enemy(100, S.ROT, S.FROST, [poke]))
+	burn.start()
+	burn.play_card(burn.player_deck.hand[0])
+	eq(burn.examiner.statuses.amount(Statuses.Kind.BURN), 3, "applied three burn")
+	burn.end_turn()
+	eq(burn.examiner.hp, 97, "burn ticked for three")
+	eq(burn.examiner.statuses.amount(Statuses.Kind.BURN), 2, "burn decremented")
+
+	# Rot pays in the player's own hit points, bypassing block.
+	var bitter := _card("Bitter", S.ROT, 1, [{"kind": CardData.SELF_DAMAGE, "amount": 3}, {"kind": CardData.DAMAGE, "amount": 12}])
+	var rot := _battle([bitter], _enemy(100, S.WARD, S.FROST, [poke]))
+	rot.start()
+	rot.player.gain_block(50)
+	rot.play_card(rot.player_deck.hand[0])
+	eq(rot.player.hp, 57, "paid three hp through block")
+	eq(rot.examiner.hp, 88, "dealt twelve")
+
+	# Killing the examiner ends the battle and reports a win.
+	var kill := _battle([strike], _enemy(5, S.ROT, S.FROST, [poke]))
+	kill.start()
+	var end_events := kill.play_card(kill.player_deck.hand[0])
+	eq(kill.finished, true, "battle over")
+	eq(kill.player_won, true, "player won")
+	var saw_end := false
+	for e in end_events:
+		if e["type"] == "battle_end":
+			saw_end = true
+	eq(saw_end, true, "emitted battle_end")
+	eq(kill.play_card(kill.player_deck.hand[0] if kill.player_deck.hand.size() > 0 else null)[0]["type"], "illegal", "cannot play after the end")
+
+	# Losing sets finished without a win. The F strike is Run's job, not Battle's.
+	var doomed := _battle([guard], _enemy(100, S.ROT, S.FROST, [_card("Crush", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 999}])]))
+	doomed.start()
+	doomed.end_turn()
+	eq(doomed.finished, true, "battle over")
+	eq(doomed.player_won, false, "player lost")
+	eq(doomed.player.is_down(), true, "player is down")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_battle.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Battle` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Battle.gd`**
+
+```gdscript
+class_name Battle
+extends RefCounted
+
+## One battle. Pure logic: every method returns an array of event dictionaries for
+## the presentation layer to replay, and nothing here touches the scene tree.
+##
+## The examiner plays exactly one card per turn, telegraphed as `examiner_intent` at
+## the end of the player's turn, so the player is never hit by untelegraphed damage.
+
+const CHILL_REDUCTION := 0.3  # per stack, applied to damage
+const BLOT_REDUCTION := 0.4  # per stack, applied to every number on the card
+
+var player: Combatant
+var examiner: Combatant
+var player_deck: Deck
+var examiner_deck: Deck
+var examiner_intent: CardInstance = null
+var turns := 0
+var xp_banked := 0
+var finished := false
+var player_won := false
+
+## Untyped: Bestiary and Battle referring to each other by type would be cyclic.
+var _bestiary
+var _enemy_data: EnemyData
+var _schools_played := {}
+var _mana_bonus_next := 0
+var _ward_played_this_turn := false
+
+
+func _init(
+	player_cards: Array, enemy: EnemyData, bestiary, rng: RandomNumberGenerator = null
+) -> void:
+	_enemy_data = enemy
+	_bestiary = bestiary
+	player = Combatant.new("Student", 60, 3)
+	examiner = enemy.to_combatant()
+	player_deck = Deck.new(player_cards, rng)
+	var examiner_instances := []
+	for card in enemy.deck:
+		examiner_instances.append(CardInstance.new(card))
+	examiner_deck = Deck.new(examiner_instances, rng)
+
+
+func schools_played() -> int:
+	return _schools_played.size()
+
+
+func start() -> Array:
+	turns = 1
+	player.refill_mana()
+	var events: Array = [{"type": "turn_start", "turn": turns, "text": "Turn 1"}]
+	for card in player_deck.draw(Deck.HAND_SIZE):
+		events.append({"type": "draw", "card": card, "text": "Drew %s" % card.data.card_name})
+	events.append_array(_choose_intent())
+	return events
+
+
+func can_play(card) -> bool:
+	if finished or card == null:
+		return false
+	if not player_deck.hand.has(card):
+		return false
+	return card.data.cost <= player.mana
+
+
+func play_card(card) -> Array:
+	if not can_play(card):
+		return [{"type": "illegal", "text": "That card cannot be played."}]
+
+	player.spend_mana(card.data.cost)
+	var events: Array = [
+		{"type": "card_played", "card": card, "text": "Played %s" % card.data.card_name}
+	]
+
+	# One scale for the whole card: the school multiplier, reduced by Blot. Blot is
+	# consumed once per card, not once per effect.
+	var scale := float(_bestiary.multiplier(_enemy_data, card.data.school))
+	var blot := player.statuses.consume(Statuses.Kind.BLOT)
+	if blot > 0:
+		scale *= maxf(0.0, 1.0 - BLOT_REDUCTION * float(blot))
+
+	# Chill likewise: consumed once, and only if this card actually attacks.
+	var chill_scale := 1.0
+	if _deals_damage(card.data):
+		var chill := player.statuses.consume(Statuses.Kind.CHILL)
+		if chill > 0:
+			chill_scale = maxf(0.0, 1.0 - CHILL_REDUCTION * float(chill))
+
+	if card.data.school == Schools.School.WARD:
+		_ward_played_this_turn = true
+
+	for effect in card.data.effects:
+		events.append_array(_apply(effect, scale, chill_scale, player, examiner))
+
+	# Learning: XP is banked on the instance, never on the CardData.
+	if card.gain_xp(1):
+		events.append(
+			{"type": "evolved", "card": card, "text": "%s evolved!" % card.data.card_name}
+		)
+	xp_banked += 1
+	_schools_played[card.data.school] = true
+
+	var revealed: String = _bestiary.record_hit(_enemy_data, card.data.school)
+	if revealed != "":
+		events.append(
+			{
+				"type": "revealed",
+				"kind": revealed,
+				"school": card.data.school,
+				"text": (
+					"%s is %s %s!"
+					% [
+						_enemy_data.enemy_name,
+						"weak to" if revealed == "weakness" else "warded against",
+						Schools.display_name(card.data.school),
+					]
+				),
+			}
+		)
+
+	player_deck.play(card)
+	events.append_array(_check_end())
+	return events
+
+
+func end_turn() -> Array:
+	if finished:
+		return [{"type": "illegal", "text": "The battle is over."}]
+
+	var events: Array = []
+	for card in player_deck.discard_hand():
+		events.append({"type": "discard", "card": card, "text": ""})
+	_ward_played_this_turn = false
+
+	# Player's Decay resolves at the end of the player's turn.
+	events.append_array(_tick_decay(player, "You"))
+	events.append_array(_check_end())
+	if finished:
+		return events
+
+	events.append_array(_examiner_turn())
+	events.append_array(_check_end())
+	if finished:
+		return events
+
+	# Back to the player.
+	turns += 1
+	player.expire_block()
+	player.refill_mana(_mana_bonus_next)
+	_mana_bonus_next = 0
+	events.append({"type": "turn_start", "turn": turns, "text": "Turn %d" % turns})
+	var burn := player.statuses.tick_start_of_turn()
+	if burn > 0:
+		player.take_damage(burn)
+		events.append({"type": "damage", "target": "player", "amount": burn, "text": "Burn"})
+	for card in player_deck.draw(Deck.HAND_SIZE):
+		events.append({"type": "draw", "card": card, "text": ""})
+	events.append_array(_check_end())
+	return events
+
+
+func _examiner_turn() -> Array:
+	var events: Array = []
+	examiner.expire_block()
+	examiner.refill_mana()
+
+	var burn := examiner.statuses.tick_start_of_turn()
+	if burn > 0:
+		examiner.take_damage(burn)
+		events.append(
+			{"type": "damage", "target": "examiner", "amount": burn, "text": "Burn"}
+		)
+	if examiner.is_down():
+		return events
+
+	if examiner_intent != null:
+		var card: CardInstance = examiner_intent
+		examiner.spend_mana(card.data.cost)
+		events.append(
+			{
+				"type": "card_played",
+				"card": card,
+				"by": "examiner",
+				"text": "%s casts %s" % [_enemy_data.enemy_name, card.data.card_name],
+			}
+		)
+		var scale := 1.0
+		var blot := examiner.statuses.consume(Statuses.Kind.BLOT)
+		if blot > 0:
+			scale *= maxf(0.0, 1.0 - BLOT_REDUCTION * float(blot))
+		var chill_scale := 1.0
+		if _deals_damage(card.data):
+			var chill := examiner.statuses.consume(Statuses.Kind.CHILL)
+			if chill > 0:
+				chill_scale = maxf(0.0, 1.0 - CHILL_REDUCTION * float(chill))
+		for effect in card.data.effects:
+			events.append_array(_apply(effect, scale, chill_scale, examiner, player))
+		examiner_deck.play(card)
+		examiner_intent = null
+
+	events.append_array(_tick_decay(examiner, _enemy_data.enemy_name))
+	if not examiner.is_down():
+		events.append_array(_choose_intent())
+	return events
+
+
+## Picks the most expensive card the examiner can afford, and telegraphs it.
+func _choose_intent() -> Array:
+	if examiner_deck.hand.size() < 3:
+		examiner_deck.draw(3 - examiner_deck.hand.size())
+	var best: CardInstance = null
+	for card in examiner_deck.hand:
+		if card.data.cost > examiner.mana_per_turn:
+			continue
+		if best == null or card.data.cost > best.data.cost:
+			best = card
+	examiner_intent = best
+	if best == null:
+		return [{"type": "intent", "card": null, "text": "%s hesitates." % _enemy_data.enemy_name}]
+	return [
+		{
+			"type": "intent",
+			"card": best,
+			"text": "%s will cast %s" % [_enemy_data.enemy_name, best.data.card_name],
+		}
+	]
+
+
+func _tick_decay(who: Combatant, label: String) -> Array:
+	var decay := who.statuses.tick_end_of_turn()
+	if decay <= 0:
+		return []
+	who.take_damage(decay)
+	return [
+		{
+			"type": "damage",
+			"target": "player" if who == player else "examiner",
+			"amount": decay,
+			"text": "%s take %d from Decay" % [label, decay],
+		}
+	]
+
+
+func _deals_damage(data: CardData) -> bool:
+	for effect in data.effects:
+		if effect.get("kind", "") in [CardData.DAMAGE, CardData.BONUS_IF_CHILLED]:
+			return true
+	return false
+
+
+## Applies one effect. `scale` covers the school multiplier and Blot; `chill_scale`
+## applies to damage only.
+func _apply(
+	effect: Dictionary, scale: float, chill_scale: float, source: Combatant, target: Combatant
+) -> Array:
+	var kind: String = effect.get("kind", "")
+	var raw: int = int(effect.get("amount", 0))
+	var scaled := int(roundf(float(raw) * scale))
+	var target_label := "player" if target == player else "examiner"
+
+	match kind:
+		CardData.DAMAGE:
+			var dealt := int(roundf(float(scaled) * chill_scale))
+			target.take_damage(dealt)
+			return [
+				{"type": "damage", "target": target_label, "amount": dealt, "text": "%d damage" % dealt}
+			]
+		CardData.BONUS_IF_CHILLED:
+			if target.statuses.amount(Statuses.Kind.CHILL) <= 0:
+				return []
+			var bonus := int(roundf(float(scaled) * chill_scale))
+			target.take_damage(bonus)
+			return [
+				{"type": "damage", "target": target_label, "amount": bonus, "text": "+%d, chilled" % bonus}
+			]
+		CardData.BLOCK:
+			source.gain_block(scaled)
+			return [{"type": "block", "amount": scaled, "text": "+%d block" % scaled}]
+		CardData.BONUS_IF_WARD_PLAYED:
+			if not _ward_played_this_turn:
+				return []
+			source.gain_block(scaled)
+			return [{"type": "block", "amount": scaled, "text": "+%d block" % scaled}]
+		CardData.HEAL:
+			source.heal(scaled)
+			return [{"type": "heal", "amount": scaled, "text": "Healed %d" % scaled}]
+		CardData.SELF_DAMAGE:
+			# Paying, not being hit: bypasses block.
+			source.pay_hp(raw)
+			return [{"type": "pay_hp", "amount": raw, "text": "Paid %d hp" % raw}]
+		CardData.STATUS:
+			var status_kind = effect.get("status", Statuses.Kind.BURN)
+			target.statuses.add(status_kind, scaled)
+			return [
+				{
+					"type": "status",
+					"target": target_label,
+					"status": status_kind,
+					"amount": scaled,
+					"text": "+%d" % scaled,
+				}
+			]
+		CardData.DOUBLE_DECAY:
+			target.statuses.double_decay()
+			return [{"type": "status", "target": target_label, "text": "Decay doubled"}]
+		CardData.DRAW:
+			var events: Array = []
+			var deck := player_deck if source == player else examiner_deck
+			for card in deck.draw(raw):
+				events.append({"type": "draw", "card": card, "text": ""})
+			return events
+		CardData.MANA_NEXT:
+			if source == player:
+				_mana_bonus_next += raw
+			return [{"type": "mana", "amount": raw, "text": "+%d mana next turn" % raw}]
+		_:
+			return []
+
+
+func _check_end() -> Array:
+	if finished:
+		return []
+	if examiner.is_down():
+		finished = true
+		player_won = true
+		return [{"type": "battle_end", "won": true, "text": "You pass the examination."}]
+	if player.is_down():
+		finished = true
+		player_won = false
+		return [{"type": "battle_end", "won": false, "text": "You fail the examination."}]
+	return []
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS. If `warded school dealt 5` fails with 6, the rounding is wrong —
+`10 × 0.5` must round to 5, so scale before rounding, never round per effect twice.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(battle): add turn resolution and the event log"
+git push
+```
+
+---
+
+## Phase 3 — Grading, the draft, and the run
+
+### Task 10: `Grading` — the four terms
+
+**Files:**
+- Create: `scripts/core/Grading.gd`
+- Test: `tests/test_grading.gd`
+
+**Interfaces:**
+- Consumes: nothing (takes plain numbers).
+- Produces: `Grading.Grade` enum `S`, `A`, `B`, `C`, `F`; `Grading.letter(grade) -> String`; `Grading.score(params: Dictionary) -> Dictionary` returning `{"efficiency": float, "survival": float, "learning": float, "discovery": float, "total": float, "grade": Grade}`; `Grading.grade_for(total: float) -> Grade`; `Grading.draft_allowance(grade) -> int` returning `-1` for "all of it", else 5/3/1/0.
+
+`params` keys: `won: bool`, `turns_taken: int`, `par_turns: int`, `hp_end: int`,
+`hp_start: int`, `xp_banked: int`, `xp_par: int`, `weakness_known: bool`,
+`distinct_schools: int`. A loss is an F regardless of the terms.
+
+- [ ] **Step 1: Write the failing test `tests/test_grading.gd`**
+
+```gdscript
+extends TestCase
+
+## Each term in isolation, then the thresholds. Note that a passing suite here does
+## NOT prove S is reachable in real play — that is what tools/simulate.gd is for.
+
+
+func suite_name() -> String:
+	return "grading"
+
+
+func _params(overrides: Dictionary) -> Dictionary:
+	var p := {
+		"won": true,
+		"turns_taken": 10,
+		"par_turns": 5,
+		"hp_end": 0,
+		"hp_start": 60,
+		"xp_banked": 0,
+		"xp_par": 15,
+		"weakness_known": false,
+		"distinct_schools": 0,
+	}
+	for key in overrides:
+		p[key] = overrides[key]
+	return p
+
+
+func run() -> void:
+	# Efficiency: full marks at or under par, scaling down after.
+	almost(Grading.score(_params({"turns_taken": 5, "par_turns": 5}))["efficiency"], 25.0, "at par")
+	almost(Grading.score(_params({"turns_taken": 3, "par_turns": 5}))["efficiency"], 25.0, "under par caps")
+	almost(Grading.score(_params({"turns_taken": 10, "par_turns": 5}))["efficiency"], 12.5, "double par is half")
+
+	# Survival: proportional to hit points kept.
+	almost(Grading.score(_params({"hp_end": 60}))["survival"], 25.0, "untouched")
+	almost(Grading.score(_params({"hp_end": 30}))["survival"], 12.5, "half hp")
+	almost(Grading.score(_params({"hp_end": 0}))["survival"], 0.0, "no hp")
+
+	# Learning: scored against an authored par, NOT against deck size.
+	almost(Grading.score(_params({"xp_banked": 15, "xp_par": 15}))["learning"], 25.0, "at xp par")
+	almost(Grading.send if false else Grading.score(_params({"xp_banked": 30, "xp_par": 15}))["learning"], 25.0, "over par caps")
+	almost(Grading.score(_params({"xp_banked": 3, "xp_par": 15}))["learning"], 5.0, "a fifth of par")
+
+	# Discovery: 15 for knowing the weakness, 10 spread over the five schools.
+	almost(Grading.score(_params({"weakness_known": true}))["discovery"], 15.0, "weakness alone")
+	almost(Grading.score(_params({"distinct_schools": 5}))["discovery"], 10.0, "all schools alone")
+	almost(
+		Grading.score(_params({"weakness_known": true, "distinct_schools": 5}))["discovery"],
+		25.0,
+		"both is full marks"
+	)
+
+	# A perfect battle totals 100 and earns an S.
+	var perfect := Grading.score(
+		_params(
+			{
+				"turns_taken": 5,
+				"par_turns": 5,
+				"hp_end": 60,
+				"xp_banked": 15,
+				"xp_par": 15,
+				"weakness_known": true,
+				"distinct_schools": 5,
+			}
+		)
+	)
+	almost(perfect["total"], 100.0, "perfect total")
+	eq(perfect["grade"], Grading.Grade.S, "perfect is an S")
+
+	# Thresholds.
+	eq(Grading.grade_for(90.0), Grading.Grade.S, "90 is S")
+	eq(Grading.grade_for(89.9), Grading.Grade.A, "just under 90 is A")
+	eq(Grading.grade_for(75.0), Grading.Grade.A, "75 is A")
+	eq(Grading.grade_for(60.0), Grading.Grade.B, "60 is B")
+	eq(Grading.grade_for(40.0), Grading.Grade.C, "40 is C")
+	eq(Grading.grade_for(39.9), Grading.Grade.F, "under 40 is F")
+	eq(Grading.grade_for(0.0), Grading.Grade.F, "zero is F")
+
+	# Losing is an F however well it otherwise went.
+	var lost := Grading.score(
+		_params(
+			{
+				"won": false,
+				"turns_taken": 5,
+				"par_turns": 5,
+				"hp_end": 0,
+				"xp_banked": 15,
+				"weakness_known": true,
+				"distinct_schools": 5,
+			}
+		)
+	)
+	eq(lost["grade"], Grading.Grade.F, "a loss is an F")
+
+	# Letters and the draft allowance the grade buys.
+	eq(Grading.letter(Grading.Grade.S), "S", "S letter")
+	eq(Grading.draft_allowance(Grading.Grade.S), -1, "S takes the whole deck")
+	eq(Grading.draft_allowance(Grading.Grade.A), 5, "A takes five")
+	eq(Grading.draft_allowance(Grading.Grade.B), 3, "B takes three")
+	eq(Grading.draft_allowance(Grading.Grade.C), 1, "C takes one")
+	eq(Grading.draft_allowance(Grading.Grade.F), 0, "F takes nothing")
+
+	# Guards against division by zero in authored content.
+	almost(Grading.score(_params({"par_turns": 0}))["efficiency"], 25.0, "zero par does not divide")
+	almost(Grading.score(_params({"xp_par": 0}))["learning"], 25.0, "zero xp par does not divide")
+```
+
+Remove the accidental `Grading.send if false else` fragment when you copy this — it is
+a typo. The line should read
+`almost(Grading.score(_params({"xp_banked": 30, "xp_par": 15}))["learning"], 25.0, "over par caps")`.
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_grading.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Grading` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Grading.gd`**
+
+```gdscript
+class_name Grading
+extends RefCounted
+
+## Four terms of 25 points each. Efficiency and Survival reward winning cleanly;
+## Learning and Discovery reward the two mechanics the game is named for. Grading on
+## efficiency alone would make never learning the optimal strategy.
+
+enum Grade { S, A, B, C, F }
+
+const TERM_MAX := 25.0
+const DISCOVERY_WEAKNESS := 15.0
+const DISCOVERY_SCHOOLS := 10.0
+const SCHOOL_COUNT := 5.0
+
+const _LETTERS := {Grade.S: "S", Grade.A: "A", Grade.B: "B", Grade.C: "C", Grade.F: "F"}
+
+## -1 means "the whole deck".
+const _ALLOWANCE := {Grade.S: -1, Grade.A: 5, Grade.B: 3, Grade.C: 1, Grade.F: 0}
+
+
+static func letter(grade: Grade) -> String:
+	return _LETTERS.get(grade, "?")
+
+
+static func draft_allowance(grade: Grade) -> int:
+	return _ALLOWANCE.get(grade, 0)
+
+
+static func grade_for(total: float) -> Grade:
+	if total >= 90.0:
+		return Grade.S
+	if total >= 75.0:
+		return Grade.A
+	if total >= 60.0:
+		return Grade.B
+	if total >= 40.0:
+		return Grade.C
+	return Grade.F
+
+
+static func score(params: Dictionary) -> Dictionary:
+	var turns_taken := maxi(1, int(params.get("turns_taken", 1)))
+	var par_turns := int(params.get("par_turns", 0))
+	var efficiency := TERM_MAX
+	if par_turns > 0:
+		efficiency = TERM_MAX * clampf(float(par_turns) / float(turns_taken), 0.0, 1.0)
+
+	var hp_start := maxi(1, int(params.get("hp_start", 1)))
+	var hp_end := clampi(int(params.get("hp_end", 0)), 0, hp_start)
+	var survival := TERM_MAX * (float(hp_end) / float(hp_start))
+
+	var xp_par := int(params.get("xp_par", 0))
+	var learning := TERM_MAX
+	if xp_par > 0:
+		learning = TERM_MAX * clampf(
+			float(int(params.get("xp_banked", 0))) / float(xp_par), 0.0, 1.0
+		)
+
+	var discovery := 0.0
+	if bool(params.get("weakness_known", false)):
+		discovery += DISCOVERY_WEAKNESS
+	var distinct := clampi(int(params.get("distinct_schools", 0)), 0, int(SCHOOL_COUNT))
+	discovery += DISCOVERY_SCHOOLS * (float(distinct) / SCHOOL_COUNT)
+
+	var total := efficiency + survival + learning + discovery
+	var grade := Grade.F if not bool(params.get("won", false)) else grade_for(total)
+
+	return {
+		"efficiency": efficiency,
+		"survival": survival,
+		"learning": learning,
+		"discovery": discovery,
+		"total": total,
+		"grade": grade,
+	}
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(grading): score battles on speed, survival, learning and discovery"
+git push
+```
