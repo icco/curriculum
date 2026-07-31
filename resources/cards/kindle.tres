@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/conflagration.tres" id="1_3kwxy"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_iofpe"]
+
+[resource]
+script = ExtResource("2_iofpe")
+card_name = "Kindle"
+effects = Array[Dictionary]([{
+"amount": 3,
+"kind": "status",
+"status": 0
+}])
+evolved_card = ExtResource("1_3kwxy")
+art_id = "cards/kindle"

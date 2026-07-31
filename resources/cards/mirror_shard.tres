@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_fuip2"]
+
+[resource]
+script = ExtResource("1_fuip2")
+card_name = "Mirror Shard"
+school = 1
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 13,
+"kind": "damage"
+}, {
+"amount": 6,
+"kind": "bonus_if_chilled"
+}])
+art_id = "cards/glass_shard"

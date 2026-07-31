@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_pmiqg"]
+
+[resource]
+script = ExtResource("1_pmiqg")
+card_name = "Spilled Ledger"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "status",
+"status": 2
+}])
+art_id = "cards/ink_blot"

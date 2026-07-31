@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/aegis_ward.tres" id="1_2xxg3"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_2wpp2"]
+
+[resource]
+script = ExtResource("2_2wpp2")
+card_name = "Rimeward"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 5,
+"kind": "block"
+}])
+evolved_card = ExtResource("1_2xxg3")
+art_id = "cards/rimeward"
+retain = true

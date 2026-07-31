@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/necrology_thesis.tres" id="1_m5pf7"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_0c1q3"]
+
+[resource]
+script = ExtResource("2_0c1q3")
+card_name = "Necrology Note"
+school = 3
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 5,
+"kind": "damage"
+}, {
+"amount": 5,
+"kind": "status",
+"status": 3
+}])
+evolved_card = ExtResource("1_m5pf7")
+art_id = "cards/necrology_note"

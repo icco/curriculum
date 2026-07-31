@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_w8065"]
+
+[resource]
+script = ExtResource("1_w8065")
+card_name = "All-Nighter"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "mana_next"
+}])
+art_id = "cards/cram"

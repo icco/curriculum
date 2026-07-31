@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/copious_marginalia.tres" id="1_g8jt6"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_bism6"]
+
+[resource]
+script = ExtResource("2_bism6")
+card_name = "Marginalia"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "draw"
+}])
+evolved_card = ExtResource("1_g8jt6")
+art_id = "cards/marginalia"

@@ -43,8 +43,14 @@ func run() -> void:
 	# load() is cache-keyed by path, so a second load() while `spark` is still in
 	# scope just hands back the same object — it cannot catch XP having been written
 	# to disk. Read the file as text instead, so this actually inspects the artifact.
+	#
+	# card_name is the needle, not xp_to_evolve: resources/cards/*.tres are now written
+	# by tools/generate_content.gd via ResourceSaver, which omits any @export property
+	# equal to its script default — xp_to_evolve's value (5) matches CardData's
+	# default, so that field never reaches disk at all. card_name has no such default
+	# to collide with, so it is a reliable "this file has real content" canary.
 	var raw := FileAccess.get_file_as_string("res://resources/cards/spark.tres")
-	check(raw.contains("xp_to_evolve"), "sanity: needle finds a real field")
+	check(raw.contains("card_name = "), "sanity: needle finds a real field")
 	check(not raw.contains("xp = "), "on-disk resource carries no stray xp field")
 
 	# Display helper.

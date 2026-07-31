@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_hvvw4"]
+
+[resource]
+script = ExtResource("1_hvvw4")
+card_name = "Still the Hall"
+school = 1
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 3,
+"kind": "status",
+"status": 1
+}, {
+"amount": 10,
+"kind": "block"
+}])
+art_id = "cards/numb_the_hall"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/restorative_study.tres" id="1_rqy45"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_c1jnc"]
+
+[resource]
+script = ExtResource("2_c1jnc")
+card_name = "Study Break"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 8,
+"kind": "heal"
+}])
+evolved_card = ExtResource("1_rqy45")
+art_id = "cards/study_break"

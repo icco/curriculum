@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/valedictory_sigil.tres" id="1_lhw3q"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_5v42v"]
+
+[resource]
+script = ExtResource("2_5v42v")
+card_name = "Honours Sigil"
+school = 4
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 18,
+"kind": "block"
+}, {
+"amount": 6,
+"kind": "heal"
+}])
+evolved_card = ExtResource("1_lhw3q")
+art_id = "cards/honours_sigil"

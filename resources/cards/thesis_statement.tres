@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/defended_thesis.tres" id="1_pudjd"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_k3mia"]
+
+[resource]
+script = ExtResource("2_k3mia")
+card_name = "Thesis Statement"
+school = 2
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 8,
+"kind": "damage"
+}, {
+"amount": 3,
+"kind": "draw"
+}])
+evolved_card = ExtResource("1_pudjd")
+art_id = "cards/thesis_statement"

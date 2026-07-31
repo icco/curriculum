@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_4k4ac"]
+
+[resource]
+script = ExtResource("1_4k4ac")
+card_name = "Cite Chapter & Verse"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 6,
+"kind": "damage"
+}, {
+"amount": 2,
+"kind": "draw"
+}])
+art_id = "cards/cite_source"

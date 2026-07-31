@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_mk7us"]
+
+[resource]
+script = ExtResource("1_mk7us")
+card_name = "Valedictory Sigil"
+school = 4
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 24,
+"kind": "block"
+}, {
+"amount": 10,
+"kind": "heal"
+}])
+art_id = "cards/honours_sigil"

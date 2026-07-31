@@ -1,15 +1,12 @@
-[gd_resource type="Resource" script_class="CardData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_866df"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("1_866df")
 card_name = "Ember Lance"
-school = 0
-cost = 1
-effects = [{"amount": 10, "kind": "damage"}]
-xp_to_evolve = 5
-evolved_card = null
+effects = Array[Dictionary]([{
+"amount": 10,
+"kind": "damage"
+}])
 art_id = "cards/spark"
-exhaust = false
-retain = false

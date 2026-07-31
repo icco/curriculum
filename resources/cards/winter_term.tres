@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/long_winter.tres" id="1_eukju"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_2yh83"]
+
+[resource]
+script = ExtResource("2_2yh83")
+card_name = "Winter Term"
+school = 1
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 12,
+"kind": "damage"
+}, {
+"amount": 4,
+"kind": "status",
+"status": 1
+}])
+evolved_card = ExtResource("1_eukju")
+art_id = "cards/winter_term"
