@@ -42,7 +42,18 @@ func _process(_delta: float) -> bool:
 			printerr("FAIL  could not load suite %s" % path)
 			total_failures += 1
 			continue
+		# A suite that fails to compile loads as a GDScript that cannot be
+		# instantiated; calling new() on it returns null and every later call on the
+		# result errors once per frame without ever reaching quit().
+		if not script.can_instantiate():
+			printerr("FAIL  suite %s did not compile" % path)
+			total_failures += 1
+			continue
 		var suite: TestCase = script.new()
+		if suite == null:
+			printerr("FAIL  could not instantiate suite %s" % path)
+			total_failures += 1
+			continue
 		suite.run()
 		total_checks += suite.checks
 		for failure in suite.failures:

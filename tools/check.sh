@@ -2,15 +2,48 @@
 # The gate. Refreshes Godot's script-class cache, runs the headless suite, and fails on
 # engine errors as well as on failed assertions — Godot exits 0 while printing
 # SCRIPT ERROR every frame, so the exit code alone proves nothing.
+#
+# Every Godot invocation is time-boxed. A script that fails to COMPILE makes
+# `--import` hang forever rather than erroring out, which in CI burns the whole job
+# timeout and reports nothing useful. A hang has to become a failure.
 set -uo pipefail
 
 GODOT="${GODOT:-godot}"
+IMPORT_TIMEOUT="${IMPORT_TIMEOUT:-180}"
+TEST_TIMEOUT="${TEST_TIMEOUT:-300}"
+
 cd "$(dirname "$0")/.."
 
 if ! command -v "$GODOT" >/dev/null 2>&1 && [ ! -x "$GODOT" ]; then
   echo "check: godot not found (set \$GODOT)" >&2
   exit 127
 fi
+
+# `timeout` is GNU coreutils: present on CI's ubuntu runners, absent from a stock
+# macOS. Fall back to a background-and-kill shim so behaviour matches either way.
+# Exit code 124 means the command was killed for running too long.
+run_limited() {
+  local limit="$1"
+  shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$limit" "$@"
+    return $?
+  fi
+  "$@" &
+  local pid=$!
+  (
+    sleep "$limit"
+    kill -9 "$pid" 2>/dev/null && exit 0
+  ) &
+  local watcher=$!
+  wait "$pid" 2>/dev/null
+  local status=$?
+  kill "$watcher" 2>/dev/null
+  wait "$watcher" 2>/dev/null
+  # 137 is SIGKILL, which here only comes from the watcher firing.
+  [ "$status" -eq 137 ] && return 124
+  return "$status"
+}
 
 # class_name globals are unresolvable until this has built
 # .godot/global_script_class_cache.cfg at least once.
@@ -19,16 +52,31 @@ fi
 # tools/generate_*.gd, and a bad ext_resource path or an unparseable typed array is
 # reported HERE. Swallowing it turns a broken resource into a null load and an
 # assertion failure somewhere unrelated.
-import_output=$("$GODOT" --headless --import --path . 2>&1)
+#
+# Note the limit of this check: --import scans assets but does not eagerly load an
+# unreferenced .tres, so an orphaned broken resource slips past it. test_content walks
+# resources/ for exactly that reason.
+import_output=$(run_limited "$IMPORT_TIMEOUT" "$GODOT" --headless --import --path . 2>&1)
+import_status=$?
+if [ "$import_status" -eq 124 ]; then
+  echo "$import_output" >&2
+  echo "check: import hung for ${IMPORT_TIMEOUT}s — a script almost certainly failed to compile" >&2
+  exit 1
+fi
 if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_output"; then
   echo "$import_output" >&2
   echo "check: import reported errors" >&2
   exit 1
 fi
 
-output=$("$GODOT" --headless --path . --script tests/run_tests.gd 2>&1)
+output=$(run_limited "$TEST_TIMEOUT" "$GODOT" --headless --path . --script tests/run_tests.gd 2>&1)
 status=$?
 echo "$output"
+
+if [ "$status" -eq 124 ]; then
+  echo "check: test run hung for ${TEST_TIMEOUT}s" >&2
+  exit 1
+fi
 
 if grep -qE 'SCRIPT ERROR|Parse Error|Cannot open file|not declared in the current scope' <<<"$output"; then
   echo "check: engine reported script errors" >&2
