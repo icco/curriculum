@@ -88,8 +88,9 @@ func validate() -> Array:
 
 	# Rule 2: every non-gate examiner must appear in at least two courses, or its
 	# Bestiary entry -- knowledge good against that type for the rest of the run --
-	# is never cashed in. Gates (and the final, which is also flagged as a gate) are
-	# one-off encounters by nature and are exempt.
+	# is never cashed in. Gates and the final are one-off encounters by nature and
+	# are exempt, each on its own terms (course.examiner.is_gate / course.is_final),
+	# not because content happens to also flag the final's examiner as a gate.
 	var uses := {}
 	var gates := {}
 	for course in courses:
@@ -98,7 +99,7 @@ func validate() -> Array:
 			continue
 		var name: String = course.examiner.enemy_name
 		uses[name] = int(uses.get(name, 0)) + 1
-		if course.examiner.is_gate:
+		if course.examiner.is_gate or course.is_final:
 			gates[name] = true
 	for name in uses:
 		if gates.has(name):

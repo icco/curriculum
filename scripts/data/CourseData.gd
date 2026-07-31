@@ -18,6 +18,7 @@ extends Resource
 @export var guaranteed_card_drop: CardData
 ## Honors nodes need an A or better on a prerequisite to open, instead of a plain pass.
 @export var is_honors: bool = false
-## The course this honors node branches from, for map rendering. Availability itself
-## is driven by `prerequisites`, not this field.
-@export var honors_of: CourseData
+## The Comprehensive Exam. Passing it wins the run; it is also exempt (alongside
+## gates) from the "every non-gate examiner appears at least twice" rule, being a
+## one-off encounter by nature.
+@export var is_final: bool = false

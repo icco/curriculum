@@ -42,6 +42,7 @@ func run() -> void:
 	_test_validate_examiner_repeat_rule()
 	_test_validate_sound_catalog()
 	_test_validate_gate_exemption()
+	_test_validate_final_exemption()
 
 
 func _test_availability_and_grading() -> void:
@@ -223,3 +224,28 @@ func _test_validate_gate_exemption() -> void:
 	var lonely := _enemy("Lonely")
 	var non_gate_once := Catalog.new([_course("Solo", 1, lonely, [])])
 	eq(non_gate_once.validate().size(), 1, "a non-gate examiner used once is a problem")
+
+
+## The final (the Comprehensive Exam) is exempt from the repeat rule on its own
+## terms -- via CourseData.is_final -- not merely because content happens to also
+## flag its examiner as a gate. Tested both ways, mirroring the gate exemption above:
+## a non-gate examiner used once in a course flagged is_final produces no problem,
+## while the same examiner used once in an otherwise-identical non-final course does.
+func _test_validate_final_exemption() -> void:
+	var fresh := CourseData.new()
+	eq(fresh.is_final, false, "is_final defaults to false")
+
+	var examiner := _enemy("Rector")
+	var final_course := _course("Comprehensive Exam", 3, examiner, [])
+	final_course.is_final = true
+	var with_final := Catalog.new([final_course])
+	eq(with_final.validate().size(), 0, "the final's examiner used once is not a problem")
+
+	var same_examiner_not_final := _enemy("Rector")
+	var non_final_course := _course("Ordinary 301", 3, same_examiner_not_final, [])
+	var without_final := Catalog.new([non_final_course])
+	eq(
+		without_final.validate().size(),
+		1,
+		"the same examiner used once in a non-final course is still a problem"
+	)
