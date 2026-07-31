@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/cards/ember_lance.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+card_name = "Spark"
+school = 0
+cost = 1
+effects = [{"amount": 6, "kind": "damage"}]
+xp_to_evolve = 5
+evolved_card = ExtResource("2")
+art_id = "cards/spark"
+exhaust = false
+retain = false
