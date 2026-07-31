@@ -2411,7 +2411,7 @@ func run() -> void:
 
 	# Learning: scored against an authored par, NOT against deck size.
 	almost(Grading.score(_params({"xp_banked": 15, "xp_par": 15}))["learning"], 25.0, "at xp par")
-	almost(Grading.send if false else Grading.score(_params({"xp_banked": 30, "xp_par": 15}))["learning"], 25.0, "over par caps")
+	almost(Grading.score(_params({"xp_banked": 30, "xp_par": 15}))["learning"], 25.0, "over par caps")
 	almost(Grading.score(_params({"xp_banked": 3, "xp_par": 15}))["learning"], 5.0, "a fifth of par")
 
 	# Discovery: 15 for knowing the weakness, 10 spread over the five schools.
@@ -2477,10 +2477,6 @@ func run() -> void:
 	almost(Grading.score(_params({"par_turns": 0}))["efficiency"], 25.0, "zero par does not divide")
 	almost(Grading.score(_params({"xp_par": 0}))["learning"], 25.0, "zero xp par does not divide")
 ```
-
-Remove the accidental `Grading.send if false else` fragment when you copy this — it is
-a typo. The line should read
-`almost(Grading.score(_params({"xp_banked": 30, "xp_par": 15}))["learning"], 25.0, "over par caps")`.
 
 - [ ] **Step 2: Register the suite and watch it fail**
 
@@ -2580,5 +2576,1126 @@ Expected: PASS.
 ```bash
 git add -A
 git commit -m "feat(grading): score battles on speed, survival, learning and discovery"
+git push
+```
+
+---
+
+### Task 11: `Draft` — Registration and the deck cap
+
+**Files:**
+- Create: `scripts/core/Draft.gd`
+- Test: `tests/test_draft.gd`
+
+**Interfaces:**
+- Consumes: `CardInstance` (4), `CardData` (3), `Grading` (10).
+- Produces: `Draft.cap_for(courses_passed: int) -> int` implementing `min(10 + courses_passed, 16)`; `Draft.new(own: Array, examiner_deck: Array[CardData], syllabus_card: CardData, grade)`; `var own: Array` (CardInstance), `var offered: Array` (CardInstance, freshly created at XP 0); `cap: int` set by the caller; `keep(selection: Array) -> Array` returning the new run deck, or `[]` if the selection is not exactly `cap` cards drawn from `own + offered`.
+
+The syllabus card is always offered, whatever the grade. Cutting a card discards its
+`CardInstance`, and with it the XP — that is the decision the screen exists to pose.
+
+- [ ] **Step 1: Write the failing test `tests/test_draft.gd`**
+
+```gdscript
+extends TestCase
+
+
+func suite_name() -> String:
+	return "draft"
+
+
+func _data(name: String) -> CardData:
+	var d := CardData.new()
+	d.card_name = name
+	return d
+
+
+func _own(n: int) -> Array:
+	var out := []
+	for i in n:
+		out.append(CardInstance.new(_data("own%d" % i)))
+	return out
+
+
+func _pool(n: int) -> Array[CardData]:
+	var out: Array[CardData] = []
+	for i in n:
+		out.append(_data("theirs%d" % i))
+	return out
+
+
+func run() -> void:
+	# The cap grows per COURSE, not per tier, so the very first Registration can
+	# already add a card rather than only swapping.
+	eq(Draft.cap_for(0), 10, "starting cap is ten")
+	eq(Draft.cap_for(1), 11, "grows after one course")
+	eq(Draft.cap_for(5), 15, "grows to fifteen")
+	eq(Draft.cap_for(6), 16, "saturates at sixteen")
+	eq(Draft.cap_for(99), 16, "never exceeds sixteen")
+
+	# Grade gates how much of their deck is offered.
+	var syllabus := _data("syllabus")
+	var s_draft := Draft.new(_own(10), _pool(8), syllabus, Grading.Grade.S)
+	eq(s_draft.offered.size(), 9, "S offers the whole deck plus the syllabus card")
+	var a_draft := Draft.new(_own(10), _pool(8), syllabus, Grading.Grade.A)
+	eq(a_draft.offered.size(), 6, "A offers five plus the syllabus card")
+	var b_draft := Draft.new(_own(10), _pool(8), syllabus, Grading.Grade.B)
+	eq(b_draft.offered.size(), 4, "B offers three plus the syllabus card")
+	var c_draft := Draft.new(_own(10), _pool(8), syllabus, Grading.Grade.C)
+	eq(c_draft.offered.size(), 2, "C offers one plus the syllabus card")
+	var f_draft := Draft.new(_own(10), _pool(8), syllabus, Grading.Grade.F)
+	eq(f_draft.offered.size(), 1, "F still offers the syllabus card")
+
+	# An F offers only the syllabus card, and it is the syllabus card.
+	eq(f_draft.offered[0].data.card_name, "syllabus", "the syllabus card is always there")
+
+	# Offered cards arrive untrained.
+	eq(s_draft.offered[0].xp, 0, "copied cards start at zero xp")
+
+	# Asking for a deck of exactly the cap succeeds.
+	var draft := Draft.new(_own(10), _pool(4), syllabus, Grading.Grade.S)
+	draft.cap = 11
+	var selection := draft.own.duplicate()
+	selection.append(draft.offered[0])
+	var kept := draft.keep(selection)
+	eq(kept.size(), 11, "kept eleven")
+
+	# Too many or too few is refused rather than silently truncated.
+	eq(draft.keep(draft.own.duplicate()).size(), 0, "ten is not eleven")
+	var too_many := draft.own.duplicate()
+	too_many.append_array(draft.offered)
+	eq(draft.keep(too_many).size(), 0, "more than the cap is refused")
+
+	# A card that came from neither list is refused.
+	var smuggled := draft.own.duplicate()
+	smuggled[0] = CardInstance.new(_data("smuggled"))
+	eq(draft.keep(smuggled).size(), 0, "cards must come from the pool")
+
+	# Cutting a trained card destroys its XP — the point of the whole screen.
+	var trained := Draft.new(_own(2), _pool(1), syllabus, Grading.Grade.S)
+	trained.cap = 2
+	trained.own[0].gain_xp()
+	trained.own[0].gain_xp()
+	eq(trained.own[0].xp, 2, "trained to two")
+	var cut := trained.keep([trained.own[1], trained.offered[0]])
+	eq(cut.size(), 2, "kept two")
+	for card in cut:
+		neq(card.data.card_name, "own0", "the trained card is gone")
+
+	# Kept cards keep their XP.
+	var retained := Draft.new(_own(2), _pool(0), syllabus, Grading.Grade.F)
+	retained.cap = 2
+	retained.own[0].gain_xp()
+	var kept_trained := retained.keep([retained.own[0], retained.own[1]])
+	eq(kept_trained.size(), 2, "kept both")
+	var found_xp := 0
+	for card in kept_trained:
+		found_xp += card.xp
+	eq(found_xp, 1, "the earned xp survived")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_draft.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Draft` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Draft.gd`**
+
+```gdscript
+class_name Draft
+extends RefCounted
+
+## Registration. Pools the player's deck with what their grade lets them copy off the
+## defeated examiner, then keeps exactly `cap` cards.
+
+const BASE_CAP := 10
+const MAX_CAP := 16
+
+var own: Array = []  ## Array[CardInstance] — the surviving run deck
+var offered: Array = []  ## Array[CardInstance] — fresh copies, XP 0
+var cap := BASE_CAP
+
+
+## Grows per course passed rather than per tier: a per-tier cap equals the starting
+## deck when the first Registration opens, leaving nothing to do.
+static func cap_for(courses_passed: int) -> int:
+	return mini(BASE_CAP + maxi(0, courses_passed), MAX_CAP)
+
+
+func _init(own_cards: Array, examiner_deck: Array, syllabus_card: CardData, grade) -> void:
+	own = own_cards.duplicate()
+
+	# The syllabus card is always available, so a course always teaches something.
+	if syllabus_card != null:
+		offered.append(CardInstance.new(syllabus_card))
+
+	var allowance: int = Grading.draft_allowance(grade)
+	if allowance == 0:
+		return
+
+	# Distinct cards first, so a deck of four identical cards does not consume the
+	# whole allowance on duplicates.
+	var seen := {}
+	var ordered: Array = []
+	for card in examiner_deck:
+		if not seen.has(card):
+			seen[card] = true
+			ordered.append(card)
+	for card in examiner_deck:
+		ordered.append(card)
+
+	var taken := 0
+	for card in ordered:
+		if allowance >= 0 and taken >= allowance:
+			break
+		offered.append(CardInstance.new(card))
+		taken += 1
+		if allowance < 0 and taken >= examiner_deck.size():
+			break
+
+
+## Returns the new run deck, or an empty array if the selection is illegal.
+func keep(selection: Array) -> Array:
+	if selection.size() != cap:
+		return []
+	var legal := {}
+	for card in own:
+		legal[card] = true
+	for card in offered:
+		legal[card] = true
+	var chosen := {}
+	for card in selection:
+		if not legal.has(card) or chosen.has(card):
+			return []
+		chosen[card] = true
+	return selection.duplicate()
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(draft): add registration with a per-course deck cap"
+git push
+```
+
+---
+
+### Task 12: `CourseData` and `Catalog`
+
+**Files:**
+- Create: `scripts/data/CourseData.gd`, `scripts/core/Catalog.gd`
+- Test: `tests/test_catalog.gd`
+
+**Interfaces:**
+- Consumes: `EnemyData` (7), `CardData` (3), `Grading` (10).
+- Produces: `CourseData` with `course_name: String`, `tier: int`, `prerequisites: Array[CourseData]`, `prerequisites_required: int` (0 means all), `examiner: EnemyData`, `par_turns: int`, `xp_par: int`, `guaranteed_card_drop: CardData`, `is_honors: bool`, `honors_of: CourseData`; and `Catalog.new(courses: Array)` with `available(grades: Dictionary) -> Array`, `is_available(course, grades) -> bool`, `is_passed(course, grades) -> bool`, `revealed(grades) -> Array`, `validate() -> Array` returning a list of problem strings.
+
+`grades` maps course name → `Grading.Grade`. A course is passed at C or better.
+`validate()` asserts the two structural rules: no honors node is a prerequisite of any
+required node, and every non-gate examiner is used by at least two courses.
+
+- [ ] **Step 1: Write the failing test `tests/test_catalog.gd`**
+
+```gdscript
+extends TestCase
+
+
+func suite_name() -> String:
+	return "catalog"
+
+
+func _enemy(name: String, gate := false) -> EnemyData:
+	var e := EnemyData.new()
+	e.enemy_name = name
+	e.is_gate = gate
+	return e
+
+
+func _course(name: String, tier: int, examiner: EnemyData, prereqs: Array, required := 0, honors := false) -> CourseData:
+	var c := CourseData.new()
+	c.course_name = name
+	c.tier = tier
+	c.examiner = examiner
+	var typed: Array[CourseData] = []
+	for p in prereqs:
+		typed.append(p)
+	c.prerequisites = typed
+	c.prerequisites_required = required
+	c.is_honors = honors
+	c.par_turns = 5
+	c.xp_par = 15
+	return c
+
+
+func run() -> void:
+	var novice := _enemy("Novice")
+	var monitor := _enemy("Hall Monitor")
+	var proctor := _enemy("Proctor", true)
+
+	var arcana := _course("Basic Arcana 101", 1, novice, [])
+	var wardcraft := _course("Wardcraft 101", 1, monitor, [])
+	var tutorial := _course("Tutorial 150", 1, monitor, [arcana], 0, true)
+	# "any two of" is what prerequisites_required expresses.
+	var inspection := _course("Proctor's Inspection", 1, proctor, [arcana, wardcraft], 2)
+	var thesis := _course("Thesis 301", 3, novice, [inspection])
+
+	var catalog := Catalog.new([arcana, wardcraft, tutorial, inspection, thesis])
+
+	# With no grades, only the courses with no prerequisites are open.
+	var open := catalog.available({})
+	eq(open.size(), 2, "two entry courses")
+
+	# A C is a pass; an F is not.
+	eq(catalog.is_passed(arcana, {"Basic Arcana 101": Grading.Grade.C}), true, "C passes")
+	eq(catalog.is_passed(arcana, {"Basic Arcana 101": Grading.Grade.F}), false, "F does not pass")
+	eq(catalog.is_passed(arcana, {}), false, "unattempted is not passed")
+
+	# "Any two of" needs two, not one.
+	var one_pass := {"Basic Arcana 101": Grading.Grade.C}
+	eq(catalog.is_available(inspection, one_pass), false, "one pass is not enough")
+	var two_pass := {"Basic Arcana 101": Grading.Grade.C, "Wardcraft 101": Grading.Grade.B}
+	eq(catalog.is_available(inspection, two_pass), true, "two passes opens the gate")
+
+	# An honors node needs an A or better on its parent, and stays hidden below that.
+	eq(catalog.is_available(tutorial, {"Basic Arcana 101": Grading.Grade.B}), false, "B hides honors")
+	eq(catalog.is_available(tutorial, {"Basic Arcana 101": Grading.Grade.A}), true, "A reveals honors")
+	eq(catalog.is_available(tutorial, {"Basic Arcana 101": Grading.Grade.S}), true, "S reveals honors")
+	var revealed := catalog.revealed({"Basic Arcana 101": Grading.Grade.S})
+	var names := []
+	for course in revealed:
+		names.append(course.course_name)
+	check(names.has("Tutorial 150"), "honors node revealed")
+
+	# A course already attempted is not offered again, pass or fail.
+	eq(catalog.is_available(arcana, {"Basic Arcana 101": Grading.Grade.F}), false, "no retakes")
+
+	# validate() catches an honors node used as a required prerequisite, which would
+	# make the run unwinnable for a player who never scores an A.
+	var blocked := _course("Blocked 301", 3, novice, [tutorial])
+	var bad := Catalog.new([arcana, wardcraft, tutorial, blocked])
+	var problems := bad.validate()
+	var found := false
+	for problem in problems:
+		if problem.contains("honors"):
+			found = true
+	eq(found, true, "flagged the honors prerequisite")
+
+	# validate() also catches an examiner the player only ever meets once, which
+	# makes its Bestiary entry worthless.
+	var lonely := _enemy("Lonely")
+	var only := _course("Only 101", 1, lonely, [])
+	var thin := Catalog.new([only])
+	var thin_problems := thin.validate()
+	var saw_once := false
+	for problem in thin_problems:
+		if problem.contains("Lonely"):
+			saw_once = true
+	eq(saw_once, true, "flagged the single-use examiner")
+
+	# Gates are exempt from the repeat rule.
+	var gate_only := Catalog.new([_course("Gate", 1, proctor, [])])
+	for problem in gate_only.validate():
+		check(not problem.contains("Proctor"), "gates are exempt from the repeat rule")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_catalog.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `CourseData` is not declared.
+
+- [ ] **Step 3: Write `scripts/data/CourseData.gd`**
+
+```gdscript
+class_name CourseData
+extends Resource
+
+## One node on the Course Catalog. Self-referential via `prerequisites`, which is
+## legal for a Resource.
+
+@export var course_name: String = ""
+@export var tier: int = 1
+@export var prerequisites: Array[CourseData] = []
+## How many prerequisites are needed. 0 means all of them.
+@export var prerequisites_required: int = 0
+@export var examiner: EnemyData
+@export var par_turns: int = 5
+## Cards a player can expect to play in a par-length battle; the Learning term
+## scores against this rather than against deck size.
+@export var xp_par: int = 15
+@export var guaranteed_card_drop: CardData
+@export var is_honors: bool = false
+@export var is_final: bool = false
+```
+
+- [ ] **Step 4: Write `scripts/core/Catalog.gd`**
+
+```gdscript
+class_name Catalog
+extends RefCounted
+
+## Course availability. `grades` maps course name -> Grading.Grade.
+
+var courses: Array = []
+
+
+func _init(course_list: Array) -> void:
+	courses = course_list.duplicate()
+
+
+## A pass is a C or better. An F is an attempt, not a pass.
+func is_passed(course, grades: Dictionary) -> bool:
+	if course == null or not grades.has(course.course_name):
+		return false
+	return grades[course.course_name] != Grading.Grade.F
+
+
+func is_attempted(course, grades: Dictionary) -> bool:
+	return course != null and grades.has(course.course_name)
+
+
+## Honors nodes need an A or better on a prerequisite; everything else needs a pass.
+func is_available(course, grades: Dictionary) -> bool:
+	if course == null or is_attempted(course, grades):
+		return false
+	if course.prerequisites.is_empty():
+		return true
+
+	var threshold: Array = (
+		[Grading.Grade.S, Grading.Grade.A]
+		if course.is_honors
+		else [Grading.Grade.S, Grading.Grade.A, Grading.Grade.B, Grading.Grade.C]
+	)
+	var met := 0
+	for prerequisite in course.prerequisites:
+		if grades.has(prerequisite.course_name) and grades[prerequisite.course_name] in threshold:
+			met += 1
+
+	var required: int = course.prerequisites_required
+	if required <= 0:
+		required = course.prerequisites.size()
+	return met >= required
+
+
+func available(grades: Dictionary) -> Array:
+	var out: Array = []
+	for course in courses:
+		if is_available(course, grades):
+			out.append(course)
+	return out
+
+
+## Available courses plus already-attempted ones, for drawing the map.
+func revealed(grades: Dictionary) -> Array:
+	var out: Array = []
+	for course in courses:
+		if is_available(course, grades) or is_attempted(course, grades):
+			out.append(course)
+	return out
+
+
+## Structural rules the content must satisfy. Returns a list of problems; an empty
+## list means the catalog is sound.
+func validate() -> Array:
+	var problems: Array = []
+
+	# Rule 1: no honors node may gate a required node, or a player who never scores
+	# an A hits a dead end and two-F permadeath makes the run unwinnable.
+	for course in courses:
+		if course.is_honors:
+			continue
+		for prerequisite in course.prerequisites:
+			if prerequisite.is_honors:
+				problems.append(
+					(
+						"%s requires the honors course %s"
+						% [course.course_name, prerequisite.course_name]
+					)
+				)
+
+	# Rule 2: every non-gate examiner must appear at least twice, or its Bestiary
+	# entry can never be cashed in.
+	var uses := {}
+	var gates := {}
+	for course in courses:
+		if course.examiner == null:
+			problems.append("%s has no examiner" % course.course_name)
+			continue
+		var name: String = course.examiner.enemy_name
+		uses[name] = int(uses.get(name, 0)) + 1
+		if course.examiner.is_gate or course.is_final:
+			gates[name] = true
+	for name in uses:
+		if gates.has(name):
+			continue
+		if int(uses[name]) < 2:
+			problems.append(
+				"examiner %s is used by only %d course(s)" % [name, int(uses[name])]
+			)
+
+	return problems
+```
+
+- [ ] **Step 5: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(catalog): add courses, prerequisites and structural validation"
+git push
+```
+
+---
+
+### Task 13: `Run` — strikes, the F-on-zero-HP rule, and expulsion
+
+**Files:**
+- Create: `scripts/core/Run.gd`
+- Test: `tests/test_run.gd`
+
+**Interfaces:**
+- Consumes: `CardInstance` (4), `Bestiary` (8), `Grading` (10), `Draft` (11).
+- Produces: `Run.STARTING_HP == 60`, `Run.MAX_STRIKES == 2`; `Run.new(starting_deck: Array)`; `var hp`, `max_hp`, `strikes`, `grades: Dictionary`, `deck: Array`, `bestiary: Bestiary`, `courses_passed: int`, `expelled: bool`, `won: bool`; `deck_cap() -> int`; `record_result(course, grade, hp_end: int) -> Dictionary`; `is_over() -> bool`.
+
+`record_result` is where §6.1 lives: an F restores HP to full, because failing an exam
+is not dying. Two Fs is expulsion.
+
+- [ ] **Step 1: Write the failing test `tests/test_run.gd`**
+
+```gdscript
+extends TestCase
+
+
+func suite_name() -> String:
+	return "run"
+
+
+func _course(name: String, final := false) -> CourseData:
+	var c := CourseData.new()
+	c.course_name = name
+	c.is_final = final
+	return c
+
+
+func _deck(n: int) -> Array:
+	var out := []
+	for i in n:
+		var d := CardData.new()
+		d.card_name = "c%d" % i
+		out.append(CardInstance.new(d))
+	return out
+
+
+func run() -> void:
+	var r := Run.new(_deck(10))
+	eq(r.hp, 60, "starts at sixty")
+	eq(r.strikes, 0, "no strikes")
+	eq(r.deck_cap(), 10, "starting cap")
+	eq(r.is_over(), false, "not over")
+
+	# Passing banks the grade, counts the course, and grows the cap.
+	r.record_result(_course("Basic Arcana 101"), Grading.Grade.B, 45)
+	eq(r.grades["Basic Arcana 101"], Grading.Grade.B, "grade recorded")
+	eq(r.courses_passed, 1, "one course passed")
+	eq(r.deck_cap(), 11, "cap grew")
+	eq(r.hp, 45, "hp carried over from the battle")
+	eq(r.strikes, 0, "a pass is not a strike")
+
+	# An F is a strike, does NOT count as a pass, and restores hit points: failing an
+	# exam is not dying, so the cap does not grow and the run continues.
+	var first_f := r.record_result(_course("Cantrips 101"), Grading.Grade.F, 0)
+	eq(r.strikes, 1, "one strike")
+	eq(r.courses_passed, 1, "an F is not a pass")
+	eq(r.deck_cap(), 11, "cap did not grow on a failure")
+	eq(r.hp, 60, "hit points restored after a failure")
+	eq(r.expelled, false, "one F is survivable")
+	eq(r.is_over(), false, "run continues")
+	eq(first_f["strike"], true, "reported the strike")
+	eq(first_f["expelled"], false, "not expelled yet")
+
+	# The second F is expulsion — the only death condition in the game.
+	var second_f := r.record_result(_course("Wardcraft 101"), Grading.Grade.F, 0)
+	eq(r.strikes, 2, "two strikes")
+	eq(r.expelled, true, "expelled")
+	eq(r.is_over(), true, "run over")
+	eq(second_f["expelled"], true, "reported the expulsion")
+
+	# Passing the final wins the run.
+	var w := Run.new(_deck(10))
+	w.record_result(_course("Comprehensive Exam", true), Grading.Grade.A, 20)
+	eq(w.won, true, "passing the final wins")
+	eq(w.is_over(), true, "run over on a win")
+
+	# Failing the final is a strike like any other, not an automatic loss.
+	var f := Run.new(_deck(10))
+	f.record_result(_course("Comprehensive Exam", true), Grading.Grade.F, 0)
+	eq(f.won, false, "failing the final does not win")
+	eq(f.strikes, 1, "one strike")
+	eq(f.is_over(), false, "and the run goes on")
+
+	# The cap saturates at sixteen however many courses are passed.
+	var long_run := Run.new(_deck(10))
+	for i in 12:
+		long_run.record_result(_course("Course %d" % i), Grading.Grade.C, 60)
+	eq(long_run.deck_cap(), 16, "cap saturates")
+
+	# The bestiary belongs to the run and survives between battles.
+	eq(long_run.bestiary is Bestiary, true, "run owns a bestiary")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_run.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Run` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Run.gd`**
+
+```gdscript
+class_name Run
+extends RefCounted
+
+## One attempt at the curriculum. Holds everything that dies with the run.
+
+const STARTING_HP := 60
+const MAX_STRIKES := 2
+
+var hp := STARTING_HP
+var max_hp := STARTING_HP
+var strikes := 0
+var courses_passed := 0
+var grades := {}  ## course name -> Grading.Grade
+var deck: Array = []  ## Array[CardInstance]
+var bestiary: Bestiary = Bestiary.new()
+var current_course = null
+var expelled := false
+var won := false
+
+
+func _init(starting_deck: Array) -> void:
+	deck = starting_deck.duplicate()
+
+
+func deck_cap() -> int:
+	return Draft.cap_for(courses_passed)
+
+
+## Records a finished battle. Returns what the report card needs to say.
+##
+## Dropping to zero hit points is an F, not death: hit points are restored and the
+## run continues. Permadeath is the second F and nothing else.
+func record_result(course, grade, hp_end: int) -> Dictionary:
+	grades[course.course_name] = grade
+	var struck := grade == Grading.Grade.F
+
+	if struck:
+		strikes += 1
+		hp = max_hp  # you failed the exam; you did not die
+		if strikes >= MAX_STRIKES:
+			expelled = true
+	else:
+		courses_passed += 1
+		hp = clampi(hp_end, 1, max_hp)  # a win never leaves you at zero
+		if course.is_final:
+			won = true
+
+	return {
+		"grade": grade,
+		"strike": struck,
+		"strikes": strikes,
+		"expelled": expelled,
+		"won": won,
+		"hp": hp,
+	}
+
+
+func is_over() -> bool:
+	return expelled or won
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(run): add strikes, hp restoration on failure and expulsion"
+git push
+```
+
+---
+
+### Task 14: `SaveGame` — a round trip that preserves card XP
+
+**Files:**
+- Create: `scripts/core/SaveGame.gd`
+- Test: `tests/test_save.gd`
+
+**Interfaces:**
+- Consumes: `Run` (13), `CardInstance` (4), `Bestiary` (8).
+- Produces: `SaveGame.PATH == "user://run.json"`; `SaveGame.save(run) -> bool`; `SaveGame.load_run() -> Run` (null when absent or unreadable); `SaveGame.has_save() -> bool`; `SaveGame.delete() -> void`.
+
+A `CardInstance` serialises as its `CardData` resource path plus an integer XP. An
+evolved card serialises as the evolved resource's path, so it reloads already evolved.
+
+- [ ] **Step 1: Write the failing test `tests/test_save.gd`**
+
+```gdscript
+extends TestCase
+
+
+func suite_name() -> String:
+	return "save"
+
+
+func run() -> void:
+	SaveGame.delete()
+	eq(SaveGame.has_save(), false, "no save to begin with")
+	eq(SaveGame.load_run(), null, "loading nothing returns null")
+
+	var spark: CardData = load("res://resources/cards/spark.tres")
+	var r := Run.new([CardInstance.new(spark), CardInstance.new(spark)])
+	r.deck[0].gain_xp()
+	r.deck[0].gain_xp()
+	r.deck[0].gain_xp()
+	var course := CourseData.new()
+	course.course_name = "Basic Arcana 101"
+	r.record_result(course, Grading.Grade.A, 42)
+	var novice: EnemyData = load("res://resources/enemies/novice.tres")
+	r.bestiary.record_hit(novice, novice.weak_school)
+
+	eq(SaveGame.save(r), true, "saved")
+	eq(SaveGame.has_save(), true, "save exists")
+
+	var back: Run = SaveGame.load_run()
+	check(back != null, "loaded")
+	if back == null:
+		return
+	eq(back.hp, 42, "hp restored")
+	eq(back.strikes, 0, "strikes restored")
+	eq(back.courses_passed, 1, "courses restored")
+	eq(back.grades["Basic Arcana 101"], Grading.Grade.A, "grade restored")
+	eq(back.deck.size(), 2, "deck size restored")
+	eq(back.bestiary.knows_weakness("Novice"), true, "bestiary restored")
+
+	# THE POINT OF THIS SUITE: per-card XP must survive, or a reload silently
+	# un-trains the player's deck.
+	var xp_total := 0
+	for card in back.deck:
+		xp_total += card.xp
+	eq(xp_total, 3, "card xp survived the round trip")
+
+	# An evolved card reloads already evolved rather than reverting to its base form.
+	var evolved_run := Run.new([CardInstance.new(spark)])
+	for i in 5:
+		evolved_run.deck[0].gain_xp()
+	eq(evolved_run.deck[0].data.card_name, "Ember Lance", "evolved before saving")
+	SaveGame.save(evolved_run)
+	var evolved_back: Run = SaveGame.load_run()
+	eq(evolved_back.deck[0].data.card_name, "Ember Lance", "still evolved after loading")
+
+	# Expulsion clears the save.
+	SaveGame.delete()
+	eq(SaveGame.has_save(), false, "delete removed it")
+
+	# A corrupt file does not crash the game.
+	var f := FileAccess.open(SaveGame.PATH, FileAccess.WRITE)
+	f.store_string("{not json")
+	f.close()
+	eq(SaveGame.load_run(), null, "corrupt save loads as null")
+	SaveGame.delete()
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_save.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `SaveGame` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/SaveGame.gd`**
+
+```gdscript
+class_name SaveGame
+extends RefCounted
+
+## Single-slot autosave. A CardInstance serialises as a resource path plus its XP, so
+## an evolved card reloads already evolved.
+
+const PATH := "user://run.json"
+
+
+static func has_save() -> bool:
+	return FileAccess.file_exists(PATH)
+
+
+static func delete() -> void:
+	if has_save():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(PATH))
+		# globalize_path does not resolve user:// on every platform; try both.
+		if FileAccess.file_exists(PATH):
+			var dir := DirAccess.open("user://")
+			if dir != null:
+				dir.remove("run.json")
+
+
+static func save(run) -> bool:
+	var cards: Array = []
+	for card in run.deck:
+		cards.append({"path": card.data.resource_path, "xp": card.xp})
+
+	var grades := {}
+	for name in run.grades:
+		grades[name] = int(run.grades[name])
+
+	var payload := {
+		"version": 1,
+		"hp": run.hp,
+		"max_hp": run.max_hp,
+		"strikes": run.strikes,
+		"courses_passed": run.courses_passed,
+		"expelled": run.expelled,
+		"won": run.won,
+		"grades": grades,
+		"deck": cards,
+		"bestiary": run.bestiary.to_dict(),
+	}
+
+	var file := FileAccess.open(PATH, FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string(JSON.stringify(payload))
+	file.close()
+	return true
+
+
+static func load_run():
+	if not has_save():
+		return null
+	var file := FileAccess.open(PATH, FileAccess.READ)
+	if file == null:
+		return null
+	var parsed = JSON.parse_string(file.get_as_text())
+	file.close()
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return null
+
+	var cards: Array = []
+	for entry in parsed.get("deck", []):
+		var path: String = str(entry.get("path", ""))
+		if path == "" or not ResourceLoader.exists(path):
+			continue
+		var data: CardData = load(path)
+		if data == null:
+			continue
+		cards.append(CardInstance.new(data, int(entry.get("xp", 0))))
+
+	var run := Run.new(cards)
+	run.hp = int(parsed.get("hp", Run.STARTING_HP))
+	run.max_hp = int(parsed.get("max_hp", Run.STARTING_HP))
+	run.strikes = int(parsed.get("strikes", 0))
+	run.courses_passed = int(parsed.get("courses_passed", 0))
+	run.expelled = bool(parsed.get("expelled", false))
+	run.won = bool(parsed.get("won", false))
+	for name in parsed.get("grades", {}):
+		run.grades[name] = int(parsed["grades"][name])
+	run.bestiary = Bestiary.from_dict(parsed.get("bestiary", {}))
+	return run
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(save): add a single-slot autosave that preserves card xp"
+git push
+```
+
+---
+
+### Task 15: `ContentLibrary` and the three thin autoloads
+
+**Files:**
+- Create: `scripts/data/ContentLibrary.gd`, `resources/content_library.tres`, `scripts/auto/GameManager.gd`, `scripts/auto/DeckManager.gd`, `scripts/auto/GradeManager.gd`
+- Modify: `project.godot` — add the `[autoload]` section
+- Test: `tests/test_autoloads.gd`
+
+**Interfaces:**
+- Consumes: everything in Phases 1–3.
+- Produces: `ContentLibrary` with `@export var cards: Array[CardData]`, `enemies: Array[EnemyData]`, `courses: Array[CourseData]`, `starting_deck: Array[CardData]`, and `card_named(name) -> CardData`, `enemy_named(name) -> EnemyData`, `course_named(name) -> CourseData`, `catalog() -> Catalog`. Autoloads `GameManager` (`.run`, `start_new_run()`, `strikes`, `save()`, `load_existing()`, `abandon()`), `DeckManager` (`.deck`, `begin_battle(cards, rng)`), `GradeManager` (`score(params)`, `letter(grade)`).
+
+The autoloads hold the current instance and forward. They contain no rules, so no test
+needs to reset them.
+
+- [ ] **Step 1: Write the failing test `tests/test_autoloads.gd`**
+
+```gdscript
+extends TestCase
+
+## The autoloads exist under the names the brief asks for, but hold no rules. A test
+## that needs a Run constructs one directly; nothing here resets a global.
+
+
+func suite_name() -> String:
+	return "autoloads"
+
+
+func run() -> void:
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	check(library != null, "content library loads")
+	if library == null:
+		return
+	check(library.cards.size() > 0, "library indexes cards")
+	check(library.starting_deck.size() > 0, "library declares a starting deck")
+	var spark := library.card_named("Spark")
+	check(spark != null, "found spark by name")
+	eq(library.card_named("Nonexistent"), null, "missing card is null")
+
+	# GradeManager is stateless: it forwards to Grading and holds nothing.
+	var scored: Dictionary = GradeManager.score(
+		{
+			"won": true,
+			"turns_taken": 5,
+			"par_turns": 5,
+			"hp_end": 60,
+			"hp_start": 60,
+			"xp_banked": 15,
+			"xp_par": 15,
+			"weakness_known": true,
+			"distinct_schools": 5,
+		}
+	)
+	eq(scored["grade"], Grading.Grade.S, "forwarded to Grading")
+	eq(GradeManager.letter(Grading.Grade.S), "S", "forwarded the letter")
+
+	# GameManager holds the current Run and forwards to it.
+	GameManager.abandon()
+	eq(GameManager.run, null, "no run after abandoning")
+	eq(GameManager.strikes(), 0, "strikes with no run is zero")
+	GameManager.start_new_run(library)
+	check(GameManager.run != null, "started a run")
+	eq(GameManager.run.deck.size(), library.starting_deck.size(), "dealt the starting deck")
+	eq(GameManager.strikes(), 0, "fresh run has no strikes")
+
+	# DeckManager holds the current battle piles.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	DeckManager.begin_battle(GameManager.run.deck, rng)
+	check(DeckManager.deck != null, "battle deck built")
+	eq(DeckManager.deck.total(), GameManager.run.deck.size(), "all cards in the piles")
+	GameManager.abandon()
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_autoloads.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `ContentLibrary` and the autoloads do not exist.
+
+- [ ] **Step 3: Write `scripts/data/ContentLibrary.gd`**
+
+```gdscript
+class_name ContentLibrary
+extends Resource
+
+## One index over all content. Adding a card means adding a .tres and listing it
+## here; nothing in the rules layer changes.
+
+@export var cards: Array[CardData] = []
+@export var enemies: Array[EnemyData] = []
+@export var courses: Array[CourseData] = []
+@export var starting_deck: Array[CardData] = []
+
+
+func card_named(name: String) -> CardData:
+	for card in cards:
+		if card != null and card.card_name == name:
+			return card
+	return null
+
+
+func enemy_named(name: String) -> EnemyData:
+	for enemy in enemies:
+		if enemy != null and enemy.enemy_name == name:
+			return enemy
+	return null
+
+
+func course_named(name: String) -> CourseData:
+	for course in courses:
+		if course != null and course.course_name == name:
+			return course
+	return null
+
+
+func catalog() -> Catalog:
+	return Catalog.new(courses)
+
+
+## Fresh CardInstances for a new run.
+func new_starting_deck() -> Array:
+	var out: Array = []
+	for card in starting_deck:
+		out.append(CardInstance.new(card))
+	return out
+```
+
+- [ ] **Step 4: Write the three autoloads**
+
+`scripts/auto/GameManager.gd`:
+
+```gdscript
+extends Node
+
+## Holds the current Run and forwards to it. No rules live here: keeping state out of
+## the singletons is what lets every suite construct a Run directly.
+
+var run: Run = null
+
+
+func start_new_run(library: ContentLibrary) -> Run:
+	run = Run.new(library.new_starting_deck())
+	return run
+
+
+func load_existing() -> Run:
+	run = SaveGame.load_run()
+	return run
+
+
+func save() -> bool:
+	if run == null:
+		return false
+	return SaveGame.save(run)
+
+
+func abandon() -> void:
+	run = null
+	SaveGame.delete()
+
+
+func strikes() -> int:
+	return 0 if run == null else run.strikes
+
+
+func deck_cap() -> int:
+	return Draft.BASE_CAP if run == null else run.deck_cap()
+```
+
+`scripts/auto/DeckManager.gd`:
+
+```gdscript
+extends Node
+
+## Holds the current battle's piles and forwards to them.
+
+var deck: Deck = null
+
+
+func begin_battle(cards: Array, rng: RandomNumberGenerator = null) -> Deck:
+	deck = Deck.new(cards, rng)
+	return deck
+
+
+func end_battle() -> void:
+	deck = null
+
+
+func hand() -> Array:
+	return [] if deck == null else deck.hand
+```
+
+`scripts/auto/GradeManager.gd`:
+
+```gdscript
+extends Node
+
+## Stateless. Exists because the brief names it; forwards to Grading.
+
+
+func score(params: Dictionary) -> Dictionary:
+	return Grading.score(params)
+
+
+func letter(grade) -> String:
+	return Grading.letter(grade)
+
+
+func draft_allowance(grade) -> int:
+	return Grading.draft_allowance(grade)
+```
+
+- [ ] **Step 5: Register the autoloads in `project.godot`**
+
+Add this section:
+
+```ini
+[autoload]
+
+GameManager="*res://scripts/auto/GameManager.gd"
+DeckManager="*res://scripts/auto/DeckManager.gd"
+GradeManager="*res://scripts/auto/GradeManager.gd"
+```
+
+The leading `*` makes each a singleton. Autoloads are available to
+`--script` runs, so the suite can call them.
+
+- [ ] **Step 6: Write `resources/content_library.tres`**
+
+Index only what exists so far — Task 16 rewrites this with the full set.
+
+```ini
+[gd_resource type="Resource" script_class="ContentLibrary" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ContentLibrary.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/cards/ember_lance.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+cards = [ExtResource("2"), ExtResource("3")]
+enemies = []
+courses = []
+starting_deck = [ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("2")]
+```
+
+- [ ] **Step 7: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 8: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(core): add the content library and three thin autoloads"
 git push
 ```
