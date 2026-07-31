@@ -57,7 +57,7 @@ func show_catalog(catalog: Catalog, grades: Dictionary) -> void:
 			var y := 220.0 + float(row) * ROW_HEIGHT
 			var centre := Vector2(x, y)
 			centres[course.course_name] = centre
-			add_child(_node_button(course, centre, catalog.is_available(course, grades)))
+			_add_course_node(course, centre, catalog.is_available(course, grades))
 
 	# Draw an edge for each prerequisite whose node is also on screen.
 	for course in revealed:
@@ -73,15 +73,37 @@ func show_catalog(catalog: Catalog, grades: Dictionary) -> void:
 			_edges.add_child(line)
 
 
-func _node_button(course: CourseData, centre: Vector2, available: bool) -> Button:
+## Builds the tap target and its name label as two separate nodes rather than one
+## Button with inline text. A Button's minimum size grows to fit an icon plus text at
+## the theme's default font size (32), which silently overrides the fixed NODE_SIZE
+## this map relies on for its column spacing -- long course names ("Applied Wardcraft
+## 301") were forcing buttons wider than their allotted column, so neighbouring nodes
+## grew until they touched or overlapped instead of reading as a spaced-out tier row.
+## An icon-only button keeps the tap target pinned to NODE_SIZE, and the wrapped label
+## underneath is free to use its own smaller font without feeding back into the
+## button's layout.
+func _add_course_node(course: CourseData, centre: Vector2, available: bool) -> void:
 	var button := Button.new()
 	button.custom_minimum_size = NODE_SIZE
 	button.size = NODE_SIZE
 	button.position = centre - NODE_SIZE * 0.5
-	button.text = course.course_name
 	button.icon = ArtFactory.medallion(course.tier, Vector2i(96, 96))
+	button.expand_icon = true
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 	button.disabled = not available
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	button.pressed.connect(func(): course_chosen.emit(course))
 	node_buttons[course.course_name] = button
-	return button
+	add_child(button)
+
+	var label := Label.new()
+	label.text = course.course_name
+	label.add_theme_font_size_override("font_size", 22)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.custom_minimum_size = Vector2(NODE_SIZE.x, 0)
+	label.size = Vector2(NODE_SIZE.x, 0)
+	label.position = Vector2(centre.x - NODE_SIZE.x * 0.5, centre.y + NODE_SIZE.y * 0.5 + 8.0)
+	add_child(label)

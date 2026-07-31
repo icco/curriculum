@@ -19,11 +19,23 @@ static func fan_transform(index: int, count: int, width: float) -> Dictionary:
 
 	# -1 at the far left, +1 at the far right.
 	var t := (float(index) / float(count - 1)) * 2.0 - 1.0
+
+	# The outermost cards are rotated by MAX_TILT about their own centre, so their
+	# axis-aligned bounding box reaches further outward than CARD_SIZE.x / 2 alone
+	# would suggest -- clamping the centre to just [0, width] left the last sliver of
+	# a tilted card hanging off the edge of the screen. Half-extent of a w x h
+	# rectangle rotated by `angle` is (w * cos(angle) + h * sin(angle)) / 2.
+	var half_extent := (
+		(CardView.CARD_SIZE.x * cos(MAX_TILT) + CardView.CARD_SIZE.y * sin(MAX_TILT)) * 0.5
+	)
 	# Narrow the spread as the hand grows so it never leaves the screen.
-	var spread := minf(MAX_SPREAD, width * 0.42)
+	var spread := minf(minf(MAX_SPREAD, width * 0.42), maxf(0.0, width * 0.5 - half_extent))
 	var x := width * 0.5 + t * spread
 	var y := absf(t) * ARC_DROP
-	return {"position": Vector2(clampf(x, 0.0, width), y), "rotation": t * MAX_TILT}
+	return {
+		"position": Vector2(clampf(x, half_extent, width - half_extent), y),
+		"rotation": t * MAX_TILT,
+	}
 
 
 func _init() -> void:
