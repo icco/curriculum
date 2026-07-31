@@ -79,7 +79,22 @@ fi
 # instead of by class_name, purely so `--import` would not resolve CourseData while
 # building autoloads. Narrowing the pattern here is the correct fix; contorting call
 # sites to keep an over-broad grep happy is not.
-import_signal=$(grep -vE 'resources still in use at exit|ObjectDB instances leaked' <<<"$import_output")
+# Only one line is filtered, and it is reported rather than hidden. The leaked-ObjectDB
+# line Godot also prints is a WARNING, so it never matched this ERROR grep and needs no
+# exclusion — an earlier version of this filter listed it anyway, with the wrong wording
+# ("instances leaked" rather than the engine's "instances were leaked"), so it matched
+# nothing and merely looked like it was doing work.
+#
+# The count is echoed so a leak cannot grow silently: excluding the message outright
+# would also swallow a genuine new leak introduced elsewhere, since Godot phrases every
+# exit-time resource leak identically regardless of cause.
+leak_line=$(grep -E 'ERROR: [0-9]+ resources still in use at exit' <<<"$import_output" || true)
+if [ -n "$leak_line" ]; then
+  echo "check: note — ${leak_line#ERROR: }" >&2
+  echo "check:        expected: CourseData exports a self-referential Array[CourseData]," >&2
+  echo "check:        and Godot's exit accounting reports it. Investigate if the count grows." >&2
+fi
+import_signal=$(grep -vE 'ERROR: [0-9]+ resources still in use at exit' <<<"$import_output")
 if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_signal"; then
   echo "$import_output" >&2
   echo "check: import reported errors" >&2
