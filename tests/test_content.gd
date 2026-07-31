@@ -77,9 +77,14 @@ func run() -> void:
 				"%s status %s is a real Statuses.Kind" % [card.card_name, effect.get("status", -1)]
 			)
 
-	# Every school must be a real Schools.School value. The generator hardcodes the
-	# enum values as integers rather than referencing Schools.School, so a reordered
-	# enum would silently reassign every card's school without this check noticing.
+	# Every school must be a real Schools.School value. This is a membership check
+	# only: it catches an out-of-range value (e.g. a typo'd constant), but a
+	# reordered Schools.School enum produces integers that are all still in
+	# range, so this alone would not notice every card's school silently
+	# reassigning. tools/generate_content.gd closes that gap at the source by
+	# reading Schools.School directly instead of mirroring it as hardcoded ints;
+	# the identity checks below (Spark is Cinder, etc.) are what actually pin a
+	# specific card to a specific school.
 	var valid_schools := Schools.ALL
 	for card in library.cards:
 		check(
@@ -92,6 +97,21 @@ func run() -> void:
 	for card in library.cards:
 		by_school[card.school] = int(by_school.get(card.school, 0)) + 1
 	eq(by_school.size(), 5, "all five schools have cards")
+
+	# Identity checks: one named card per school, and one named status. A
+	# membership check (school in Schools.ALL) cannot tell CINDER from FROST if
+	# the enum reorders — these can, because they compare against a specific
+	# named enum member rather than "any valid value."
+	eq(library.card_named("Spark").school, Schools.School.CINDER, "spark is cinder")
+	eq(library.card_named("Frost Lance").school, Schools.School.FROST, "frost lance is frost")
+	eq(library.card_named("Ink Blot").school, Schools.School.INK, "ink blot is ink")
+	eq(library.card_named("Rot Seed").school, Schools.School.ROT, "rot seed is rot")
+	eq(library.card_named("Guard").school, Schools.School.WARD, "guard is ward")
+
+	var kindle := library.card_named("Kindle")
+	check(kindle != null, "kindle exists")
+	if kindle != null:
+		eq(kindle.effects[0]["status"], Statuses.Kind.BURN, "kindle burns, specifically")
 
 	# Spot-check the table against the spec.
 	var spark := library.card_named("Spark")
