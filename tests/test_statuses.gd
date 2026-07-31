@@ -52,6 +52,22 @@ func run() -> void:
 	stack.add(Statuses.Kind.BLOT, 2)
 	eq(stack.amount(Statuses.Kind.BLOT), 3, "blot stacks")
 
-	# Round-trips for the save file.
-	var round := Statuses.from_dict(stack.to_dict())
-	eq(round.amount(Statuses.Kind.BLOT), 3, "survives a round trip")
+	# Round-trips for the save file with all four statuses.
+	var all := Statuses.new()
+	all.add(Statuses.Kind.BURN, 5)
+	all.add(Statuses.Kind.CHILL, 3)
+	all.add(Statuses.Kind.BLOT, 7)
+	all.add(Statuses.Kind.DECAY, 11)
+	var round := Statuses.from_dict(all.to_dict())
+	eq(round.amount(Statuses.Kind.BURN), 5, "burn survives round trip")
+	eq(round.amount(Statuses.Kind.CHILL), 3, "chill survives round trip")
+	eq(round.amount(Statuses.Kind.BLOT), 7, "blot survives round trip")
+	eq(round.amount(Statuses.Kind.DECAY), 11, "decay survives round trip")
+
+	# add() clamps to zero and does not go negative.
+	var clamp := Statuses.new()
+	clamp.add(Statuses.Kind.BURN, -5)
+	eq(clamp.amount(Statuses.Kind.BURN), 0, "negative add on empty clamps to zero")
+	clamp.add(Statuses.Kind.BURN, 10)
+	clamp.add(Statuses.Kind.BURN, -3)
+	eq(clamp.amount(Statuses.Kind.BURN), 7, "negative add reduces but does not go below zero")
