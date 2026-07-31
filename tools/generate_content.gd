@@ -6,17 +6,23 @@ extends SceneTree
 
 const OUT_DIR := "res://resources/cards"
 
-const CINDER := 0
-const FROST := 1
-const INK := 2
-const ROT := 3
-const WARD := 4
+# These read Schools.School and Statuses.Kind directly rather than mirroring
+# them as hardcoded ints (the previous CINDER := 0 ... WARD := 4, BURN := 0
+# ... DECAY := 3). A hardcoded mirror is exactly how a reordered enum could
+# silently reassign every card's school or status without anything noticing —
+# a bare int keeps matching whatever the enum reorders to. Aliasing the real
+# enum members keeps the table short while making a reorder correct by
+# construction instead of relying on a test to catch it after the fact.
+const CINDER := Schools.School.CINDER
+const FROST := Schools.School.FROST
+const INK := Schools.School.INK
+const ROT := Schools.School.ROT
+const WARD := Schools.School.WARD
 
-# Statuses.Kind: BURN 0, CHILL 1, BLOT 2, DECAY 3
-const BURN := 0
-const CHILL := 1
-const BLOT := 2
-const DECAY := 3
+const BURN := Statuses.Kind.BURN
+const CHILL := Statuses.Kind.CHILL
+const BLOT := Statuses.Kind.BLOT
+const DECAY := Statuses.Kind.DECAY
 
 
 static func dmg(n: int) -> Dictionary:
