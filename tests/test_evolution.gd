@@ -40,9 +40,12 @@ func run() -> void:
 	eq(spark.card_name, "Spark", "the shared resource is unchanged")
 	check(not ("xp" in spark), "CardData has no xp property at all")
 
-	# Reloading the resource must not show XP either.
-	var reloaded: CardData = load("res://resources/cards/spark.tres")
-	eq(reloaded.card_name, "Spark", "reloaded card is pristine")
+	# load() is cache-keyed by path, so a second load() while `spark` is still in
+	# scope just hands back the same object — it cannot catch XP having been written
+	# to disk. Read the file as text instead, so this actually inspects the artifact.
+	var raw := FileAccess.get_file_as_string("res://resources/cards/spark.tres")
+	check(raw.contains("xp_to_evolve"), "sanity: needle finds a real field")
+	check(not raw.contains("xp = "), "on-disk resource carries no stray xp field")
 
 	# Display helper.
 	eq(CardInstance.new(spark, 3).progress(), "3/5", "progress reads x/y")
