@@ -1232,3 +1232,555 @@ Expected: PASS.
 git add -A
 git commit -m "feat(deck): add draw, reshuffle, retain and exhaust piles"
 ```
+
+---
+
+## Phase 2 — Battle
+
+### Task 6: `Statuses` — the five status effects
+
+**Files:**
+- Create: `scripts/core/Statuses.gd`
+- Test: `tests/test_statuses.gd`
+
+**Interfaces:**
+- Consumes: nothing.
+- Produces: `Statuses.Kind` enum with `BURN`, `CHILL`, `BLOT`, `DECAY`; `Statuses.new()`; `amount(kind) -> int`; `add(kind, n) -> void`; `consume(kind) -> int` (returns the stack and zeroes it); `clear_all() -> void`; `tick_start_of_turn() -> int` (Burn damage, then Burn decrements by 1); `tick_end_of_turn() -> int` (Decay damage, then Decay grows by 2); `double_decay() -> void`; `to_dict() -> Dictionary` / `Statuses.from_dict(d) -> Statuses` for saves.
+
+Block is *not* here — it lives on `Combatant`, because it interacts with damage
+application rather than with the tick cycle.
+
+- [ ] **Step 1: Write the failing test `tests/test_statuses.gd`**
+
+```gdscript
+extends TestCase
+
+## Burn decays, Decay grows. That asymmetry is the whole identity of the two
+## damage-over-time schools, so it is pinned here.
+
+
+func suite_name() -> String:
+	return "statuses"
+
+
+func run() -> void:
+	var s := Statuses.new()
+	eq(s.amount(Statuses.Kind.BURN), 0, "starts empty")
+
+	# Burn: ticks at the start of the turn, then decrements.
+	s.add(Statuses.Kind.BURN, 3)
+	eq(s.tick_start_of_turn(), 3, "burn deals its value")
+	eq(s.amount(Statuses.Kind.BURN), 2, "burn decremented")
+	eq(s.tick_start_of_turn(), 2, "burn deals less")
+	eq(s.tick_start_of_turn(), 1, "burn deals one")
+	eq(s.tick_start_of_turn(), 0, "burn is spent")
+	eq(s.amount(Statuses.Kind.BURN), 0, "burn cannot go negative")
+
+	# Decay: ticks at the end of the turn, then GROWS by two.
+	var d := Statuses.new()
+	d.add(Statuses.Kind.DECAY, 4)
+	eq(d.tick_end_of_turn(), 4, "decay deals its value")
+	eq(d.amount(Statuses.Kind.DECAY), 6, "decay grew by two")
+	eq(d.tick_end_of_turn(), 6, "decay deals more")
+	eq(d.amount(Statuses.Kind.DECAY), 8, "decay grew again")
+
+	# Doubling is what Feed the Curriculum does.
+	d.double_decay()
+	eq(d.amount(Statuses.Kind.DECAY), 16, "decay doubled")
+
+	# Decay with no stacks does nothing and does not start growing from zero.
+	var empty := Statuses.new()
+	eq(empty.tick_end_of_turn(), 0, "no decay, no damage")
+	eq(empty.amount(Statuses.Kind.DECAY), 0, "decay stays at zero")
+
+	# Chill and Blot are consumed whole by the next card, not ticked.
+	var c := Statuses.new()
+	c.add(Statuses.Kind.CHILL, 2)
+	eq(c.consume(Statuses.Kind.CHILL), 2, "consume returns the stack")
+	eq(c.amount(Statuses.Kind.CHILL), 0, "consume zeroes it")
+	eq(c.consume(Statuses.Kind.CHILL), 0, "consuming nothing is zero")
+	eq(c.tick_start_of_turn(), 0, "chill is not burn")
+
+	# Stacks accumulate.
+	var stack := Statuses.new()
+	stack.add(Statuses.Kind.BLOT, 1)
+	stack.add(Statuses.Kind.BLOT, 2)
+	eq(stack.amount(Statuses.Kind.BLOT), 3, "blot stacks")
+
+	# Round-trips for the save file.
+	var round := Statuses.from_dict(stack.to_dict())
+	eq(round.amount(Statuses.Kind.BLOT), 3, "survives a round trip")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_statuses.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Statuses` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Statuses.gd`**
+
+```gdscript
+class_name Statuses
+extends RefCounted
+
+## The four stacking statuses. Block is deliberately absent: it belongs to
+## Combatant, because it modifies incoming damage rather than ticking.
+
+enum Kind { BURN, CHILL, BLOT, DECAY }
+
+## How much Decay grows each time it ticks. Growing rather than decaying is what
+## makes Rot lose short fights and win long ones.
+const DECAY_GROWTH := 2
+
+var _stacks := {
+	Kind.BURN: 0,
+	Kind.CHILL: 0,
+	Kind.BLOT: 0,
+	Kind.DECAY: 0,
+}
+
+
+func amount(kind: Kind) -> int:
+	return _stacks.get(kind, 0)
+
+
+func add(kind: Kind, n: int) -> void:
+	_stacks[kind] = maxi(0, amount(kind) + n)
+
+
+## Returns the stack and zeroes it. Chill and Blot are spent whole by one card.
+func consume(kind: Kind) -> int:
+	var value := amount(kind)
+	_stacks[kind] = 0
+	return value
+
+
+func clear_all() -> void:
+	for kind in _stacks:
+		_stacks[kind] = 0
+
+
+## Burn damage, then Burn decrements. Returns the damage dealt.
+func tick_start_of_turn() -> int:
+	var burn := amount(Kind.BURN)
+	if burn > 0:
+		_stacks[Kind.BURN] = burn - 1
+	return burn
+
+
+## Decay damage, then Decay grows. Returns the damage dealt.
+func tick_end_of_turn() -> int:
+	var decay := amount(Kind.DECAY)
+	if decay > 0:
+		_stacks[Kind.DECAY] = decay + DECAY_GROWTH
+	return decay
+
+
+func double_decay() -> void:
+	_stacks[Kind.DECAY] = amount(Kind.DECAY) * 2
+
+
+func to_dict() -> Dictionary:
+	return {
+		"burn": amount(Kind.BURN),
+		"chill": amount(Kind.CHILL),
+		"blot": amount(Kind.BLOT),
+		"decay": amount(Kind.DECAY),
+	}
+
+
+static func from_dict(d: Dictionary) -> Statuses:
+	var s := Statuses.new()
+	s.add(Kind.BURN, int(d.get("burn", 0)))
+	s.add(Kind.CHILL, int(d.get("chill", 0)))
+	s.add(Kind.BLOT, int(d.get("blot", 0)))
+	s.add(Kind.DECAY, int(d.get("decay", 0)))
+	return s
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(battle): add the five status effects"
+git push
+```
+
+---
+
+### Task 7: `Combatant` and `EnemyData`
+
+**Files:**
+- Create: `scripts/core/Combatant.gd`, `scripts/data/EnemyData.gd`, `resources/enemies/novice.tres`
+- Test: `tests/test_combatant.gd`
+
+**Interfaces:**
+- Consumes: `Statuses` (Task 6), `Schools` (Task 1), `CardData` (Task 3).
+- Produces: `Combatant.new(display_name: String, max_hp: int, mana_per_turn: int)`; `var display_name, hp, max_hp, block, mana, mana_per_turn`; `var statuses: Statuses`; `take_damage(amount: int) -> int` returning HP actually lost; `gain_block(n: int) -> void`; `heal(n: int) -> void`; `spend_mana(n: int) -> bool`; `refill_mana(bonus := 0) -> void`; `is_down() -> bool`; `hp_fraction() -> float`. And `EnemyData` with `enemy_name: String`, `max_hp: int`, `mana_per_turn: int`, `deck: Array[CardData]`, `weak_school: Schools.School`, `warded_school: Schools.School`, `art_id: String`, plus `to_combatant() -> Combatant`.
+
+- [ ] **Step 1: Write the failing test `tests/test_combatant.gd`**
+
+```gdscript
+extends TestCase
+
+
+func suite_name() -> String:
+	return "combatant"
+
+
+func run() -> void:
+	var c := Combatant.new("Student", 60, 3)
+	eq(c.hp, 60, "starts at full")
+	eq(c.mana, 0, "mana starts empty until refilled")
+	c.refill_mana()
+	eq(c.mana, 3, "refilled to per-turn")
+
+	# Block absorbs damage before HP, and is consumed by it.
+	c.gain_block(10)
+	eq(c.take_damage(4), 0, "block ate it all")
+	eq(c.block, 6, "block partly spent")
+	eq(c.hp, 60, "hp untouched")
+	eq(c.take_damage(10), 4, "overflow reaches hp")
+	eq(c.block, 0, "block exhausted")
+	eq(c.hp, 56, "lost the overflow only")
+
+	# Healing cannot exceed max.
+	c.heal(100)
+	eq(c.hp, 60, "healing caps at max")
+
+	# HP floors at zero and reports down.
+	eq(c.is_down(), false, "not down at full")
+	c.take_damage(999)
+	eq(c.hp, 0, "hp floors at zero")
+	eq(c.is_down(), true, "down at zero")
+	almost(c.hp_fraction(), 0.0, "fraction is zero")
+
+	# Mana spending refuses what it cannot afford.
+	var m := Combatant.new("M", 10, 3)
+	m.refill_mana()
+	eq(m.spend_mana(2), true, "afforded two")
+	eq(m.mana, 1, "one left")
+	eq(m.spend_mana(2), false, "cannot afford two more")
+	eq(m.mana, 1, "failed spend changed nothing")
+	m.refill_mana(2)
+	eq(m.mana, 5, "bonus mana added on refill")
+
+	# EnemyData builds a combatant and declares its secrets.
+	var novice: EnemyData = load("res://resources/enemies/novice.tres")
+	check(novice != null, "novice loads")
+	if novice == null:
+		return
+	eq(novice.enemy_name, "Novice", "name")
+	eq(novice.weak_school, Schools.School.INK, "novice is weak to ink")
+	eq(novice.warded_school, Schools.School.FROST, "novice wards frost")
+	neq(novice.weak_school, novice.warded_school, "weak and warded differ")
+	check(novice.deck.size() > 0, "novice has a deck")
+	var body := novice.to_combatant()
+	eq(body.hp, novice.max_hp, "combatant starts at full hp")
+	eq(body.display_name, "Novice", "combatant carries the name")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_combatant.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Combatant` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Combatant.gd`**
+
+```gdscript
+class_name Combatant
+extends RefCounted
+
+## The shared shape of the player and an examiner: hit points, block, mana and
+## statuses. Knows nothing about cards or turns.
+
+var display_name := ""
+var hp := 0
+var max_hp := 0
+var block := 0
+var mana := 0
+var mana_per_turn := 0
+var statuses: Statuses = Statuses.new()
+
+
+func _init(name_in: String, max_hp_in: int, mana_per_turn_in: int) -> void:
+	display_name = name_in
+	max_hp = max_hp_in
+	hp = max_hp_in
+	mana_per_turn = mana_per_turn_in
+
+
+## Block absorbs first. Returns the hit points actually lost.
+func take_damage(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	var absorbed := mini(block, amount)
+	block -= absorbed
+	var lost := mini(amount - absorbed, hp)
+	hp -= lost
+	return lost
+
+
+func gain_block(n: int) -> void:
+	block = maxi(0, block + n)
+
+
+func heal(n: int) -> void:
+	hp = clampi(hp + n, 0, max_hp)
+
+
+## Self-damage from Rot cards bypasses block — you are paying, not being hit.
+func pay_hp(n: int) -> void:
+	hp = maxi(0, hp - n)
+
+
+func spend_mana(n: int) -> bool:
+	if n > mana:
+		return false
+	mana -= n
+	return true
+
+
+func refill_mana(bonus: int = 0) -> void:
+	mana = mana_per_turn + bonus
+
+
+## Block expires at the start of its owner's turn.
+func expire_block() -> void:
+	block = 0
+
+
+func is_down() -> bool:
+	return hp <= 0
+
+
+func hp_fraction() -> float:
+	if max_hp <= 0:
+		return 0.0
+	return float(hp) / float(max_hp)
+```
+
+- [ ] **Step 4: Write `scripts/data/EnemyData.gd`**
+
+```gdscript
+class_name EnemyData
+extends Resource
+
+## An examiner. Its deck is drawn from the same CardData pool the player uses, which
+## is what makes copying its cards after a win cost no extra content.
+
+@export var enemy_name: String = ""
+@export var max_hp: int = 30
+@export var mana_per_turn: int = 2
+@export var deck: Array[CardData] = []
+@export var weak_school: Schools.School = Schools.School.CINDER
+@export var warded_school: Schools.School = Schools.School.FROST
+@export var art_id: String = ""
+## Gates and the final are exempt from the "appears in >= 2 courses" rule.
+@export var is_gate: bool = false
+
+
+func to_combatant() -> Combatant:
+	return Combatant.new(enemy_name, max_hp, mana_per_turn)
+```
+
+- [ ] **Step 5: Write `resources/enemies/novice.tres`**
+
+The Novice leans Cinder, is weak to Ink and wards Frost, per the spec's roster. Its
+deck is four Sparks for now; Task 17 authors the real lists.
+
+```ini
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+enemy_name = "Novice"
+max_hp = 28
+mana_per_turn = 2
+deck = [ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("2")]
+weak_school = 2
+warded_school = 1
+art_id = "entities/novice"
+is_gate = false
+```
+
+`weak_school = 2` is `INK`, `warded_school = 1` is `FROST` — the enum order is
+`CINDER, FROST, INK, ROT, WARD`.
+
+- [ ] **Step 6: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 7: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(battle): add combatants and the examiner resource"
+git push
+```
+
+---
+
+### Task 8: `Bestiary` and the school multiplier
+
+**Files:**
+- Create: `scripts/core/Bestiary.gd`
+- Test: `tests/test_schools_multiplier.gd`
+
+**Interfaces:**
+- Consumes: `Schools` (Task 1), `EnemyData` (Task 7).
+- Produces: `Bestiary.WEAK_MULTIPLIER == 1.5`, `Bestiary.WARD_MULTIPLIER == 0.5`; `Bestiary.new()`; `multiplier(enemy: EnemyData, school) -> float`; `record_hit(enemy: EnemyData, school) -> String` returning `"weakness"`, `"ward"` or `""` when the hit revealed something new; `knows_weakness(enemy_name: String) -> bool`; `knows_ward(enemy_name: String) -> bool`; `to_dict()` / `Bestiary.from_dict(d)`.
+
+The multiplier applies whether or not the weakness is known — the reveal is
+information, not the reward.
+
+- [ ] **Step 1: Write the failing test `tests/test_schools_multiplier.gd`**
+
+```gdscript
+extends TestCase
+
+## The multiplier applies to a card's numbers, not to damage alone: that is what
+## lets Ward be a weakness at all, since Ward deals no damage.
+
+
+func suite_name() -> String:
+	return "multiplier"
+
+
+func run() -> void:
+	var novice: EnemyData = load("res://resources/enemies/novice.tres")
+	var b := Bestiary.new()
+
+	# Weak to Ink, wards Frost, neutral to everything else.
+	almost(b.multiplier(novice, Schools.School.INK), 1.5, "weak school hits harder")
+	almost(b.multiplier(novice, Schools.School.FROST), 0.5, "warded school is halved")
+	almost(b.multiplier(novice, Schools.School.CINDER), 1.0, "neutral school is plain")
+
+	# The bonus applies before it is known. Knowledge is the second reward.
+	eq(b.knows_weakness("Novice"), false, "nothing known yet")
+	almost(b.multiplier(novice, Schools.School.INK), 1.5, "bonus applies unrevealed")
+
+	# A hit with the weak school reveals it, once.
+	eq(b.record_hit(novice, Schools.School.INK), "weakness", "revealed the weakness")
+	eq(b.knows_weakness("Novice"), true, "weakness now known")
+	eq(b.record_hit(novice, Schools.School.INK), "", "second hit reveals nothing new")
+
+	# A wasted hit still buys knowledge.
+	eq(b.record_hit(novice, Schools.School.FROST), "ward", "revealed the ward")
+	eq(b.knows_ward("Novice"), true, "ward now known")
+
+	# A neutral hit reveals nothing.
+	eq(b.record_hit(novice, Schools.School.CINDER), "", "neutral hit teaches nothing")
+
+	# Knowledge is keyed by examiner NAME, so it carries to the next course that
+	# uses the same examiner. That is the whole point of the Bestiary.
+	var second: EnemyData = load("res://resources/enemies/novice.tres")
+	eq(b.knows_weakness(second.enemy_name), true, "known for the type, not the instance")
+
+	# Round-trips for the save file.
+	var round := Bestiary.from_dict(b.to_dict())
+	eq(round.knows_weakness("Novice"), true, "weakness survives a round trip")
+	eq(round.knows_ward("Novice"), true, "ward survives a round trip")
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_schools_multiplier.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `Bestiary` is not declared.
+
+- [ ] **Step 3: Write `scripts/core/Bestiary.gd`**
+
+```gdscript
+class_name Bestiary
+extends RefCounted
+
+## What the student has learned about examiners this run. Keyed by examiner name, so
+## a weakness learned in Cantrips 101 still pays in Marginalia 201.
+
+const WEAK_MULTIPLIER := 1.5
+const WARD_MULTIPLIER := 0.5
+
+var _weaknesses_known := {}
+var _wards_known := {}
+
+
+## Scales every number on a card of this school. Applies whether or not the player
+## has discovered the weakness: the reveal is information, not the reward.
+func multiplier(enemy: EnemyData, school) -> float:
+	if enemy == null:
+		return 1.0
+	if school == enemy.weak_school:
+		return WEAK_MULTIPLIER
+	if school == enemy.warded_school:
+		return WARD_MULTIPLIER
+	return 1.0
+
+
+## Records what a hit taught. Returns "weakness", "ward", or "" for nothing new.
+func record_hit(enemy: EnemyData, school) -> String:
+	if enemy == null:
+		return ""
+	if school == enemy.weak_school and not _weaknesses_known.has(enemy.enemy_name):
+		_weaknesses_known[enemy.enemy_name] = school
+		return "weakness"
+	if school == enemy.warded_school and not _wards_known.has(enemy.enemy_name):
+		_wards_known[enemy.enemy_name] = school
+		return "ward"
+	return ""
+
+
+func knows_weakness(enemy_name: String) -> bool:
+	return _weaknesses_known.has(enemy_name)
+
+
+func knows_ward(enemy_name: String) -> bool:
+	return _wards_known.has(enemy_name)
+
+
+func weakness_of(enemy_name: String):
+	return _weaknesses_known.get(enemy_name, null)
+
+
+func to_dict() -> Dictionary:
+	return {"weaknesses": _weaknesses_known.duplicate(), "wards": _wards_known.duplicate()}
+
+
+static func from_dict(d: Dictionary) -> Bestiary:
+	var b := Bestiary.new()
+	for name in d.get("weaknesses", {}):
+		b._weaknesses_known[name] = d["weaknesses"][name]
+	for name in d.get("wards", {}):
+		b._wards_known[name] = d["wards"][name]
+	return b
+```
+
+- [ ] **Step 4: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(battle): add the bestiary and school multipliers"
+git push
+```
