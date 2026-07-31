@@ -35,7 +35,8 @@ func _build() -> void:
 		return
 
 	var frame := TextureRect.new()
-	frame.texture = ArtLibrary.texture(card.data.art_id, Vector2i(CARD_SIZE))
+	# The card's own school, not one hashed from the key: the ink IS the school cue.
+	frame.texture = ArtLibrary.texture(card.data.art_id, Vector2i(CARD_SIZE), card.data.school)
 	frame.size = CARD_SIZE
 	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -53,13 +54,20 @@ func _build() -> void:
 		rim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(rim)
 
+	# Text must contrast with the school's ink, not with the theme. Ink is #000000, so a
+	# black-on-black card name is invisible — a fifth of the pool unreadable.
+	var ink: Color = Schools.colour(card.data.school)
+	var text_colour: Color = ArtLibrary.PAPER if ink.get_luminance() < 0.4 else ArtLibrary.INK
+
 	var name_box := UIKit.label(card.data.card_name, 24)
 	name_box.position = Vector2(16, CARD_SIZE.y - 96)
 	name_box.size = Vector2(CARD_SIZE.x - 32, 40)
+	name_box.add_theme_color_override("font_color", text_colour)
 	add_child(name_box)
 
 	var cost := UIKit.label(str(card.data.cost), 30)
 	cost.position = Vector2(12, 8)
+	cost.add_theme_color_override("font_color", text_colour)
 	add_child(cost)
 
 	var sigil := TextureRect.new()
