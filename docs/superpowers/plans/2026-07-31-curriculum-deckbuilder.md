@@ -172,7 +172,7 @@ textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.969, 0.918, 0.867, 1)
 ```
 
-`run/main_scene` points at a scene that does not exist until Task 19. That is fine for headless tests, which never load it; do not create a placeholder.
+**`run/main_scene` is deliberately absent until Task 24 creates `scenes/Main.tscn`.** Declaring a scene that does not exist makes `--import` emit `Failed loading resource`, which `check.sh` treats as a failure — correctly, since the project would be lying about its entry point. Task 24 adds the key back. Do not create a placeholder scene instead.
 
 `default_clear_color` is `#F7EADD` in linear floats. Keep it light.
 
@@ -346,8 +346,22 @@ if ! command -v "$GODOT" >/dev/null 2>&1 && [ ! -x "$GODOT" ]; then
   exit 127
 fi
 
-# class_name globals are unresolvable until this has run at least once.
-"$GODOT" --headless --import --path . >/dev/null 2>&1
+# class_name globals are unresolvable until this has built
+# .godot/global_script_class_cache.cfg at least once.
+#
+# The import output is checked, not discarded: Tasks 16-18 generate 72 .tres files, and a
+# bad ext_resource path or an unparseable typed array is reported HERE. Swallowing it
+# turns a broken resource into a null load and an assertion failure somewhere unrelated.
+#
+# Note the limit of this check: --import scans assets but does not eagerly load an
+# unreferenced .tres, so an orphaned broken resource slips past it. test_content walks
+# resources/ for exactly that reason.
+import_output=$("$GODOT" --headless --import --path . 2>&1)
+if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_output"; then
+  echo "$import_output" >&2
+  echo "check: import reported errors" >&2
+  exit 1
+fi
 
 output=$("$GODOT" --headless --path . --script tests/run_tests.gd 2>&1)
 status=$?
@@ -368,7 +382,19 @@ chmod +x tools/check.sh
 ./tools/check.sh
 ```
 
-Expected: FAIL. Before `--import` has run, `Schools` and `TestCase` are undeclared. Run it a second time — it must then pass, which is the point of the `--import` line. If it still fails, read the error rather than re-running.
+Expected: PASS. `check.sh` builds the class cache before running the suite, so a cold clone passes first time. Then prove the gate is not vacuous, which matters more than the green tick:
+
+```bash
+# A failed assertion must exit non-zero.
+sed -i.bak 's/Schools.ALL.size(), 5/Schools.ALL.size(), 99/' tests/test_schools.gd
+./tools/check.sh; echo "exit=$?"   # expect a FAIL line and exit=1
+mv tests/test_schools.gd.bak tests/test_schools.gd
+
+# A script error must also exit non-zero, even though Godot exits 0 while printing it.
+printf '\nfunc broken() -> void:\n\tthis_is_not_a_function()\n' >> scripts/core/Schools.gd
+./tools/check.sh >/dev/null 2>&1; echo "exit=$?"   # expect exit=1
+# restore Schools.gd by removing the appended function before continuing
+```
 
 - [ ] **Step 11: Run the test and watch it pass**
 
@@ -2649,6 +2675,18 @@ func run() -> void:
 	# An F offers only the syllabus card, and it is the syllabus card.
 	eq(f_draft.offered[0].data.card_name, "syllabus", "the syllabus card is always there")
 
+	# You cannot copy more cards than the examiner had, nor more copies of one card
+	# than it owned. The shipped tier-1 decks are 4-5 cards with repeats, so this is
+	# the real shape of the input, not an edge case.
+	var dup := _data("dup")
+	var thin := Draft.new(_own(10), [dup, dup, dup, _data("other")], syllabus, Grading.Grade.A)
+	eq(thin.offered.size(), 5, "four of theirs plus the syllabus, not the full allowance")
+	var dup_count := 0
+	for card in thin.offered:
+		if card.data.card_name == "dup":
+			dup_count += 1
+	eq(dup_count, 3, "offered exactly the three copies they owned")
+
 	# Offered cards arrive untrained.
 	eq(s_draft.offered[0].xp, 0, "copied cards start at zero xp")
 
@@ -2733,25 +2771,26 @@ func _init(own_cards: Array, examiner_deck: Array, syllabus_card: CardData, grad
 	if allowance == 0:
 		return
 
-	# Distinct cards first, so a deck of four identical cards does not consume the
-	# whole allowance on duplicates.
+	# Distinct cards first, so a generous allowance against a repetitive deck does not
+	# spend itself on duplicates before the player sees the interesting card. Building
+	# the order must PRESERVE THE MULTISET: appending the whole deck after the distinct
+	# pass would let a 4-card deck offer 5 cards, including more copies of one card
+	# than the examiner ever owned. Every tier-1 examiner has a 4-5 card deck, so that
+	# bug fires on the first Registration screen of every run.
 	var seen := {}
 	var ordered: Array = []
+	var duplicates: Array = []
 	for card in examiner_deck:
-		if not seen.has(card):
+		if seen.has(card):
+			duplicates.append(card)
+		else:
 			seen[card] = true
 			ordered.append(card)
-	for card in examiner_deck:
-		ordered.append(card)
+	ordered.append_array(duplicates)
 
-	var taken := 0
-	for card in ordered:
-		if allowance >= 0 and taken >= allowance:
-			break
-		offered.append(CardInstance.new(card))
-		taken += 1
-		if allowance < 0 and taken >= examiner_deck.size():
-			break
+	var limit := ordered.size() if allowance < 0 else mini(allowance, ordered.size())
+	for i in limit:
+		offered.append(CardInstance.new(ordered[i]))
 
 
 ## Returns the new run deck, or an empty array if the selection is illegal.
@@ -3773,6 +3812,34 @@ func run() -> void:
 				"%s shares art with its evolution" % card.card_name
 			)
 	eq(base_count, 24, "exactly twenty-four cards can evolve")
+
+	# Every .tres under resources/ must load, including any the library does not index.
+	# `--import` scans assets but does not eagerly load an unreferenced .tres, so a
+	# broken orphan is invisible to check.sh's import step and only this walk finds it.
+	for dir_name in ["cards", "enemies", "courses"]:
+		var dir := DirAccess.open("res://resources/%s" % dir_name)
+		check(dir != null, "resources/%s exists" % dir_name)
+		if dir == null:
+			continue
+		for file in dir.get_files():
+			if not file.ends_with(".tres"):
+				continue
+			var path := "res://resources/%s/%s" % [dir_name, file]
+			check(load(path) != null, "%s loads" % path)
+
+	# Status effects must name a real Statuses.Kind. The generator hardcodes the enum
+	# values as integers, so nothing else would notice them drifting out of order and
+	# silently applying Chill where Burn was meant.
+	var valid_kinds := Statuses.Kind.values()
+	for card in library.cards:
+		for effect in card.effects:
+			if effect.get("kind", "") != CardData.STATUS:
+				continue
+			check(effect.has("status"), "%s status effect names a kind" % card.card_name)
+			check(
+				effect.get("status", -1) in valid_kinds,
+				"%s status %s is a real Statuses.Kind" % [card.card_name, effect.get("status", -1)]
+			)
 
 	# Every school is represented, or a deck cannot be built in it.
 	var by_school := {}
@@ -6315,7 +6382,7 @@ func _screenshot(path: String) -> void:
 	get_tree().quit()  # or the process hangs forever
 ```
 
-- [ ] **Step 5: Build `scenes/Main.tscn`**
+- [ ] **Step 5: Build `scenes/Main.tscn` and declare it as the entry point**
 
 ```ini
 [gd_scene load_steps=2 format=3]
@@ -6324,6 +6391,20 @@ func _screenshot(path: String) -> void:
 
 [node name="Main" type="Node"]
 script = ExtResource("1")
+```
+
+Now that the scene exists, add the key Task 1 deliberately left out — into the
+`[application]` section of `project.godot`, directly after `config/description`:
+
+```ini
+run/main_scene="res://scenes/Main.tscn"
+```
+
+Then confirm the gate still passes from a cold cache, since `check.sh` fails on the
+`Failed loading resource` that a wrong path here would produce:
+
+```bash
+rm -rf .godot && ./tools/check.sh
 ```
 
 - [ ] **Step 6: Run the tests and watch them pass**

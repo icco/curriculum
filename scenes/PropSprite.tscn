@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://scripts/view/PropSprite.gd" id="1_g53nn"]
-
-[node name="@Node2D@3" type="Node2D" unique_id=581699954]
-script = ExtResource("1_g53nn")
