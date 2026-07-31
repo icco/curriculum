@@ -4570,3 +4570,2352 @@ git add -A
 git commit -m "feat(content): add the fifteen courses and a headless run simulation"
 git push
 ```
+
+---
+
+## Phase 5 — Presentation
+
+### Task 19: The theme and the procedural art fallback
+
+Art lands in Task 26. Until then every sprite is painted at runtime, so the game is
+playable from here on and a half-finished art set still renders.
+
+**Files:**
+- Create: `scripts/view/ArtFactory.gd`, `scripts/view/ArtLibrary.gd`, `tools/generate_theme.gd`, `resources/ui_theme.tres` (generated)
+- Test: `tests/test_art.gd`
+
+**Interfaces:**
+- Consumes: `Schools` (1).
+- Produces: `ArtLibrary.PAPER`, `INK`, `SLATE`, `GRAIN_A`, `GRAIN_B` colour constants; `ArtLibrary.texture(key: String, size: Vector2i) -> Texture2D` returning the imported sprite at `assets/sprites/<key>.png` when it exists and a painted fallback otherwise; `ArtLibrary.has_sprite(key) -> bool`; `ArtLibrary.missing_keys(keys: Array) -> Array`. `ArtFactory.card_face(school, size) -> ImageTexture`, `sigil(school, size)`, `figure(seed_text: String, size)`, `medallion(tier: int, size)`.
+
+- [ ] **Step 1: Write the failing test `tests/test_art.gd`**
+
+```gdscript
+extends TestCase
+
+## Art is optional per sprite. These checks are what let the game ship before any
+## illustration exists, and what stop a typo'd art_id from silently falling back.
+
+
+func suite_name() -> String:
+	return "art"
+
+
+func run() -> void:
+	eq(ArtLibrary.PAPER, Color("#F7EADD"), "paper is the reference cream")
+	eq(ArtLibrary.INK, Color("#000000"), "ink is black")
+
+	# A key with no file still returns a usable texture.
+	var missing := ArtLibrary.texture("cards/definitely_not_a_real_key", Vector2i(64, 96))
+	check(missing != null, "fallback texture returned")
+	eq(missing.get_width(), 64, "fallback respects the requested width")
+	eq(missing.get_height(), 96, "fallback respects the requested height")
+	eq(ArtLibrary.has_sprite("cards/definitely_not_a_real_key"), false, "reports no sprite")
+
+	# Every school paints a distinct card face and sigil.
+	var faces := {}
+	for school in Schools.ALL:
+		var face := ArtFactory.card_face(school, Vector2i(32, 48))
+		check(face != null, "painted a face for %s" % Schools.display_name(school))
+		faces[face.get_image().get_pixel(4, 4)] = true
+		var sigil := ArtFactory.sigil(school, Vector2i(16, 16))
+		check(sigil != null, "painted a sigil for %s" % Schools.display_name(school))
+	eq(faces.size(), 5, "the five schools paint five distinct faces")
+
+	# Figures are deterministic per name, so an examiner looks the same every battle.
+	var a := ArtFactory.figure("Novice", Vector2i(24, 48))
+	var b := ArtFactory.figure("Novice", Vector2i(24, 48))
+	eq(a.get_image().get_pixel(12, 24), b.get_image().get_pixel(12, 24), "figures are stable")
+	var c := ArtFactory.figure("Rector", Vector2i(24, 48))
+	neq(a.get_image().get_pixel(12, 24), c.get_image().get_pixel(12, 24), "different names differ")
+
+	# Every art_id the content declares is a key the library can serve, painted or not.
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var keys := []
+	for card in library.cards:
+		keys.append(card.art_id)
+	for enemy in library.enemies:
+		keys.append(enemy.art_id)
+	for key in keys:
+		var texture := ArtLibrary.texture(key, Vector2i(16, 16))
+		check(texture != null, "%s resolves to something drawable" % key)
+
+	# The theme exists and is light, per spec 9.2.
+	var theme: Theme = load("res://resources/ui_theme.tres")
+	check(theme != null, "theme loads")
+	if theme != null:
+		check(theme.default_font_size >= 24, "font is thumb-legible at 1080 wide")
+
+	# Reports what art is still procedural, which drives the manifest in Task 25.
+	var still_missing := ArtLibrary.missing_keys(keys)
+	print("    art: %d of %d keys still procedural" % [still_missing.size(), keys.size()])
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_art.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `ArtLibrary` is not declared.
+
+- [ ] **Step 3: Write `scripts/view/ArtFactory.gd`**
+
+The register is flat mid-century screenprint: flat inks, no gradients, no outlines,
+plus grain. Paint grain as scattered single pixels of the grain greys — that reads as
+risograph at small sizes and costs nothing.
+
+```gdscript
+class_name ArtFactory
+extends RefCounted
+
+## Paints the procedural fallbacks. Flat shapes and stipple grain, never gradients:
+## the art direction is 1950s screenprint, and flat shapes read at card size.
+
+
+static func _grain(image: Image, rng: RandomNumberGenerator, density := 0.06) -> void:
+	var count := int(float(image.get_width() * image.get_height()) * density)
+	for _i in count:
+		var x := rng.randi_range(0, image.get_width() - 1)
+		var y := rng.randi_range(0, image.get_height() - 1)
+		var grey := ArtLibrary.GRAIN_A if rng.randf() < 0.5 else ArtLibrary.GRAIN_B
+		image.set_pixel(x, y, image.get_pixel(x, y).lerp(grey, 0.35))
+
+
+static func _rng_for(text: String) -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(text)
+	return rng
+
+
+## A card's illustration area: the school's ink as a large organic field on paper.
+static func card_face(school, size: Vector2i) -> ImageTexture:
+	var image := Image.create(maxi(1, size.x), maxi(1, size.y), false, Image.FORMAT_RGBA8)
+	image.fill(ArtLibrary.PAPER)
+	var ink: Color = Schools.colour(school)
+	var rng := _rng_for(Schools.display_name(school))
+
+	# One big rounded field, inset like a printed plate rather than bleeding out.
+	var inset := maxi(1, size.x / 8)
+	var radius := float(size.x) * 0.34
+	var centre := Vector2(float(size.x) * 0.5, float(size.y) * 0.45)
+	for y in size.y:
+		for x in size.x:
+			if x < inset or x >= size.x - inset or y < inset:
+				continue
+			if Vector2(x, y).distance_to(centre) <= radius:
+				image.set_pixel(x, y, ink)
+
+	# A single stippled celestial glyph, as in the reference.
+	var glyph := Vector2(float(size.x) * 0.72, float(size.y) * 0.22)
+	var glyph_r := maxf(1.0, float(size.x) * 0.09)
+	for y in size.y:
+		for x in size.x:
+			if Vector2(x, y).distance_to(glyph) <= glyph_r:
+				image.set_pixel(x, y, ArtLibrary.GRAIN_A)
+
+	_grain(image, rng)
+	return ImageTexture.create_from_image(image)
+
+
+## The school's mark: a small flat shape, distinct per school by silhouette as well as
+## by colour, so it survives a colourblind player.
+static func sigil(school, size: Vector2i) -> ImageTexture:
+	var image := Image.create(maxi(1, size.x), maxi(1, size.y), false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	var ink: Color = Schools.colour(school)
+	var w := size.x
+	var h := size.y
+	match school:
+		Schools.School.CINDER:  # upward triangle
+			for y in h:
+				var half := int(float(y) / float(h) * float(w) * 0.5)
+				for x in range(w / 2 - half, w / 2 + half + 1):
+					if x >= 0 and x < w:
+						image.set_pixel(x, h - 1 - y, ink)
+		Schools.School.FROST:  # diamond
+			for y in h:
+				var d := absi(y - h / 2)
+				var half := (h / 2 - d) * w / maxi(1, h)
+				for x in range(w / 2 - half, w / 2 + half + 1):
+					if x >= 0 and x < w:
+						image.set_pixel(x, y, ink)
+		Schools.School.INK:  # filled circle
+			var r := float(mini(w, h)) * 0.45
+			for y in h:
+				for x in w:
+					if Vector2(x, y).distance_to(Vector2(w, h) * 0.5) <= r:
+						image.set_pixel(x, y, ink)
+		Schools.School.ROT:  # downward triangle
+			for y in h:
+				var half := int(float(h - y) / float(h) * float(w) * 0.5)
+				for x in range(w / 2 - half, w / 2 + half + 1):
+					if x >= 0 and x < w:
+						image.set_pixel(x, h - 1 - y, ink)
+		Schools.School.WARD:  # square
+			for y in range(h / 6, h - h / 6):
+				for x in range(w / 6, w - w / 6):
+					image.set_pixel(x, y, ink)
+	return ImageTexture.create_from_image(image)
+
+
+## A figure: a flat silhouette whose proportions come from the name, so an examiner
+## looks the same in every battle.
+static func figure(seed_text: String, size: Vector2i) -> ImageTexture:
+	var image := Image.create(maxi(1, size.x), maxi(1, size.y), false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	var rng := _rng_for(seed_text)
+	var robe := [
+		Color("#D45C3C"), Color("#E0A51F"), Color("#498BAD"), Color("#6E7B3F"), Color("#A3B0AC")
+	][rng.randi_range(0, 4)]
+	var w := size.x
+	var h := size.y
+
+	# Robe: a trapezium widening to the hem.
+	var shoulder := int(float(w) * rng.randf_range(0.34, 0.46))
+	for y in range(int(float(h) * 0.28), h):
+		var t := float(y - int(float(h) * 0.28)) / maxf(1.0, float(h) * 0.72)
+		var half := int(lerpf(float(shoulder), float(w) * 0.5, t))
+		for x in range(w / 2 - half, w / 2 + half):
+			if x >= 0 and x < w:
+				image.set_pixel(x, y, robe)
+
+	# Head: a black circle, the reference's flat-black treatment.
+	var head_r := float(w) * 0.18
+	var head_c := Vector2(float(w) * 0.5, float(h) * 0.18)
+	for y in h:
+		for x in w:
+			if Vector2(x, y).distance_to(head_c) <= head_r:
+				image.set_pixel(x, y, ArtLibrary.INK)
+
+	_grain(image, rng, 0.05)
+	return ImageTexture.create_from_image(image)
+
+
+## A course medallion, one flat colour per tier.
+static func medallion(tier: int, size: Vector2i) -> ImageTexture:
+	var image := Image.create(maxi(1, size.x), maxi(1, size.y), false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	var ink := [Color("#498BAD"), Color("#E0A51F"), Color("#D45C3C")][clampi(tier - 1, 0, 2)]
+	var r := float(mini(size.x, size.y)) * 0.46
+	var c := Vector2(size.x, size.y) * 0.5
+	for y in size.y:
+		for x in size.x:
+			var d := Vector2(x, y).distance_to(c)
+			if d <= r:
+				image.set_pixel(x, y, ink if d > r * 0.72 else ArtLibrary.PAPER)
+	_grain(image, _rng_for("tier%d" % tier), 0.04)
+	return ImageTexture.create_from_image(image)
+```
+
+- [ ] **Step 4: Write `scripts/view/ArtLibrary.gd`**
+
+A `.png` is not loadable until Godot has imported it, so `ResourceLoader.exists` is the
+right check, not `FileAccess.file_exists`.
+
+```gdscript
+class_name ArtLibrary
+extends RefCounted
+
+## Sprite lookup with a per-key procedural fallback, so a half-finished art set renders
+## correctly and one illustration can drop in at a time.
+
+const PAPER := Color("#F7EADD")
+const INK := Color("#000000")
+const SLATE := Color("#A3B0AC")
+const GRAIN_A := Color("#999189")
+const GRAIN_B := Color("#6C6661")
+
+const SPRITE_DIR := "res://assets/sprites"
+
+static var _cache := {}
+
+
+static func _sprite_path(key: String) -> String:
+	return "%s/%s.png" % [SPRITE_DIR, key]
+
+
+## A .png is unusable until Godot has imported it — writing the file is not enough,
+## which is why tools/import-assets.sh runs --import.
+static func has_sprite(key: String) -> bool:
+	return ResourceLoader.exists(_sprite_path(key))
+
+
+static func texture(key: String, size: Vector2i) -> Texture2D:
+	if has_sprite(key):
+		var loaded: Texture2D = load(_sprite_path(key))
+		if loaded != null:
+			return loaded
+
+	var cache_key := "%s@%dx%d" % [key, size.x, size.y]
+	if _cache.has(cache_key):
+		return _cache[cache_key]
+
+	var painted: Texture2D = _paint(key, size)
+	_cache[cache_key] = painted
+	return painted
+
+
+static func _paint(key: String, size: Vector2i) -> Texture2D:
+	if key.begins_with("cards/"):
+		return ArtFactory.card_face(_school_for(key), size)
+	if key.begins_with("entities/"):
+		return ArtFactory.figure(key, size)
+	if key.begins_with("courses/"):
+		return ArtFactory.medallion(1, size)
+	return ArtFactory.figure(key, size)
+
+
+## Cards fall back to a face in a school derived from the key, so two different cards
+## do not paint identically.
+static func _school_for(key: String):
+	return Schools.ALL[absi(hash(key)) % Schools.ALL.size()]
+
+
+## Which of these keys are still drawn procedurally. Drives the art manifest.
+static func missing_keys(keys: Array) -> Array:
+	var out: Array = []
+	var seen := {}
+	for key in keys:
+		if seen.has(key):
+			continue
+		seen[key] = true
+		if not has_sprite(key):
+			out.append(key)
+	return out
+```
+
+- [ ] **Step 5: Write `tools/generate_theme.gd` and generate the theme**
+
+```gdscript
+extends SceneTree
+
+## Regenerates resources/ui_theme.tres. Light, per spec 9.2: paper ground, ink text,
+## and 48px minimum tap targets for thumbs at 1080 wide.
+
+const OUT := "res://resources/ui_theme.tres"
+const MIN_TAP := 96  # 48dp at a 2x portrait scale
+
+
+func _flat(colour: Color, border: Color, width := 2) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = colour
+	box.border_color = border
+	box.set_border_width_all(width)
+	box.set_corner_radius_all(6)
+	box.set_content_margin_all(16)
+	return box
+
+
+func _process(_delta: float) -> bool:
+	var theme := Theme.new()
+	theme.default_font_size = 32
+
+	theme.set_stylebox("normal", "Button", _flat(ArtLibrary.PAPER, ArtLibrary.INK))
+	theme.set_stylebox("hover", "Button", _flat(Color("#E0A51F"), ArtLibrary.INK))
+	theme.set_stylebox("pressed", "Button", _flat(Color("#D45C3C"), ArtLibrary.INK))
+	theme.set_stylebox("disabled", "Button", _flat(ArtLibrary.SLATE, ArtLibrary.GRAIN_B))
+	theme.set_color("font_color", "Button", ArtLibrary.INK)
+	theme.set_color("font_disabled_color", "Button", ArtLibrary.GRAIN_B)
+	theme.set_constant("h_separation", "Button", 12)
+	theme.set_color("font_color", "Label", ArtLibrary.INK)
+	theme.set_stylebox("panel", "PanelContainer", _flat(ArtLibrary.PAPER, ArtLibrary.INK))
+	theme.set_stylebox("background", "ProgressBar", _flat(ArtLibrary.SLATE, ArtLibrary.INK, 2))
+	theme.set_stylebox("fill", "ProgressBar", _flat(Color("#D45C3C"), ArtLibrary.INK, 0))
+
+	if ResourceSaver.save(theme, OUT) != OK:
+		printerr("failed to write %s" % OUT)
+		quit(1)
+		return true
+	print("wrote %s (min tap target %dpx)" % [OUT, MIN_TAP])
+	quit(0)
+	return true
+```
+
+Then:
+
+```bash
+godot --headless --path . --script tools/generate_theme.gd
+godot --headless --import --path . >/dev/null 2>&1
+```
+
+- [ ] **Step 6: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS, with the `art:` line reporting every key still procedural.
+
+- [ ] **Step 7: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(view): add the procedural art fallback and the light theme"
+git push
+```
+
+---
+
+### Task 20: `CardView` and `HandFan`
+
+**Files:**
+- Create: `scripts/ui/UIKit.gd`, `scripts/ui/CardView.gd`, `scripts/ui/HandFan.gd`
+- Test: `tests/test_ui.gd`
+
+**Interfaces:**
+- Consumes: `CardInstance` (4), `ArtLibrary`/`ArtFactory` (19), `Schools` (1).
+- Produces: `UIKit.label(text, size) -> Label`, `UIKit.button(text) -> Button`, `UIKit.spacer() -> Control`, `UIKit.transparent(container)` setting `MOUSE_FILTER_IGNORE`. `CardView` (extends `Control`) with `setup(card: CardInstance)`, `signal play_requested(card)`, `signal inspect_requested(card)`, `var card`, `set_playable(bool)`. `HandFan` (extends `Control`) with `set_hand(cards: Array)`, `layout()`, `signal card_play_requested(card)`, and `static fan_transform(index: int, count: int, width: float) -> Dictionary` returning `{"position": Vector2, "rotation": float}`.
+
+The fan maths is a pure static function so it is testable without a scene.
+
+- [ ] **Step 1: Write the failing test `tests/test_ui.gd`**
+
+```gdscript
+extends TestCase
+
+## Layout maths and the mouse-filter discipline. Control nodes eat board taps: every
+## container must be MOUSE_FILTER_IGNORE with only buttons set to STOP, or the screen
+## goes silently unresponsive.
+
+
+func suite_name() -> String:
+	return "ui"
+
+
+func _card(name: String, cost := 1) -> CardInstance:
+	var d := CardData.new()
+	d.card_name = name
+	d.cost = cost
+	d.school = Schools.School.CINDER
+	d.effects = [{"kind": CardData.DAMAGE, "amount": 6}] as Array[Dictionary]
+	d.art_id = "cards/spark"
+	return CardInstance.new(d)
+
+
+func run() -> void:
+	# A single card sits centred and upright.
+	var solo := HandFan.fan_transform(0, 1, 1080.0)
+	almost(solo["rotation"], 0.0, "one card is upright")
+	almost(solo["position"].x, 540.0, "one card is centred")
+
+	# Five cards fan symmetrically about the centre.
+	var first := HandFan.fan_transform(0, 5, 1080.0)
+	var last := HandFan.fan_transform(4, 5, 1080.0)
+	var middle := HandFan.fan_transform(2, 5, 1080.0)
+	check(first["position"].x < middle["position"].x, "cards run left to right")
+	check(middle["position"].x < last["position"].x, "cards run left to right")
+	almost(middle["rotation"], 0.0, "the middle card is upright")
+	almost(first["rotation"], -last["rotation"], "the fan is symmetric")
+	check(first["rotation"] < 0.0, "the left card tilts left")
+	# Outer cards sit lower, which is what makes a fan read as a fan.
+	check(first["position"].y > middle["position"].y, "outer cards hang lower")
+	almost(first["position"].y, last["position"].y, "the fan is level")
+
+	# The fan never runs off a 1080-wide screen, however many cards are held.
+	for count in [1, 3, 5, 8, 12]:
+		for i in count:
+			var t := HandFan.fan_transform(i, count, 1080.0)
+			check(t["position"].x >= 0.0, "card %d/%d is on screen" % [i, count])
+			check(t["position"].x <= 1080.0, "card %d/%d is on screen" % [i, count])
+
+	# A CardView reports the card it was given and its XP progress.
+	var view := CardView.new()
+	var card := _card("Spark")
+	view.setup(card)
+	eq(view.card, card, "view holds its card")
+	check(view.get_child_count() > 0, "view built its children")
+	view.set_playable(false)
+	eq(view.modulate.a < 1.0, true, "unplayable cards are dimmed")
+	view.set_playable(true)
+	almost(view.modulate.a, 1.0, "playable cards are opaque")
+
+	# Containers must not swallow taps.
+	var fan := HandFan.new()
+	fan.set_hand([_card("a"), _card("b")])
+	eq(fan.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the fan itself ignores the mouse")
+	eq(fan.get_child_count(), 2, "one view per card")
+
+	var box := UIKit.transparent(VBoxContainer.new())
+	eq(box.mouse_filter, Control.MOUSE_FILTER_IGNORE, "UIKit containers ignore the mouse")
+	eq(UIKit.button("Tap").mouse_filter, Control.MOUSE_FILTER_STOP, "buttons stop it")
+	# 48dp thumb targets at 1080 wide.
+	check(UIKit.button("Tap").custom_minimum_size.y >= 96.0, "buttons are thumb-sized")
+
+	view.free()
+	fan.free()
+	box.free()
+```
+
+- [ ] **Step 2: Register the suite and watch it fail**
+
+Add `"res://tests/test_ui.gd"` to `SUITES`, run `./tools/check.sh`.
+Expected: FAIL — `HandFan` is not declared.
+
+- [ ] **Step 3: Write `scripts/ui/UIKit.gd`**
+
+```gdscript
+class_name UIKit
+extends RefCounted
+
+## Shared widget constructors, so screens read as declarations. Also the single place
+## the mouse-filter rule is applied.
+
+const TAP_MIN := 96.0  # 48dp at portrait 2x
+
+
+static func label(text: String, size := 32) -> Label:
+	var node := Label.new()
+	node.text = text
+	node.add_theme_font_size_override("font_size", size)
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return node
+
+
+static func button(text: String) -> Button:
+	var node := Button.new()
+	node.text = text
+	node.custom_minimum_size = Vector2(TAP_MIN * 2.0, TAP_MIN)
+	node.mouse_filter = Control.MOUSE_FILTER_STOP
+	return node
+
+
+## Containers must never intercept taps meant for the board beneath them.
+static func transparent(container: Control) -> Control:
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return container
+
+
+static func spacer() -> Control:
+	var node := Control.new()
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	node.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return node
+```
+
+- [ ] **Step 4: Write `scripts/ui/CardView.gd`**
+
+```gdscript
+class_name CardView
+extends Control
+
+## One card. Dragged upward to play, tapped to inspect. Portrait 2:3, so it stays
+## legible in a five-card fan on a 1080-wide screen.
+
+signal play_requested(card)
+signal inspect_requested(card)
+
+const CARD_SIZE := Vector2(200, 300)
+## How far up the card must be dragged before it counts as played.
+const PLAY_THRESHOLD := 120.0
+
+var card: CardInstance = null
+
+var _dragging := false
+var _drag_start := Vector2.ZERO
+var _home := Vector2.ZERO
+var _playable := true
+
+
+func setup(instance: CardInstance) -> void:
+	card = instance
+	custom_minimum_size = CARD_SIZE
+	size = CARD_SIZE
+	pivot_offset = CARD_SIZE * 0.5
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	_build()
+
+
+func _build() -> void:
+	for child in get_children():
+		child.queue_free()
+	if card == null:
+		return
+
+	var frame := TextureRect.new()
+	frame.texture = ArtLibrary.texture(card.data.art_id, Vector2i(CARD_SIZE))
+	frame.size = CARD_SIZE
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(frame)
+
+	# Evolved cards get a gold rim: same illustration, now mastered.
+	if not card.can_evolve():
+		var rim := Panel.new()
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(0, 0, 0, 0)
+		box.border_color = Color("#E0A51F")
+		box.set_border_width_all(6)
+		rim.add_theme_stylebox_override("panel", box)
+		rim.size = CARD_SIZE
+		rim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(rim)
+
+	var name_box := UIKit.label(card.data.card_name, 24)
+	name_box.position = Vector2(16, CARD_SIZE.y - 96)
+	name_box.size = Vector2(CARD_SIZE.x - 32, 40)
+	add_child(name_box)
+
+	var cost := UIKit.label(str(card.data.cost), 30)
+	cost.position = Vector2(12, 8)
+	add_child(cost)
+
+	var sigil := TextureRect.new()
+	sigil.texture = ArtFactory.sigil(card.data.school, Vector2i(32, 32))
+	sigil.position = Vector2(CARD_SIZE.x - 44, 8)
+	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(sigil)
+
+	# XP ticks along the bottom edge.
+	if card.can_evolve():
+		for i in card.data.xp_to_evolve:
+			var tick := Panel.new()
+			var style := StyleBoxFlat.new()
+			style.bg_color = ArtLibrary.INK if i < card.xp else ArtLibrary.SLATE
+			tick.add_theme_stylebox_override("panel", style)
+			tick.size = Vector2(24, 8)
+			tick.position = Vector2(16 + i * 30, CARD_SIZE.y - 24)
+			tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			add_child(tick)
+
+
+func set_playable(value: bool) -> void:
+	_playable = value
+	modulate.a = 1.0 if value else 0.45
+
+
+func remember_home() -> void:
+	_home = position
+
+
+func _gui_input(event: InputEvent) -> void:
+	if card == null:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_dragging = true
+			_drag_start = event.global_position
+			_home = position
+		else:
+			var lifted := _drag_start.y - event.global_position.y
+			_dragging = false
+			if _playable and lifted >= PLAY_THRESHOLD:
+				play_requested.emit(card)
+			else:
+				position = _home
+				inspect_requested.emit(card)
+	elif event is InputEventMouseMotion and _dragging:
+		position += event.relative
+```
+
+- [ ] **Step 5: Write `scripts/ui/HandFan.gd`**
+
+```gdscript
+class_name HandFan
+extends Control
+
+## The curved hand. The layout maths is a static function so it can be tested without
+## instantiating a scene.
+
+signal card_play_requested(card)
+signal card_inspect_requested(card)
+
+const MAX_SPREAD := 420.0
+const MAX_TILT := 0.22  # radians at the outermost card
+const ARC_DROP := 46.0  # how far the outer cards hang below the middle
+
+
+## Where card `index` of `count` sits across a screen `width` wide.
+static func fan_transform(index: int, count: int, width: float) -> Dictionary:
+	if count <= 1:
+		return {"position": Vector2(width * 0.5, 0.0), "rotation": 0.0}
+
+	# -1 at the far left, +1 at the far right.
+	var t := (float(index) / float(count - 1)) * 2.0 - 1.0
+	# Narrow the spread as the hand grows so it never leaves the screen.
+	var spread := minf(MAX_SPREAD, width * 0.42)
+	var x := width * 0.5 + t * spread
+	var y := absf(t) * ARC_DROP
+	return {"position": Vector2(clampf(x, 0.0, width), y), "rotation": t * MAX_TILT}
+
+
+func _init() -> void:
+	# The fan itself must not eat taps; only the CardViews inside it do.
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func set_hand(cards: Array) -> void:
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	for card in cards:
+		var view := CardView.new()
+		view.setup(card)
+		view.play_requested.connect(func(c): card_play_requested.emit(c))
+		view.inspect_requested.connect(func(c): card_inspect_requested.emit(c))
+		add_child(view)
+	layout()
+
+
+func layout() -> void:
+	var width := size.x if size.x > 0.0 else 1080.0
+	var views := get_children()
+	for i in views.size():
+		var view: CardView = views[i]
+		var t := fan_transform(i, views.size(), width)
+		view.position = t["position"] - CardView.CARD_SIZE * 0.5
+		view.rotation = t["rotation"]
+		view.remember_home()
+
+
+func set_playable(predicate: Callable) -> void:
+	for child in get_children():
+		var view: CardView = child
+		view.set_playable(predicate.call(view.card))
+```
+
+- [ ] **Step 6: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 7: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(ui): add card views and the curved hand fan"
+git push
+```
+
+---
+
+### Task 21: `BattleScreen`
+
+**Files:**
+- Create: `scripts/ui/BattleScreen.gd`
+- Modify: `tests/test_ui.gd`
+
+**Interfaces:**
+- Consumes: `Battle` (9), `HandFan`/`CardView`/`UIKit` (20), `ArtLibrary` (19).
+- Produces: `BattleScreen` (extends `Control`) with `begin(battle: Battle)`, `signal battle_finished(battle)`, `refresh()`, and `replay(events: Array)` appending each event's `text` to the log. Node tree: a root `Control` holding `ExaminerPanel` (figure, HP bar, intent label), `PlayerPanel` (HP bar, mana pips, pile counts), `Log`, `HandFan`, and an `End Turn` button.
+
+- [ ] **Step 1: Add battle-screen checks to `tests/test_ui.gd`**
+
+Append to `run()`:
+
+```gdscript
+	# The battle screen wires a Battle to the fan and the end-turn button.
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var deck := library.new_starting_deck()
+	var fight := Battle.new(deck, library.enemies[0], Bestiary.new(), rng)
+	var screen := BattleScreen.new()
+	screen.size = Vector2(1080, 1920)
+	screen.begin(fight)
+	eq(screen.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the screen does not eat taps")
+	check(screen.hand_fan != null, "built a hand fan")
+	eq(screen.hand_fan.get_child_count(), 5, "showed the five drawn cards")
+	check(screen.end_turn_button != null, "built an end-turn button")
+	eq(screen.end_turn_button.mouse_filter, Control.MOUSE_FILTER_STOP, "the button takes taps")
+	check(screen.intent_label.text.length() > 0, "telegraphed the examiner's intent")
+
+	# Replaying events writes them to the log rather than touching core state.
+	var before := fight.examiner.hp
+	screen.replay([{"type": "damage", "target": "examiner", "amount": 3, "text": "3 damage"}])
+	eq(fight.examiner.hp, before, "replaying does not mutate the battle")
+	check(screen.log_label.text.contains("3 damage"), "logged the event")
+
+	# Unaffordable cards are dimmed.
+	fight.player.mana = 0
+	screen.refresh()
+	var any_dimmed := false
+	for child in screen.hand_fan.get_children():
+		if child.modulate.a < 1.0:
+			any_dimmed = true
+	eq(any_dimmed, true, "unaffordable cards dim with no mana")
+
+	screen.free()
+```
+
+- [ ] **Step 2: Run it and watch it fail**
+
+Expected: FAIL — `BattleScreen` is not declared.
+
+- [ ] **Step 3: Write `scripts/ui/BattleScreen.gd`**
+
+```gdscript
+class_name BattleScreen
+extends Control
+
+## Top half examiner, bottom half player and hand, per the brief. Replays the event
+## arrays Battle returns; never computes a rule itself.
+
+signal battle_finished(battle)
+
+var battle: Battle = null
+
+var hand_fan: HandFan = null
+var end_turn_button: Button = null
+var intent_label: Label = null
+var log_label: Label = null
+var examiner_bar: ProgressBar = null
+var player_bar: ProgressBar = null
+var mana_label: Label = null
+var piles_label: Label = null
+var examiner_figure: TextureRect = null
+
+var _log_lines: Array[String] = []
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func begin(fight: Battle) -> void:
+	battle = fight
+	_build()
+	replay(battle.start() if battle.turns == 0 else [])
+	refresh()
+
+
+func _build() -> void:
+	for child in get_children():
+		child.queue_free()
+
+	var root := UIKit.transparent(VBoxContainer.new())
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+
+	# --- Top half: the examiner ---
+	var top := UIKit.transparent(VBoxContainer.new())
+	top.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_child(top)
+
+	examiner_figure = TextureRect.new()
+	examiner_figure.custom_minimum_size = Vector2(360, 520)
+	examiner_figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	examiner_figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	examiner_figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(examiner_figure)
+
+	top.add_child(UIKit.label(battle.examiner.display_name, 40))
+	examiner_bar = ProgressBar.new()
+	examiner_bar.custom_minimum_size = Vector2(600, 40)
+	examiner_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(examiner_bar)
+
+	intent_label = UIKit.label("", 28)
+	top.add_child(intent_label)
+
+	log_label = UIKit.label("", 24)
+	log_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	top.add_child(log_label)
+
+	# --- Bottom half: the player ---
+	var bottom := UIKit.transparent(VBoxContainer.new())
+	root.add_child(bottom)
+
+	player_bar = ProgressBar.new()
+	player_bar.custom_minimum_size = Vector2(600, 40)
+	player_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom.add_child(player_bar)
+
+	var row := UIKit.transparent(HBoxContainer.new())
+	bottom.add_child(row)
+	mana_label = UIKit.label("", 32)
+	row.add_child(mana_label)
+	piles_label = UIKit.label("", 24)
+	row.add_child(piles_label)
+
+	hand_fan = HandFan.new()
+	hand_fan.custom_minimum_size = Vector2(1080, 340)
+	hand_fan.size = Vector2(1080, 340)
+	hand_fan.card_play_requested.connect(_on_card_played)
+	bottom.add_child(hand_fan)
+
+	end_turn_button = UIKit.button("End Turn")
+	end_turn_button.pressed.connect(_on_end_turn)
+	bottom.add_child(end_turn_button)
+
+
+func _on_card_played(card) -> void:
+	if battle == null or battle.finished:
+		return
+	replay(battle.play_card(card))
+	refresh()
+	_check_finished()
+
+
+func _on_end_turn() -> void:
+	if battle == null or battle.finished:
+		return
+	replay(battle.end_turn())
+	refresh()
+	_check_finished()
+
+
+func _check_finished() -> void:
+	if battle != null and battle.finished:
+		end_turn_button.disabled = true
+		battle_finished.emit(battle)
+
+
+## Appends each event's text. Never mutates the battle: core has already resolved it.
+func replay(events: Array) -> void:
+	for event in events:
+		var text: String = str(event.get("text", ""))
+		if text != "":
+			_log_lines.append(text)
+	while _log_lines.size() > 6:
+		_log_lines.pop_front()
+	if log_label != null:
+		log_label.text = "\n".join(_log_lines)
+
+
+func refresh() -> void:
+	if battle == null:
+		return
+	examiner_bar.max_value = maxi(1, battle.examiner.max_hp)
+	examiner_bar.value = battle.examiner.hp
+	player_bar.max_value = maxi(1, battle.player.max_hp)
+	player_bar.value = battle.player.hp
+
+	examiner_figure.texture = ArtLibrary.texture(
+		battle.examiner_art_id(), Vector2i(360, 520)
+	)
+
+	var block_text := "" if battle.player.block <= 0 else "  block %d" % battle.player.block
+	mana_label.text = "%d/%d mana%s" % [battle.player.mana, battle.player.mana_per_turn, block_text]
+	piles_label.text = (
+		"draw %d  discard %d"
+		% [battle.player_deck.draw_pile.size(), battle.player_deck.discard_pile.size()]
+	)
+
+	if battle.examiner_intent != null:
+		intent_label.text = "Next: %s" % battle.examiner_intent.data.card_name
+	else:
+		intent_label.text = "Next: hesitating"
+
+	hand_fan.set_hand(battle.player_deck.hand)
+	hand_fan.set_playable(func(card): return battle.can_play(card))
+```
+
+- [ ] **Step 4: Add `examiner_art_id()` to `scripts/core/Battle.gd`**
+
+`Battle` already holds the `EnemyData`; the screen should not reach into a private
+field for it.
+
+```gdscript
+func examiner_art_id() -> String:
+	return "" if _enemy_data == null else _enemy_data.art_id
+
+
+func examiner_data() -> EnemyData:
+	return _enemy_data
+```
+
+- [ ] **Step 5: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(ui): add the battle screen and event replay"
+git push
+```
+
+---
+
+### Task 22: `ReportCard` and `RegistrationScreen`
+
+**Files:**
+- Create: `scripts/ui/ReportCard.gd`, `scripts/ui/RegistrationScreen.gd`
+- Modify: `tests/test_ui.gd`
+
+**Interfaces:**
+- Consumes: `Grading` (10), `Draft` (11), `CardView` (20).
+- Produces: `ReportCard.show_result(scored: Dictionary, result: Dictionary, course)`, `signal continued`; `RegistrationScreen.begin(draft: Draft)`, `signal registration_complete(kept: Array)`, `toggle(card)`, `var selected: Array`, `can_confirm() -> bool`.
+
+Registration is the screen that poses the plan's central decision, so it must show XP
+on every card and refuse a selection that is not exactly the cap.
+
+- [ ] **Step 1: Add checks to `tests/test_ui.gd`**
+
+Append to `run()`:
+
+```gdscript
+	# The report card shows all four terms and the letter.
+	var report := ReportCard.new()
+	var course := CourseData.new()
+	course.course_name = "Basic Arcana 101"
+	var scored := Grading.score({
+		"won": true, "turns_taken": 5, "par_turns": 5, "hp_end": 60, "hp_start": 60,
+		"xp_banked": 15, "xp_par": 15, "weakness_known": true, "distinct_schools": 5,
+	})
+	report.show_result(scored, {"strike": false, "strikes": 0, "expelled": false}, course)
+	var report_text := ""
+	for child in report.find_children("*", "Label", true, false):
+		report_text += child.text + " "
+	check(report_text.contains("S"), "showed the letter grade")
+	for term in ["Efficiency", "Survival", "Learning", "Discovery"]:
+		check(report_text.contains(term), "showed the %s term" % term)
+	report.free()
+
+	# Registration enforces the cap and shows XP.
+	var own: Array = []
+	for i in 10:
+		own.append(_card("own%d" % i))
+	own[0].gain_xp()
+	var pool: Array[CardData] = []
+	for i in 4:
+		var d := CardData.new()
+		d.card_name = "theirs%d" % i
+		d.art_id = "cards/spark"
+		pool.append(d)
+	var syllabus := CardData.new()
+	syllabus.card_name = "syllabus"
+	syllabus.art_id = "cards/spark"
+	var draft := Draft.new(own, pool, syllabus, Grading.Grade.S)
+	draft.cap = 11
+	var registration := RegistrationScreen.new()
+	registration.size = Vector2(1080, 1920)
+	registration.begin(draft)
+	eq(registration.selected.size(), 0, "nothing chosen yet")
+	eq(registration.can_confirm(), false, "cannot confirm an empty selection")
+	for card in draft.own:
+		registration.toggle(card)
+	eq(registration.selected.size(), 10, "chose ten")
+	eq(registration.can_confirm(), false, "ten is not the cap of eleven")
+	registration.toggle(draft.offered[0])
+	eq(registration.selected.size(), 11, "chose eleven")
+	eq(registration.can_confirm(), true, "eleven meets the cap")
+	registration.toggle(draft.offered[0])
+	eq(registration.selected.size(), 10, "toggling removes")
+	registration.free()
+```
+
+- [ ] **Step 2: Run it and watch it fail**
+
+Expected: FAIL — `ReportCard` is not declared.
+
+- [ ] **Step 3: Write `scripts/ui/ReportCard.gd`**
+
+```gdscript
+class_name ReportCard
+extends Control
+
+## Post-battle breakdown. Shows all four terms, because the player needs to see that
+## learning is what earned the grade.
+
+signal continued
+
+var _rows: VBoxContainer = null
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func show_result(scored: Dictionary, result: Dictionary, course) -> void:
+	for child in get_children():
+		child.queue_free()
+
+	_rows = UIKit.transparent(VBoxContainer.new()) as VBoxContainer
+	_rows.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(_rows)
+
+	_rows.add_child(UIKit.label(course.course_name, 36))
+	_rows.add_child(UIKit.label(Grading.letter(scored["grade"]), 120))
+
+	for term in ["efficiency", "survival", "learning", "discovery"]:
+		_rows.add_child(
+			UIKit.label("%s  %.0f / 25" % [term.capitalize(), float(scored[term])], 28)
+		)
+	_rows.add_child(UIKit.label("Total  %.0f / 100" % float(scored["total"]), 32))
+
+	var allowance: int = Grading.draft_allowance(scored["grade"])
+	var allowance_text := (
+		"You may copy their whole deck."
+		if allowance < 0
+		else "You may copy %d of their cards." % allowance
+	)
+	_rows.add_child(UIKit.label(allowance_text, 26))
+
+	if bool(result.get("strike", false)):
+		var strikes := int(result.get("strikes", 0))
+		_rows.add_child(
+			UIKit.label(
+				"ACADEMIC PROBATION — strike %d of %d" % [strikes, Run.MAX_STRIKES], 28
+			)
+		)
+		_rows.add_child(UIKit.label("Your hit points have been restored.", 24))
+
+	var button := UIKit.button("Continue")
+	button.pressed.connect(func(): continued.emit())
+	_rows.add_child(button)
+```
+
+- [ ] **Step 4: Write `scripts/ui/RegistrationScreen.gd`**
+
+```gdscript
+class_name RegistrationScreen
+extends Control
+
+## The draft. Keeping exactly `cap` cards is the run's recurring decision, and cutting
+## a card destroys its XP — which is why every card shows its progress.
+
+signal registration_complete(kept)
+
+var draft: Draft = null
+var selected: Array = []
+
+var _confirm: Button = null
+var _counter: Label = null
+var _grid: GridContainer = null
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func begin(the_draft: Draft) -> void:
+	draft = the_draft
+	selected = []
+	_build()
+	_refresh()
+
+
+func _build() -> void:
+	for child in get_children():
+		child.queue_free()
+
+	var root := UIKit.transparent(VBoxContainer.new())
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+
+	root.add_child(UIKit.label("Registration", 40))
+	_counter = UIKit.label("", 30)
+	root.add_child(_counter)
+	root.add_child(UIKit.label("Cutting a card loses the experience it earned.", 22))
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.add_child(scroll)
+
+	_grid = GridContainer.new()
+	_grid.columns = 4
+	_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scroll.add_child(_grid)
+
+	for card in draft.own:
+		_grid.add_child(_entry(card, false))
+	for card in draft.offered:
+		_grid.add_child(_entry(card, true))
+
+	_confirm = UIKit.button("Confirm")
+	_confirm.pressed.connect(_on_confirm)
+	root.add_child(_confirm)
+
+
+func _entry(card, is_offered: bool) -> Control:
+	var column := UIKit.transparent(VBoxContainer.new())
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(240, 120)
+	button.text = "%s\n%s%s" % [
+		card.data.card_name,
+		card.progress(),
+		"  (theirs)" if is_offered else "",
+	]
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.pressed.connect(func(): toggle(card))
+	button.set_meta("card", card)
+	column.add_child(button)
+	return column
+
+
+func toggle(card) -> void:
+	if selected.has(card):
+		selected.erase(card)
+	else:
+		if selected.size() >= draft.cap:
+			return  # the cap is the rule; refuse rather than silently swap
+		selected.append(card)
+	_refresh()
+
+
+func can_confirm() -> bool:
+	return draft != null and selected.size() == draft.cap
+
+
+func _refresh() -> void:
+	if _counter != null:
+		_counter.text = "Keep %d of %d" % [selected.size(), draft.cap]
+	if _confirm != null:
+		_confirm.disabled = not can_confirm()
+	if _grid == null:
+		return
+	for column in _grid.get_children():
+		for child in column.get_children():
+			if child is Button and child.has_meta("card"):
+				child.modulate = (
+					Color("#E0A51F") if selected.has(child.get_meta("card")) else Color.WHITE
+				)
+
+
+func _on_confirm() -> void:
+	if not can_confirm():
+		return
+	var kept := draft.keep(selected)
+	if kept.is_empty():
+		return  # Draft refused it; leave the screen up rather than losing the deck
+	registration_complete.emit(kept)
+```
+
+- [ ] **Step 5: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(ui): add the report card and registration screens"
+git push
+```
+
+---
+
+### Task 23: `CourseCatalog` and `BestiaryScreen`
+
+**Files:**
+- Create: `scripts/ui/CourseCatalog.gd`, `scripts/ui/BestiaryScreen.gd`
+- Modify: `tests/test_ui.gd`
+
+**Interfaces:**
+- Consumes: `Catalog`/`CourseData` (12), `Bestiary` (8), `ArtFactory` (19).
+- Produces: `CourseCatalog.show_catalog(catalog: Catalog, grades: Dictionary)`, `signal course_chosen(course)`, `var node_buttons: Dictionary`; `BestiaryScreen.show_bestiary(bestiary, enemies: Array)`, `signal closed`.
+
+The map draws prerequisite edges with `Line2D` behind tier rows of medallion buttons.
+Unavailable courses are visible but disabled; unrevealed honors nodes are absent.
+
+- [ ] **Step 1: Add checks to `tests/test_ui.gd`**
+
+Append to `run()`:
+
+```gdscript
+	# The map shows revealed courses, disables the unavailable ones, and hides honors
+	# nodes until an A reveals them.
+	var lib: ContentLibrary = load("res://resources/content_library.tres")
+	var cat := lib.catalog()
+	var map := CourseCatalog.new()
+	map.size = Vector2(1080, 1920)
+	map.show_catalog(cat, {})
+	eq(map.node_buttons.size(), 3, "only the three entry courses at the start")
+	for name in map.node_buttons:
+		eq(map.node_buttons[name].disabled, false, "entry courses are enterable")
+
+	# An S on an entry course reveals its honors branch.
+	map.show_catalog(cat, {"Basic Arcana 101": Grading.Grade.S})
+	check(map.node_buttons.has("Tutorial 150"), "an S revealed the honors node")
+	check(not map.node_buttons.has("Comprehensive Exam"), "the final stays hidden")
+	# An attempted course is shown but cannot be retaken.
+	check(map.node_buttons.has("Basic Arcana 101"), "the passed course is still drawn")
+	eq(map.node_buttons["Basic Arcana 101"].disabled, true, "no retakes")
+	check(map.edge_count() > 0, "drew prerequisite edges")
+	map.free()
+
+	# The bestiary lists what has been learned and hides what has not.
+	var known := Bestiary.new()
+	known.record_hit(lib.enemies[0], lib.enemies[0].weak_school)
+	var beast := BestiaryScreen.new()
+	beast.show_bestiary(known, lib.enemies)
+	var beast_text := ""
+	for child in beast.find_children("*", "Label", true, false):
+		beast_text += child.text + " "
+	check(beast_text.contains(lib.enemies[0].enemy_name), "listed the known examiner")
+	check(beast_text.contains("?"), "unknown weaknesses stay hidden")
+	beast.free()
+```
+
+- [ ] **Step 2: Run it and watch it fail**
+
+Expected: FAIL — `CourseCatalog` is not declared.
+
+- [ ] **Step 3: Write `scripts/ui/CourseCatalog.gd`**
+
+```gdscript
+class_name CourseCatalog
+extends Control
+
+## The syllabus map: tier rows of medallion buttons with Line2D prerequisite edges
+## behind them. Tap targets are thumb-sized per the brief.
+
+signal course_chosen(course)
+
+const NODE_SIZE := Vector2(200, 200)
+const ROW_HEIGHT := 380.0
+
+var node_buttons := {}  ## course name -> Button
+
+var _edges: Node2D = null
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func edge_count() -> int:
+	return 0 if _edges == null else _edges.get_child_count()
+
+
+func show_catalog(catalog, grades: Dictionary) -> void:
+	for child in get_children():
+		child.queue_free()
+	node_buttons = {}
+
+	# Edges first so they sit behind the nodes.
+	_edges = Node2D.new()
+	add_child(_edges)
+
+	var revealed: Array = catalog.revealed(grades)
+	var by_tier := {}
+	for course in revealed:
+		if not by_tier.has(course.tier):
+			by_tier[course.tier] = []
+		by_tier[course.tier].append(course)
+
+	var width := size.x if size.x > 0.0 else 1080.0
+	var centres := {}
+	var tiers := by_tier.keys()
+	tiers.sort()
+	for row in tiers.size():
+		var tier: int = tiers[row]
+		var courses: Array = by_tier[tier]
+		for i in courses.size():
+			var course = courses[i]
+			var x := width * (float(i) + 1.0) / (float(courses.size()) + 1.0)
+			var y := 220.0 + float(row) * ROW_HEIGHT
+			var centre := Vector2(x, y)
+			centres[course.course_name] = centre
+			add_child(_node_button(course, centre, catalog.is_available(course, grades)))
+
+	# Draw an edge for each prerequisite whose node is also on screen.
+	for course in revealed:
+		if not centres.has(course.course_name):
+			continue
+		for prerequisite in course.prerequisites:
+			if not centres.has(prerequisite.course_name):
+				continue
+			var line := Line2D.new()
+			line.width = 6.0
+			line.default_color = ArtLibrary.SLATE
+			line.points = [centres[prerequisite.course_name], centres[course.course_name]]
+			_edges.add_child(line)
+
+
+func _node_button(course, centre: Vector2, available: bool) -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = NODE_SIZE
+	button.size = NODE_SIZE
+	button.position = centre - NODE_SIZE * 0.5
+	button.text = course.course_name
+	button.icon = ArtFactory.medallion(course.tier, Vector2i(96, 96))
+	button.disabled = not available
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.pressed.connect(func(): course_chosen.emit(course))
+	node_buttons[course.course_name] = button
+	return button
+```
+
+- [ ] **Step 4: Write `scripts/ui/BestiaryScreen.gd`**
+
+```gdscript
+class_name BestiaryScreen
+extends Control
+
+## What the student has learned. Unknown entries show "?" rather than being omitted,
+## so the player can see there is something left to discover.
+
+signal closed
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func show_bestiary(bestiary, enemies: Array) -> void:
+	for child in get_children():
+		child.queue_free()
+
+	var root := UIKit.transparent(VBoxContainer.new())
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	root.add_child(UIKit.label("Student Bestiary", 40))
+
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.add_child(scroll)
+
+	var list := UIKit.transparent(VBoxContainer.new())
+	scroll.add_child(list)
+
+	for enemy in enemies:
+		var weak := (
+			Schools.display_name(enemy.weak_school)
+			if bestiary.knows_weakness(enemy.enemy_name)
+			else "?"
+		)
+		var ward := (
+			Schools.display_name(enemy.warded_school)
+			if bestiary.knows_ward(enemy.enemy_name)
+			else "?"
+		)
+		list.add_child(
+			UIKit.label("%s — weak: %s   warded: %s" % [enemy.enemy_name, weak, ward], 26)
+		)
+
+	var button := UIKit.button("Back")
+	button.pressed.connect(func(): closed.emit())
+	root.add_child(button)
+```
+
+- [ ] **Step 5: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(ui): add the course catalog map and the bestiary"
+git push
+```
+
+---
+
+### Task 24: `Main` — the composition root, menus, and a real screenshot
+
+**Files:**
+- Create: `scripts/Main.gd`, `scripts/ui/MainMenu.gd`, `scripts/ui/GameOver.gd`, `scenes/Main.tscn`
+- Modify: `tests/test_ui.gd`
+
+**Interfaces:**
+- Consumes: everything.
+- Produces: `Main` (extends `Node`) owning the `Run` and swapping screens; `MainMenu` with `signal new_run_requested`, `signal continue_requested`, `signal bestiary_requested`; `GameOver` with `show_outcome(run)`, `signal restarted`. `Main` parses `--shot <path>`, `--seed <n>` and `--screen <name>` from `OS.get_cmdline_user_args()` so `tools/shot.sh` works.
+
+- [ ] **Step 1: Add composition-root checks to `tests/test_ui.gd`**
+
+Append to `run()`:
+
+```gdscript
+	# The composition root wires screens without any of them knowing about each other.
+	var main := Main.new()
+	main.boot_headless()
+	eq(main.current_screen_name(), "menu", "boots to the menu")
+	main.start_new_run()
+	eq(main.current_screen_name(), "catalog", "a new run opens the catalog")
+	check(main.run != null, "root owns the run")
+	eq(main.run.deck.size(), 10, "dealt the starting deck")
+
+	# Choosing a course opens a battle.
+	var lib2: ContentLibrary = load("res://resources/content_library.tres")
+	main.enter_course(lib2.course_named("Basic Arcana 101"))
+	eq(main.current_screen_name(), "battle", "entering a course opens the battle")
+	check(main.battle != null, "root owns the battle")
+
+	# Expulsion ends the run and clears the save.
+	main.run.strikes = Run.MAX_STRIKES
+	main.run.expelled = true
+	main.finish_battle_headless(false)
+	eq(main.current_screen_name(), "gameover", "expulsion ends the run")
+	eq(SaveGame.has_save(), false, "expulsion cleared the save")
+	main.free()
+```
+
+- [ ] **Step 2: Run it and watch it fail**
+
+Expected: FAIL — `Main` is not declared.
+
+- [ ] **Step 3: Write `scripts/ui/MainMenu.gd` and `scripts/ui/GameOver.gd`**
+
+```gdscript
+class_name MainMenu
+extends Control
+
+signal new_run_requested
+signal continue_requested
+signal bestiary_requested
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func build(has_save: bool) -> void:
+	for child in get_children():
+		child.queue_free()
+	var root := UIKit.transparent(VBoxContainer.new())
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+	root.add_child(UIKit.label("CURRICULUM", 72))
+	root.add_child(UIKit.label("The only way to learn is by playing.", 26))
+
+	if has_save:
+		var resume := UIKit.button("Continue")
+		resume.pressed.connect(func(): continue_requested.emit())
+		root.add_child(resume)
+
+	var fresh := UIKit.button("Enroll")
+	fresh.pressed.connect(func(): new_run_requested.emit())
+	root.add_child(fresh)
+
+	var beast := UIKit.button("Bestiary")
+	beast.pressed.connect(func(): bestiary_requested.emit())
+	root.add_child(beast)
+```
+
+```gdscript
+class_name GameOver
+extends Control
+
+signal restarted
+
+
+func _init() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func show_outcome(run) -> void:
+	for child in get_children():
+		child.queue_free()
+	var root := UIKit.transparent(VBoxContainer.new())
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
+
+	if run.won:
+		root.add_child(UIKit.label("GRADUATED", 64))
+		root.add_child(UIKit.label("You broke the curriculum.", 28))
+	else:
+		root.add_child(UIKit.label("EXPELLED", 64))
+		root.add_child(UIKit.label("Two failures. Your enrolment is terminated.", 28))
+
+	root.add_child(UIKit.label("Courses passed: %d" % run.courses_passed, 26))
+	var again := UIKit.button("Enroll again")
+	again.pressed.connect(func(): restarted.emit())
+	root.add_child(again)
+```
+
+- [ ] **Step 4: Write `scripts/Main.gd`**
+
+```gdscript
+class_name Main
+extends Node
+
+## Composition root. Owns the Run and swaps screens; no screen knows about another.
+
+var run: Run = null
+var battle: Battle = null
+
+var library: ContentLibrary = null
+var catalog: Catalog = null
+
+var _screen: Control = null
+var _screen_name := ""
+var _course = null
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	boot_headless()
+	_handle_cmdline()
+
+
+## Separated from _ready so tests can boot without a scene tree.
+func boot_headless() -> void:
+	library = load("res://resources/content_library.tres")
+	catalog = library.catalog()
+	_rng.randomize()
+	_show_menu()
+
+
+func current_screen_name() -> String:
+	return _screen_name
+
+
+func _swap(screen: Control, name: String) -> void:
+	if _screen != null and _screen.get_parent() == self:
+		remove_child(_screen)
+		_screen.queue_free()
+	_screen = screen
+	_screen_name = name
+	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(screen)
+
+
+func _show_menu() -> void:
+	var menu := MainMenu.new()
+	menu.build(SaveGame.has_save())
+	menu.new_run_requested.connect(start_new_run)
+	menu.continue_requested.connect(_continue_run)
+	menu.bestiary_requested.connect(_show_bestiary)
+	_swap(menu, "menu")
+
+
+func start_new_run() -> void:
+	run = Run.new(library.new_starting_deck())
+	GameManager.run = run
+	SaveGame.save(run)
+	_show_catalog()
+
+
+func _continue_run() -> void:
+	run = SaveGame.load_run()
+	if run == null:
+		start_new_run()
+		return
+	GameManager.run = run
+	_show_catalog()
+
+
+func _show_catalog() -> void:
+	var map := CourseCatalog.new()
+	map.course_chosen.connect(enter_course)
+	_swap(map, "catalog")
+	map.show_catalog(catalog, run.grades)
+
+
+func _show_bestiary() -> void:
+	var screen := BestiaryScreen.new()
+	screen.closed.connect(_show_menu if run == null else _show_catalog)
+	_swap(screen, "bestiary")
+	screen.show_bestiary(
+		run.bestiary if run != null else Bestiary.new(), library.enemies
+	)
+
+
+func enter_course(course) -> void:
+	_course = course
+	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng)
+	DeckManager.deck = battle.player_deck
+	var screen := BattleScreen.new()
+	screen.battle_finished.connect(func(_b): _on_battle_finished())
+	_swap(screen, "battle")
+	screen.begin(battle)
+
+
+func _on_battle_finished() -> void:
+	finish_battle_headless(battle.player_won)
+
+
+## Grades the finished battle, records it, and moves on. Exposed for tests.
+func finish_battle_headless(_won: bool) -> void:
+	var scored: Dictionary = GradeManager.score(
+		{
+			"won": battle.player_won,
+			"turns_taken": battle.turns,
+			"par_turns": _course.par_turns,
+			"hp_end": battle.player.hp,
+			"hp_start": run.max_hp,
+			"xp_banked": battle.xp_banked,
+			"xp_par": _course.xp_par,
+			"weakness_known": run.bestiary.knows_weakness(_course.examiner.enemy_name),
+			"distinct_schools": battle.schools_played(),
+		}
+	)
+	var result := run.record_result(_course, scored["grade"], battle.player.hp)
+
+	if run.is_over():
+		SaveGame.delete()
+		var over := GameOver.new()
+		over.restarted.connect(start_new_run)
+		_swap(over, "gameover")
+		over.show_outcome(run)
+		return
+
+	var report := ReportCard.new()
+	report.continued.connect(func(): _show_registration(scored))
+	_swap(report, "report")
+	report.show_result(scored, result, _course)
+
+
+func _show_registration(scored: Dictionary) -> void:
+	if not battle.player_won:
+		SaveGame.save(run)
+		_show_catalog()
+		return
+	var draft := Draft.new(
+		run.deck, _course.examiner.deck, _course.guaranteed_card_drop, scored["grade"]
+	)
+	draft.cap = run.deck_cap()
+	var screen := RegistrationScreen.new()
+	screen.registration_complete.connect(
+		func(kept):
+			run.deck = kept
+			SaveGame.save(run)
+			_show_catalog()
+	)
+	_swap(screen, "registration")
+	screen.begin(draft)
+
+
+## tools/shot.sh passes --shot/--seed/--screen after a bare --.
+func _handle_cmdline() -> void:
+	var args := OS.get_cmdline_user_args()
+	var out := ""
+	var wanted := ""
+	for i in args.size():
+		if args[i] == "--shot" and i + 1 < args.size():
+			out = args[i + 1]
+		elif args[i] == "--seed" and i + 1 < args.size():
+			_rng.seed = args[i + 1].to_int()
+		elif args[i] == "--screen" and i + 1 < args.size():
+			wanted = args[i + 1]
+	if out == "":
+		return
+
+	match wanted:
+		"catalog":
+			start_new_run()
+		"battle":
+			start_new_run()
+			enter_course(library.course_named("Basic Arcana 101"))
+		"bestiary":
+			_show_bestiary()
+		_:
+			pass
+	_screenshot(out)
+
+
+func _screenshot(path: String) -> void:
+	# --headless does not render, so this only works from a windowed run, and the
+	# frame must be drawn before the viewport texture holds anything.
+	await RenderingServer.frame_post_draw
+	await RenderingServer.frame_post_draw
+	var image := get_viewport().get_texture().get_image()
+	image.save_png(path)
+	print("wrote %s" % path)
+	get_tree().quit()  # or the process hangs forever
+```
+
+- [ ] **Step 5: Build `scenes/Main.tscn`**
+
+```ini
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1")
+```
+
+- [ ] **Step 6: Run the tests and watch them pass**
+
+```bash
+./tools/check.sh
+```
+
+Expected: PASS.
+
+- [ ] **Step 7: Take a real screenshot of each screen**
+
+This is the first time anything visual has been verified.
+
+```bash
+./tools/shot.sh /tmp/catalog.png 7 catalog
+./tools/shot.sh /tmp/battle.png 7 battle
+```
+
+Open both. Check the specific things that go wrong: the hand fans across the bottom
+without leaving the screen, the examiner and its intent are readable, tap targets look
+thumb-sized, and the whole thing is on cream rather than dark. If the board does not
+respond to taps, a container is missing `MOUSE_FILTER_IGNORE`.
+
+- [ ] **Step 8: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(ui): add the composition root, menus and screenshot support"
+git push
+```
+
+---
+
+## Phase 6 — Art
+
+### Task 25: The Recraft manifest and generator
+
+**Files:**
+- Create: `assets/prompts/manifest.json`, `assets/prompts/recraft.md`, `assets/prompts/README.md`, `tools/recraft.py`, `tools/import-assets.sh`, `tools/import_assets.gd`
+- Modify: `tests/test_art.gd`
+
+**Interfaces:**
+- Consumes: the content `art_id` values (16, 17).
+- Produces: `python3 tools/recraft.py list|card <slug>|figure <slug>|ornament <slug> [--n 4]` writing into `assets/source/`; `./tools/import-assets.sh [--status]` processing `assets/source` into `assets/sprites` and re-importing.
+
+Two simplifications fall out of the flat print style: art is generated **onto the cream
+ground**, so no background removal is needed, and there is no perspective, so there is
+no projection step.
+
+- [ ] **Step 1: Add a manifest-agreement check to `tests/test_art.gd`**
+
+Append to `run()`:
+
+```gdscript
+	# Every art_id the content declares must have a manifest entry, or an asset can
+	# never be generated for it. A typo'd art_id otherwise falls back silently.
+	var file := FileAccess.open("res://assets/prompts/manifest.json", FileAccess.READ)
+	check(file != null, "manifest loads")
+	if file == null:
+		return
+	var manifest = JSON.parse_string(file.get_as_text())
+	file.close()
+	check(typeof(manifest) == TYPE_DICTIONARY, "manifest is a json object")
+	if typeof(manifest) != TYPE_DICTIONARY:
+		return
+	check(manifest.has("style"), "manifest declares the shared style clause")
+	check(manifest.has("model"), "manifest names the model")
+
+	var subjects := {}
+	for group in ["cards", "figures", "ornament"]:
+		for name in manifest.get(group, {}):
+			subjects["%s/%s" % [group, name]] = true
+
+	for card in library.cards:
+		# Evolved cards share their base card's art, so only base ids need a subject.
+		if card.is_fully_evolved():
+			continue
+		var slug: String = card.art_id.trim_prefix("cards/")
+		check(subjects.has("cards/%s" % slug), "manifest has a subject for %s" % card.art_id)
+	for enemy in library.enemies:
+		var slug: String = enemy.art_id.trim_prefix("entities/")
+		check(subjects.has("figures/%s" % slug), "manifest has a subject for %s" % enemy.art_id)
+```
+
+- [ ] **Step 2: Run it and watch it fail**
+
+Expected: FAIL — no manifest.
+
+- [ ] **Step 3: Write `assets/prompts/manifest.json`**
+
+One `style` clause carries cohesion, because Recraft V4 does not support `style_id`.
+The `cards` keys are the 24 base-card art slugs, `figures` the 9 examiners.
+
+```json
+{
+  "model": "recraftv4_1",
+  "style": "Mid-century modern screenprint illustration, in the manner of 1950s poster art: completely flat shapes with no outlines, no shading, no gradients and no rendering, form carried entirely by silhouette. A tiny palette of flat inks on a warm cream paper ground, with visible risograph halftone grain inside each ink and along its edges. Bold, simple, confident shapes.",
+  "palette": "Cream paper #F7EADD, black #000000, vermilion #D45C3C, saffron #E0A51F, blue #498BAD, pale slate #A3B0AC, moss #6E7B3F. Use no more than three inks in any one image.",
+  "card_rules": "Composed for a small portrait card, shown about 200 pixels wide, so use only three or four large shapes across the whole frame and no fine detail. The subject sits on a single large organic field shape in the school's ink, inset from the edge so a cream margin frames it like a printed plate. One small stippled grey celestial glyph — a circle, crescent or five-pointed star — floats alongside. Flat cream ground behind everything, no scenery, no horizon, no text, no letters, no border rule.",
+  "figure_rules": "A single full-body figure standing and facing three-quarters toward the viewer, alone on a flat cream ground. Completely flat robe shapes in one or two inks with a flat black head and no facial features, in the manner of mid-century poster figures. Strong silhouette that still reads at 120 pixels tall. No scenery, no shadow, no text.",
+  "card_size": "1024x1024",
+  "figure_size": "768x1536",
+  "ornament_size": "1024x1024",
+  "cards": {
+    "spark": "A single sharp vermilion lightning bolt striking downward",
+    "kindle": "A small vermilion flame rising from a black wick",
+    "scorch_notes": "A sheet of paper curling as vermilion fire eats one corner",
+    "cinder_burst": "A vermilion starburst of angular shards flying outward",
+    "final_recitation": "A tall column of vermilion flame rising from an open black book",
+    "frost_lance": "A long blue icicle angled like a spear",
+    "hoarfrost": "A flat blue six-pointed frost crystal",
+    "glass_shard": "Three angular blue glass fragments, one catching pale slate light",
+    "numb_the_hall": "A blue arch of frost closing across a doorway",
+    "winter_term": "A bare black tree under a large flat blue circle",
+    "ink_blot": "A single spreading black ink blot with one trailing drip",
+    "marginalia": "A black quill nib beside three short marginal strokes",
+    "cite_source": "An open black book with one page turned, a slate ribbon marker",
+    "cram": "A tall stack of black books with a small saffron lamp at the top",
+    "thesis_statement": "A rolled black scroll bound with a saffron cord",
+    "rot_seed": "A single moss-green seed splitting open with a dark tendril",
+    "bitter_recall": "A moss-green hand offering a small dark fruit",
+    "necrology_note": "A moss-green skull resting on a folded page",
+    "feed_the_curriculum": "A moss-green vine coiling tightly around a black book",
+    "guard": "A plain saffron kite shield, flat and unadorned",
+    "rimeward": "A saffron shield with a pale slate frost edge",
+    "study_break": "A saffron cup with a curl of steam above it",
+    "warded_bracers": "A pair of saffron forearm bracers seen straight on",
+    "honours_sigil": "A saffron laurel ring enclosing a small black star"
+  },
+  "figures": {
+    "novice": "A nervous young apprentice in a plain undyed cream robe clutching an oversized black book",
+    "glass_tutor": "A tutor in a pale slate robe with three blue glass shards orbiting one raised hand",
+    "hall_monitor": "A brisk hall monitor in a saffron uniform robe with a rolled timetable under one arm",
+    "drillmaster": "A broad-shouldered drillmaster in blue training robes with a bound weight on a cord",
+    "alchemy_master": "An alchemy master in a stained moss-green robe with a bandolier of flasks",
+    "battle_chanter": "A battle chanter in reinforced vermilion robes with a shield strapped to one arm",
+    "proctor": "A stern proctor in a saffron and slate robe holding a brass badge and a ledger",
+    "vice_chancellor": "An imposing vice-chancellor in a heavy black ceremonial robe carrying a great ledger",
+    "rector": "The Rector, a towering figure in a deep black and saffron robe beneath a ring of floating marks"
+  },
+  "ornament": {
+    "card_back": "A flat cream card back with a single centred saffron ring and fine halftone grain",
+    "paper_grain": "A flat even field of warm cream paper with visible risograph halftone grain and nothing else on it",
+    "tier_1": "A flat blue circular medallion with a plain cream centre",
+    "tier_2": "A flat saffron circular medallion with a plain cream centre",
+    "tier_3": "A flat vermilion circular medallion with a plain cream centre"
+  }
+}
+```
+
+- [ ] **Step 4: Write `tools/recraft.py`**
+
+```python
+#!/usr/bin/env python3
+"""Generates game art through the Recraft API.
+
+    tools/recraft.py list
+    tools/recraft.py card spark --n 4
+    tools/recraft.py figure novice --n 4
+    tools/recraft.py ornament card_back --n 2
+
+Prompts live in assets/prompts/manifest.json, never here, so the asset set has one
+source of truth. The flat screenprint style is generated straight onto the cream
+ground, so there is no background-removal or projection step.
+
+Needs RECRAFT_API_KEY. A generation is roughly 35 credits (about $0.035).
+"""
+
+import argparse
+import json
+import os
+import pathlib
+import sys
+import urllib.error
+import urllib.request
+
+API = "https://external.api.recraft.ai/v1"
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+MANIFEST = ROOT / "assets" / "prompts" / "manifest.json"
+SOURCE = ROOT / "assets" / "source"
+
+# Recraft serves WebP whatever the URL says, and Godot picks its loader from the
+# extension, so files must be named for what they actually are.
+MAGIC = {b"\x89PNG": ".png", b"RIFF": ".webp", b"\xff\xd8\xff": ".jpg"}
+
+# Which manifest group maps to which sprite directory and size/rules keys.
+GROUPS = {
+    "card": ("cards", "cards", "card_rules", "card_size"),
+    "figure": ("figures", "entities", "figure_rules", "figure_size"),
+    "ornament": ("ornament", "ornament", "card_rules", "ornament_size"),
+}
+
+
+def die(message):
+    sys.exit("recraft: " + message)
+
+
+def load_manifest():
+    with open(MANIFEST) as f:
+        return json.load(f)
+
+
+def post(path, body):
+    key = os.environ.get("RECRAFT_API_KEY")
+    if not key:
+        die("RECRAFT_API_KEY is not set")
+    request = urllib.request.Request(
+        API + path,
+        data=json.dumps(body).encode(),
+        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as e:
+        die("%s -> HTTP %d: %s" % (path, e.code, e.read().decode()[:400]))
+
+
+def download(url, stem):
+    """Saves an image, naming it for its real format. Returns the path."""
+    # The CDN rejects urllib's default user agent.
+    request = urllib.request.Request(url, headers={"User-Agent": "curriculum-assets"})
+    with urllib.request.urlopen(request) as response:
+        data = response.read()
+    suffix = next((s for magic, s in MAGIC.items() if data.startswith(magic)), ".bin")
+    path = stem.with_suffix(suffix)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return path
+
+
+def generate(kind, name, n):
+    manifest = load_manifest()
+    group, out_dir, rules_key, size_key = GROUPS[kind]
+    subjects = manifest.get(group, {})
+    if name not in subjects:
+        die("no subject %r in manifest group %r" % (name, group))
+
+    # Subject first, then the shared clauses. Colour belongs to the subject line: in
+    # the shared style clause it overrides every subject's own colour.
+    prompt = ". ".join(
+        [
+            subjects[name],
+            manifest[rules_key],
+            manifest["style"],
+            manifest["palette"],
+        ]
+    )
+    result = post(
+        "/images/generations",
+        {
+            "prompt": prompt,
+            "model": manifest["model"],
+            "size": manifest[size_key],
+            "n": n,
+        },
+    )
+    urls = [item["url"] for item in result.get("data", [])]
+    if not urls:
+        die("no images returned")
+
+    written = []
+    for i, url in enumerate(urls, start=1):
+        stem = SOURCE / out_dir / ("%s-%d" % (name, i) if len(urls) > 1 else name)
+        written.append(download(url, stem))
+    for path in written:
+        print(path.relative_to(ROOT))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("list")
+    for kind in GROUPS:
+        p = sub.add_parser(kind)
+        p.add_argument("name")
+        p.add_argument("--n", type=int, default=4, help="1-6 variants")
+
+    args = parser.parse_args()
+    if args.command == "list":
+        manifest = load_manifest()
+        for kind, (group, _out, _rules, _size) in GROUPS.items():
+            for name in sorted(manifest.get(group, {})):
+                print("%-9s %s" % (kind, name))
+        return
+    if not 1 <= args.n <= 6:
+        die("--n must be between 1 and 6")
+    generate(args.command, args.name, args.n)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+- [ ] **Step 5: Write `tools/import_assets.gd` and `tools/import-assets.sh`**
+
+```gdscript
+extends SceneTree
+
+## Copies chosen art from assets/source into assets/sprites as .png at its final size,
+## then reports what is still procedural. --status only reports.
+
+const SOURCE := "res://assets/source"
+const SPRITES := "res://assets/sprites"
+
+const SIZES := {"cards": Vector2i(400, 400), "entities": Vector2i(360, 720), "ornament": Vector2i(256, 256)}
+
+
+func _process(_delta: float) -> bool:
+	var status_only := OS.get_cmdline_user_args().has("--status")
+
+	if not status_only:
+		for group in SIZES:
+			var in_dir := "%s/%s" % [SOURCE, group]
+			var out_group := "cards" if group == "cards" else group
+			var dir := DirAccess.open(in_dir)
+			if dir == null:
+				continue
+			DirAccess.make_dir_recursive_absolute(
+				ProjectSettings.globalize_path("%s/%s" % [SPRITES, out_group])
+			)
+			for file in dir.get_files():
+				# Variants are named name-1, name-2; only the bare name is accepted.
+				var base := file.get_basename()
+				if base.contains("-"):
+					continue
+				var image := Image.load_from_file("%s/%s" % [ProjectSettings.globalize_path(in_dir), file])
+				if image == null:
+					continue
+				image.resize(SIZES[group].x, SIZES[group].y, Image.INTERPOLATE_LANCZOS)
+				var out := "%s/%s/%s.png" % [ProjectSettings.globalize_path(SPRITES), out_group, base]
+				image.save_png(out)
+				print("wrote %s" % out)
+
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var keys: Array = []
+	for card in library.cards:
+		keys.append(card.art_id)
+	for enemy in library.enemies:
+		keys.append(enemy.art_id)
+	var missing := ArtLibrary.missing_keys(keys)
+	print("%d of %d art keys still procedural:" % [missing.size(), keys.size()])
+	for key in missing:
+		print("  %s" % key)
+	quit(0)
+	return true
+```
+
+```bash
+#!/usr/bin/env bash
+# Processes assets/source into assets/sprites and re-imports, because a .png is not
+# loadable until Godot has imported it. --status only reports what is still procedural.
+set -euo pipefail
+
+GODOT="${GODOT:-godot}"
+cd "$(dirname "$0")/.."
+
+"$GODOT" --headless --path . --script tools/import_assets.gd -- "${1:-}"
+"$GODOT" --headless --import --path . >/dev/null 2>&1
+"$GODOT" --headless --path . --script tools/import_assets.gd -- --status
+```
+
+- [ ] **Step 6: Write `assets/prompts/recraft.md` and `assets/prompts/README.md`**
+
+`recraft.md` documents the pipeline and how to judge output. Cover, in your own words:
+the two shapes of asset (cards and figures), that no background removal or projection
+is needed because the style is flat on cream, that `negative_prompt` and `style_id` are
+unsupported on V4 so cohesion rests on the shared `style` clause, that colour belongs
+in the subject line rather than the shared clause, and that a card must be judged at
+200px wide rather than at 1024.
+
+`README.md` is a three-row table pointing at `init.md`, `manifest.json` and
+`recraft.md`, noting that `export_presets.cfg` excludes this directory from builds.
+
+- [ ] **Step 7: Run the tests and watch them pass**
+
+```bash
+chmod +x tools/recraft.py tools/import-assets.sh
+python3 tools/recraft.py list
+./tools/check.sh
+```
+
+Expected: `list` prints 24 cards, 9 figures and 5 ornaments; `check.sh` PASSES.
+
+- [ ] **Step 8: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(art): add the recraft manifest, generator and import pipeline"
+git push
+```
+
+---
+
+### Task 26: Generate the art set
+
+Costs real money — roughly $7 at 4 variants across 38 subjects. Generate a small batch
+first and look at it before committing to the whole set.
+
+**Files:**
+- Create: `assets/source/**`, `assets/sprites/**`
+- Modify: `.gitignore`
+
+- [ ] **Step 1: Add the raw-output ignore rules to `.gitignore`**
+
+Variants are large and only the accepted one matters.
+
+```gitignore
+# Raw generator output. Only the accepted variant is promoted into assets/sprites,
+# and the bare-named source file beside it is what gets committed.
+/assets/source/**/*-[1-9].webp
+/assets/source/**/*-[1-9].png
+/assets/source/**/*-[1-9].jpg
+```
+
+- [ ] **Step 2: Generate one card and one figure, and look at them**
+
+```bash
+python3 tools/recraft.py card spark --n 4
+python3 tools/recraft.py figure novice --n 4
+ls assets/source/cards assets/source/entities
+```
+
+Open the eight files. Judge them at the size they will be shown, not at 1024:
+
+- A card is ~200px wide. Three or four large shapes, no fine detail, strong silhouette.
+- Cream ground, not white and not dark. Three inks at most.
+- Visible halftone grain, no gradients or soft shading.
+- If a subject came back with scenery, a horizon or text, tighten the *shared* rules
+  clause and regenerate rather than patching one subject.
+
+- [ ] **Step 3: Promote the variants you chose**
+
+Rename the chosen variant to the bare subject name, which is what
+`import_assets.gd` accepts:
+
+```bash
+mv assets/source/cards/spark-2.webp assets/source/cards/spark.webp
+mv assets/source/entities/novice-3.webp assets/source/entities/novice.webp
+./tools/import-assets.sh
+```
+
+Expected: the status list shrinks by two keys.
+
+- [ ] **Step 4: Verify the real card renders**
+
+```bash
+./tools/shot.sh /tmp/art.png 7 battle
+```
+
+The Spark in hand should now be the generated illustration while every other card is
+still procedural — that per-sprite fallback is the whole point of the design.
+
+- [ ] **Step 5: Generate the rest**
+
+```bash
+for name in $(python3 tools/recraft.py list | awk '$1=="card"{print $2}'); do
+  python3 tools/recraft.py card "$name" --n 4
+done
+for name in $(python3 tools/recraft.py list | awk '$1=="figure"{print $2}'); do
+  python3 tools/recraft.py figure "$name" --n 4
+done
+for name in $(python3 tools/recraft.py list | awk '$1=="ornament"{print $2}'); do
+  python3 tools/recraft.py ornament "$name" --n 2
+done
+```
+
+Promote one variant per subject, then `./tools/import-assets.sh`.
+
+- [ ] **Step 6: Confirm the set is coherent and the suite still passes**
+
+```bash
+./tools/import-assets.sh --status
+./tools/check.sh
+./tools/shot.sh /tmp/final-battle.png 7 battle
+./tools/shot.sh /tmp/final-catalog.png 7 catalog
+```
+
+Expected: `0 of N art keys still procedural`, PASS, and two screenshots that read as one
+coherent set. If the set drifts, tighten the shared `style` clause and regenerate the
+outliers rather than accepting a mixed look.
+
+- [ ] **Step 7: Commit and push**
+
+```bash
+git add -A
+git commit -m "feat(art): generate the mid-century screenprint art set"
+git push
+```
+
+---
+
+## Phase 7 — Documentation
+
+### Task 27: Rewrite `README.md` and `AGENTS.md`
+
+Both files currently describe a game that no longer exists.
+
+**Files:**
+- Create: `README.md`, `AGENTS.md`
+
+- [ ] **Step 1: Write `README.md`**
+
+Cover, in your own words and matching what the code actually does: what the game is
+(mobile portrait roguelike deckbuilder set in a dangerous magical academy); the three
+mechanics that make it distinct (cards gain XP and evolve mid-battle; examiners hide a
+school weakness worth ×1.5 that the Bestiary remembers for the run; your grade decides
+how much of a defeated examiner's deck you may copy, kept to a deck cap that grows one
+card per course); that dropping to 0 HP is an F rather than death and the second F is
+expulsion; how to run it (`godot --path .`, and the published container); the art
+direction and its reference; and the development commands table. State the deviations
+from `assets/prompts/init.md`: the four-term grade instead of turns-and-damage, the
+light mid-century palette instead of dark parchment, and plain classes behind thin
+autoloads instead of stateful singletons.
+
+- [ ] **Step 2: Write `AGENTS.md`**
+
+Cover: the commands table (`check.sh`, `shot.sh`, `simulate.gd`, the three content
+generators, `generate_theme.gd`, `recraft.py`, `import-assets.sh`, `export-web.sh`); the
+directory layout; the event-dictionary convention and the rule that `scripts/core/`
+never references the view or UI layers; and the Godot traps this build actually hit —
+the class-cache requirement before a fresh clone can test, Godot exiting 0 while
+printing `SCRIPT ERROR`, `--headless` not rendering so screenshots need a windowed run
+and `frame_post_draw`, containers eating taps unless they are `MOUSE_FILTER_IGNORE`, a
+`.png` being unloadable until imported, `SceneTree._init()` having no tree, and card XP
+belonging on `CardInstance` rather than `CardData`. Close with the Conventional Commits
+rule and the never-force-push rule.
+
+- [ ] **Step 3: Verify every command in both files actually runs**
+
+Documentation that lies is worse than none. Run each one.
+
+```bash
+./tools/check.sh
+godot --headless --path . --script tools/simulate.gd -- 5
+./tools/import-assets.sh --status
+python3 tools/recraft.py list
+./tools/export-web.sh
+```
+
+- [ ] **Step 4: Commit, push, and open the PR**
+
+```bash
+git add -A
+git commit -m "docs: rewrite the readme and agent guide for the deckbuilder"
+git push
+gh pr create --title "feat: rebuild curriculum as a roguelike deckbuilder" --body "$(cat <<'BODY'
+Replaces the isometric tactical roguelike with the deckbuilder in
+`assets/prompts/init.md`. Spec and plan are in `docs/superpowers/`.
+
+**Where to look**
+- `scripts/core/` — all rules, headlessly testable, event-dictionary returns
+- `scripts/core/CardInstance.gd` — XP is per-copy and per-run; it must never reach `CardData`
+- `scripts/core/Grading.gd` — four terms, so learning is scored rather than punished
+- `scripts/core/Draft.gd` — the deck cap grows per course, not per tier
+- `scripts/core/Catalog.gd` — `validate()` is what makes two-F permadeath fair
+
+**Risks**
+- Balance is unproven beyond `tools/simulate.gd`'s greedy policy.
+- `.github/` was kept unmodified, so the five tool contracts in `tools/` must keep their names.
+- Art is generated; per-sprite procedural fallback covers anything missing.
+BODY
+)"
+```
+
+---
+
+## Self-Review
+
+Checked after writing, against the spec.
+
+**Spec coverage.** §1 reset → Task 1. §1.1 CI contracts → Task 2. §2 loop → Tasks 21–24.
+§3 combat → Tasks 5–9. §3.1 statuses → Task 6. §3.2 schools → Task 1. §4 evolution →
+Task 4. §5 weakness → Task 8. §6 grading → Task 10. §6.1 F-not-death → Task 13. §7 draft
+→ Task 11. §8/§8.1/§8.2 catalog → Tasks 12, 18. §9 art direction → Tasks 19, 25, 26.
+§9.1 palette → Global Constraints, Task 19. §9.5 card layout → Task 20. §10.1 layout →
+File Structure. §10.2 events → Task 9. §10.3 autoloads → Task 15. §10.4 data → Tasks 3,
+7, 12. §10.5 persistence → Task 14. §10.6 portrait → Task 1. §11 content → Tasks 16–18.
+§12 testing → every task. §13 deferred → not built, correctly. §14 assumptions → carried
+into the tasks that depend on them.
+
+Two spec test suites were renamed for clarity: `test_schools` covers the enum and
+`test_schools_multiplier` the ×1.5/×0.5 behaviour, and `Combatant` got its own
+`test_combatant` rather than living in `test_battle`. `test_tooling` and `test_autoloads`
+are additions the spec does not list.
+
+**One spec gap, resolved in the plan and flagged to the user:** the examiner's turn
+structure. See "Clarification: the examiner's turn" above.
+
+**Type consistency.** `Schools.School` throughout; `CardData.DAMAGE`-style string
+constants for effect kinds; `Statuses.Kind`; `Grading.Grade`. `Bestiary.multiplier` and
+`record_hit` take `(enemy, school)` in that order everywhere. `Draft.keep` returns `[]`
+on an illegal selection in every caller. `Battle` exposes `examiner_art_id()` and
+`examiner_data()` rather than letting the UI read `_enemy_data`.
