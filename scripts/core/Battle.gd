@@ -210,6 +210,14 @@ func _examiner_turn() -> Array:
 		examiner_deck.play(card)
 		examiner_intent = null
 
+		# The intent may have just killed the player. Do not tick the examiner's
+		# own Decay or pick a new intent on top of a battle that is already
+		# over — that is how a dead player was getting credited with the win:
+		# the examiner's own Decay tick would then kill the examiner too, and
+		# _check_end (before its fix below) asked "is the examiner down?" first.
+		if player.is_down():
+			return events
+
 	events.append_array(_tick_decay(examiner, _enemy_data.enemy_name))
 	if not examiner.is_down():
 		events.append_array(_choose_intent())
@@ -218,14 +226,21 @@ func _examiner_turn() -> Array:
 
 ## Picks the most expensive card the examiner can afford, and telegraphs it.
 func _choose_intent() -> Array:
-	if examiner_deck.hand.size() < 3:
-		examiner_deck.draw(3 - examiner_deck.hand.size())
-	var best: CardInstance = null
-	for card in examiner_deck.hand:
-		if card.data.cost > examiner.mana_per_turn:
-			continue
-		if best == null or card.data.cost > best.data.cost:
-			best = card
+	_refill_examiner_hand()
+	var best := _best_affordable_in_hand()
+	if best == null and not examiner_deck.hand.is_empty():
+		# Nothing currently in hand is affordable. Rather than hold the same
+		# unaffordable hand forever (hand.size() stays >= 3, so it would never
+		# be topped up again and the examiner would hesitate every turn for the
+		# rest of the battle), cycle the whole hand into the discard and try
+		# once more with a fresh draw. This does not guarantee an affordable
+		# card exists anywhere in the deck, but it stops a merely unlucky draw
+		# from making a battle un-loseable.
+		for card in examiner_deck.hand.duplicate():
+			examiner_deck.hand.erase(card)
+			examiner_deck.discard_pile.append(card)
+		_refill_examiner_hand()
+		best = _best_affordable_in_hand()
 	examiner_intent = best
 	if best == null:
 		return [{"type": "intent", "card": null, "text": "%s hesitates." % _enemy_data.enemy_name}]
@@ -236,6 +251,21 @@ func _choose_intent() -> Array:
 			"text": "%s will cast %s" % [_enemy_data.enemy_name, best.data.card_name],
 		}
 	]
+
+
+func _refill_examiner_hand() -> void:
+	if examiner_deck.hand.size() < 3:
+		examiner_deck.draw(3 - examiner_deck.hand.size())
+
+
+func _best_affordable_in_hand() -> CardInstance:
+	var best: CardInstance = null
+	for card in examiner_deck.hand:
+		if card.data.cost > examiner.mana_per_turn:
+			continue
+		if best == null or card.data.cost > best.data.cost:
+			best = card
+	return best
 
 
 func _tick_decay(who: Combatant, label: String) -> Array:
@@ -301,9 +331,11 @@ func _apply(
 			source.heal(scaled)
 			return [{"type": "heal", "amount": scaled, "text": "Healed %d" % scaled}]
 		CardData.SELF_DAMAGE:
-			# Paying, not being hit: bypasses block. This is a fixed cost, not an
-			# effect against a target, so it is not scaled by the enemy's
-			# weakness/ward multiplier or by Blot.
+			# Paying, not being hit: bypasses block. Unlike BLOCK/HEAL (which also
+			# land on `source` but ARE scaled), this is a fixed price the card
+			# charges its own caster, not scaled by the enemy's weakness/ward
+			# multiplier or by Blot — the examiner's own vulnerabilities should
+			# not make the player's Rot cards cheaper or more expensive to cast.
 			source.pay_hp(raw)
 			return [{"type": "pay_hp", "amount": raw, "text": "Paid %d hp" % raw}]
 		CardData.STATUS:
@@ -339,12 +371,16 @@ func _apply(
 func _check_end() -> Array:
 	if finished:
 		return []
-	if examiner.is_down():
-		finished = true
-		player_won = true
-		return [{"type": "battle_end", "won": true, "text": "You pass the examination."}]
+	# Player checked first: a dead player is always a loss, even if the
+	# examiner also went down in the same exchange (e.g. the examiner's own
+	# Decay or a self-costing spell kills it in the same turn it kills the
+	# player). Simultaneous death must not be scored as a win.
 	if player.is_down():
 		finished = true
 		player_won = false
 		return [{"type": "battle_end", "won": false, "text": "You fail the examination."}]
+	if examiner.is_down():
+		finished = true
+		player_won = true
+		return [{"type": "battle_end", "won": true, "text": "You pass the examination."}]
 	return []

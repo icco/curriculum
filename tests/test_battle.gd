@@ -233,6 +233,24 @@ func run() -> void:
 	chilled.play_card(chilled.player_deck.hand[0])
 	eq(chilled.examiner.hp, 95, "school scale and Chill combined and rounded once")
 
+	# Chill is likewise consumed ONCE per card, not once per effect: both hits
+	# on a two-DAMAGE-effect card must get the same reduction. Neutral school
+	# (scale=1.0) isolates Chill from the school/Blot scale entirely.
+	var twin_strike := _card("Twin Strike", S.INK, 0, [{"kind": CardData.DAMAGE, "amount": 10}, {"kind": CardData.DAMAGE, "amount": 10}])
+	var chill_twice := _battle([twin_strike], _enemy(100, S.ROT, S.FROST, [poke]))
+	chill_twice.start()
+	chill_twice.player.statuses.add(Statuses.Kind.CHILL, 1)
+	chill_twice.play_card(chill_twice.player_deck.hand[0])
+	eq(chill_twice.examiner.hp, 86, "both hits reduced by the same single Chill consumption (10*0.7 twice = 14), not 17")
+
+	# Chill is untouched by a card that deals no damage at all — it must not be
+	# silently spent (and lost) on a Block-only play.
+	var chill_guard := _battle([guard], _enemy(100, S.ROT, S.FROST, [poke]))
+	chill_guard.start()
+	chill_guard.player.statuses.add(Statuses.Kind.CHILL, 1)
+	chill_guard.play_card(chill_guard.player_deck.hand[0])
+	eq(chill_guard.player.statuses.amount(Statuses.Kind.CHILL), 1, "Chill is untouched by a card with no damage effect")
+
 	# The examiner plays the highest-cost card it can AFFORD with its
 	# mana_per_turn (2 here), not the highest-cost card in its deck.
 	var nip := _card("Nip", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 1}])
@@ -277,6 +295,78 @@ func run() -> void:
 		if e.get("by", "") == "examiner":
 			examiner_played = true
 	eq(examiner_played, false, "burn resolved before the intent could be played")
+
+	# CRITICAL: simultaneous death must be scored as a loss, not a win. The
+	# examiner's own intent can carry a self-cost (a Rot-flavoured spell) that
+	# kills the examiner in the very same effects pass that its damage effect
+	# kills the player. _check_end must ask "is the player down?" before "is
+	# the examiner down?", or a dead player gets credited with passing.
+	var reckless := _card("Reckless Blast", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 70}, {"kind": CardData.SELF_DAMAGE, "amount": 5}])
+	var mutual := _battle([guard], _enemy(3, S.ROT, S.FROST, [reckless]))
+	mutual.start()
+	mutual.end_turn()
+	eq(mutual.player.is_down(), true, "the player died to the examiner's blast")
+	eq(mutual.examiner.is_down(), true, "the examiner paid for it with its own life")
+	eq(mutual.finished, true, "battle over")
+	eq(mutual.player_won, false, "simultaneous death is a loss, not a win")
+
+	# Isolating the OTHER half of the same fix: once the player is dead, the
+	# examiner's own end-of-turn Decay must not still tick against a battle
+	# that is already decided. Decay of 5 against 3 hp would have been lethal
+	# if it ticked — asserting the examiner's hp is untouched proves it never
+	# got the chance.
+	var lethal_hit := _card("Lethal Hit", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 70}])
+	var overkill := _battle([guard], _enemy(3, S.ROT, S.FROST, [lethal_hit]))
+	overkill.start()
+	overkill.examiner.statuses.add(Statuses.Kind.DECAY, 5)
+	overkill.end_turn()
+	eq(overkill.player.is_down(), true, "the player died to the examiner's hit")
+	eq(overkill.player_won, false, "the player's death is still a loss")
+	eq(overkill.examiner.hp, 3, "the examiner's own decay never ticked against an already-finished battle")
+
+	# The ordinary, non-mutual case must still work: the examiner alone dies to
+	# its own Decay while the player survives, and that is still a win.
+	var soft_hit := _card("Soft Hit", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 4}])
+	var decay_kill := _battle([guard], _enemy(3, S.ROT, S.FROST, [soft_hit]))
+	decay_kill.start()
+	decay_kill.examiner.statuses.add(Statuses.Kind.DECAY, 5)
+	decay_kill.end_turn()
+	eq(decay_kill.player.is_down(), false, "the player survived a soft hit")
+	eq(decay_kill.finished, true, "battle over")
+	eq(decay_kill.player_won, true, "the examiner's own decay killed it — still a win")
+
+	# The examiner must not become permanently stuck hesitating if its hand
+	# happens to be all cards it cannot afford — a later task's decks include
+	# cost-3 cards, and a battle where the examiner never acts again is
+	# effectively unloseable. Force the reproduction regardless of shuffle
+	# order: the examiner's hand holds only the three unaffordable cards, with
+	# the one affordable card still sitting in the draw pile, waiting to be
+	# found once the hand cycles.
+	var pricey_a := _card("Pricey A", S.CINDER, 3, [{"kind": CardData.DAMAGE, "amount": 3}])
+	var pricey_b := _card("Pricey B", S.CINDER, 3, [{"kind": CardData.DAMAGE, "amount": 3}])
+	var pricey_c := _card("Pricey C", S.CINDER, 3, [{"kind": CardData.DAMAGE, "amount": 3}])
+	var cheap_hit := _card("Cheap Hit", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 5}])
+	var stuck := _battle(
+		[strike, strike, strike, strike, strike],
+		_enemy(100, S.ROT, S.FROST, [pricey_a, pricey_b, pricey_c, cheap_hit])
+	)
+	var forced_hand: Array[CardInstance] = []
+	var forced_draw: Array[CardInstance] = []
+	for c in stuck.examiner_deck.draw_pile:
+		if c.data.card_name == "Cheap Hit":
+			forced_draw.append(c)
+		else:
+			forced_hand.append(c)
+	stuck.examiner_deck.hand = forced_hand
+	stuck.examiner_deck.draw_pile = forced_draw
+	stuck.start()
+	check(stuck.examiner_intent != null, "the examiner found something to play instead of hesitating forever")
+	if stuck.examiner_intent != null:
+		eq(
+			stuck.examiner_intent.data.card_name,
+			"Cheap Hit",
+			"cycled the unaffordable hand to find the one card it could afford"
+		)
 
 	# The UI needs read access to the enemy's art id and data without reaching
 	# into a private field.
