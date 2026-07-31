@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/novice.tres" id="1_hdj3g"]
+[ext_resource type="Resource" path="res://resources/cards/winter_term.tres" id="2_h3k56"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_e0b83"]
+[ext_resource type="Resource" path="res://resources/courses/thesis_301.tres" id="4_e0b83"]
+[ext_resource type="Resource" path="res://resources/courses/applied_wardcraft_301.tres" id="5_c680j"]
+
+[resource]
+script = ExtResource("3_e0b83")
+course_name = "Viva Voce 350"
+tier = 3
+prerequisites = Array[ExtResource("3_e0b83")]([ExtResource("4_e0b83"), ExtResource("5_c680j")])
+prerequisites_required = 1
+examiner = ExtResource("1_hdj3g")
+par_turns = 9
+xp_par = 26
+guaranteed_card_drop = ExtResource("2_h3k56")
+is_honors = true

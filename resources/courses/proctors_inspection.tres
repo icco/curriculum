@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/proctor.tres" id="1_6xfo0"]
+[ext_resource type="Resource" path="res://resources/cards/rimeward.tres" id="2_2tjyl"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_5xyy2"]
+[ext_resource type="Resource" path="res://resources/courses/basic_arcana_101.tres" id="4_6yig2"]
+[ext_resource type="Resource" path="res://resources/courses/cantrips_101.tres" id="5_g8td8"]
+[ext_resource type="Resource" path="res://resources/courses/wardcraft_101.tres" id="6_ni2ig"]
+
+[resource]
+script = ExtResource("3_5xyy2")
+course_name = "Proctor's Inspection"
+prerequisites = Array[ExtResource("3_5xyy2")]([ExtResource("4_6yig2"), ExtResource("5_g8td8"), ExtResource("6_ni2ig")])
+prerequisites_required = 2
+examiner = ExtResource("1_6xfo0")
+par_turns = 8
+xp_par = 22
+guaranteed_card_drop = ExtResource("2_2tjyl")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/glass_tutor.tres" id="1_lcy7v"]
+[ext_resource type="Resource" path="res://resources/cards/marginalia.tres" id="2_evag5"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_gsaoi"]
+
+[resource]
+script = ExtResource("3_gsaoi")
+course_name = "Cantrips 101"
+examiner = ExtResource("1_lcy7v")
+xp_par = 14
+guaranteed_card_drop = ExtResource("2_evag5")

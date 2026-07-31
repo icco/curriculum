@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/drillmaster.tres" id="1_mi8kl"]
+[ext_resource type="Resource" path="res://resources/cards/frost_lance.tres" id="2_w0nf3"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_t7sv4"]
+[ext_resource type="Resource" path="res://resources/courses/proctors_inspection.tres" id="4_w0nf3"]
+
+[resource]
+script = ExtResource("3_t7sv4")
+course_name = "Cryomancy 201"
+tier = 2
+prerequisites = Array[ExtResource("3_t7sv4")]([ExtResource("4_w0nf3")])
+examiner = ExtResource("1_mi8kl")
+par_turns = 7
+xp_par = 20
+guaranteed_card_drop = ExtResource("2_w0nf3")

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/alchemy_master.tres" id="1_mh1yy"]
+[ext_resource type="Resource" path="res://resources/cards/rot_seed.tres" id="2_b2end"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_mtrvf"]
+[ext_resource type="Resource" path="res://resources/courses/proctors_inspection.tres" id="4_b2end"]
+
+[resource]
+script = ExtResource("3_mtrvf")
+course_name = "Necrology 201"
+tier = 2
+prerequisites = Array[ExtResource("3_mtrvf")]([ExtResource("4_b2end")])
+examiner = ExtResource("1_mh1yy")
+par_turns = 8
+xp_par = 22
+guaranteed_card_drop = ExtResource("2_b2end")

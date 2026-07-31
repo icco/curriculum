@@ -33,18 +33,18 @@ func run() -> void:
 		eq(novice.enemy_name, "Novice", "enemy_named returns the enemy actually named Novice")
 	eq(library.enemy_named("Nonexistent"), null, "missing enemy is null")
 
-	# No course resources exist yet (Task 16 generates them), so course_named has no
-	# hit to pin and catalog().available({}) has nothing to return either way — both
-	# assertions below cannot fail against a `return null` / `return []` stub and are
-	# kept only as a placeholder pinned once course content lands.
-	eq(library.course_named("Nonexistent"), null, "missing course is null (unable to fail: no courses exist yet)")
+	# Course content landed in Task 18, so course_named gets a real hit to pin, not
+	# just a miss that a `return null` stub would also satisfy.
+	var arcana := library.course_named("Basic Arcana 101")
+	check(arcana != null, "found basic arcana 101 by name")
+	if arcana != null:
+		eq(arcana.course_name, "Basic Arcana 101", "course_named returns the course actually named Basic Arcana 101")
+	eq(library.course_named("Nonexistent"), null, "missing course is null")
+
 	var catalog := library.catalog()
 	check(catalog != null, "catalog() builds a Catalog")
-	eq(
-		catalog.available({}),
-		[],
-		"empty course list has nothing available yet (unable to fail: no courses exist yet)"
-	)
+	# The three entry courses (no prerequisites) are available with no grades yet.
+	eq(catalog.available({}).size(), 3, "the three entry courses are available with no grades")
 
 	# GradeManager is stateless: pin the forward against calling Grading directly with
 	# the same params, not just against the known S outcome, so a forward that mutates

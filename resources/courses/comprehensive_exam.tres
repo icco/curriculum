@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/rector.tres" id="1_6mrgs"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="2_jqskc"]
+[ext_resource type="Resource" path="res://resources/courses/thesis_301.tres" id="3_awtxo"]
+[ext_resource type="Resource" path="res://resources/courses/applied_wardcraft_301.tres" id="4_ue6b3"]
+
+[resource]
+script = ExtResource("2_jqskc")
+course_name = "Comprehensive Exam"
+tier = 3
+prerequisites = Array[ExtResource("2_jqskc")]([ExtResource("3_awtxo"), ExtResource("4_ue6b3")])
+examiner = ExtResource("1_6mrgs")
+par_turns = 12
+xp_par = 34
+is_final = true

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/hall_monitor.tres" id="1_8sahy"]
+[ext_resource type="Resource" path="res://resources/cards/honours_sigil.tres" id="2_o5vg2"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_wsbgk"]
+[ext_resource type="Resource" path="res://resources/courses/midterm_review.tres" id="4_o5vg2"]
+
+[resource]
+script = ExtResource("3_wsbgk")
+course_name = "Applied Wardcraft 301"
+tier = 3
+prerequisites = Array[ExtResource("3_wsbgk")]([ExtResource("4_o5vg2")])
+examiner = ExtResource("1_8sahy")
+par_turns = 9
+xp_par = 26
+guaranteed_card_drop = ExtResource("2_o5vg2")

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/vice_chancellor.tres" id="1_klxhh"]
+[ext_resource type="Resource" path="res://resources/cards/cram.tres" id="2_qgbyc"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_cowhf"]
+[ext_resource type="Resource" path="res://resources/courses/pyromancy_201.tres" id="4_1n6v4"]
+[ext_resource type="Resource" path="res://resources/courses/cryomancy_201.tres" id="5_i4hkw"]
+[ext_resource type="Resource" path="res://resources/courses/necrology_201.tres" id="6_05wjr"]
+[ext_resource type="Resource" path="res://resources/courses/marginalia_201.tres" id="7_ip2l7"]
+
+[resource]
+script = ExtResource("3_cowhf")
+course_name = "Midterm Review"
+tier = 2
+prerequisites = Array[ExtResource("3_cowhf")]([ExtResource("4_1n6v4"), ExtResource("5_i4hkw"), ExtResource("6_05wjr"), ExtResource("7_ip2l7")])
+prerequisites_required = 2
+examiner = ExtResource("1_klxhh")
+par_turns = 10
+xp_par = 28
+guaranteed_card_drop = ExtResource("2_qgbyc")

@@ -52,18 +52,34 @@
 [ext_resource type="Resource" path="res://resources/cards/honours_sigil.tres" id="48_5emdn"]
 [ext_resource type="Resource" path="res://resources/cards/valedictory_sigil.tres" id="49_3pec6"]
 [ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="50_0t1gm"]
+[ext_resource type="Resource" path="res://resources/courses/basic_arcana_101.tres" id="51_oqpp6"]
 [ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="51_xochb"]
+[ext_resource type="Resource" path="res://resources/courses/cantrips_101.tres" id="52_nkoh0"]
+[ext_resource type="Resource" path="res://resources/courses/wardcraft_101.tres" id="53_0ahg0"]
 [ext_resource type="Resource" path="res://resources/enemies/glass_tutor.tres" id="53_lotx8"]
+[ext_resource type="Resource" path="res://resources/courses/tutorial_150.tres" id="54_5cjkh"]
 [ext_resource type="Resource" path="res://resources/enemies/hall_monitor.tres" id="54_y1v0d"]
+[ext_resource type="Resource" path="res://resources/courses/proctors_inspection.tres" id="55_8q3xo"]
 [ext_resource type="Resource" path="res://resources/enemies/drillmaster.tres" id="55_35plr"]
+[ext_resource type="Resource" path="res://resources/courses/pyromancy_201.tres" id="56_e82my"]
 [ext_resource type="Resource" path="res://resources/enemies/alchemy_master.tres" id="56_wjvce"]
 [ext_resource type="Resource" path="res://resources/enemies/battle_chanter.tres" id="57_7natg"]
+[ext_resource type="Resource" path="res://resources/courses/cryomancy_201.tres" id="57_mpkl0"]
+[ext_resource type="Resource" path="res://resources/courses/necrology_201.tres" id="58_hinix"]
 [ext_resource type="Resource" path="res://resources/enemies/proctor.tres" id="58_pasft"]
 [ext_resource type="Resource" path="res://resources/enemies/vice_chancellor.tres" id="59_6ii6x"]
+[ext_resource type="Resource" path="res://resources/courses/marginalia_201.tres" id="59_f8smh"]
 [ext_resource type="Resource" path="res://resources/enemies/rector.tres" id="60_mgbki"]
+[ext_resource type="Resource" path="res://resources/courses/fieldwork_250.tres" id="60_y6ct5"]
+[ext_resource type="Resource" path="res://resources/courses/midterm_review.tres" id="61_iwxa4"]
+[ext_resource type="Resource" path="res://resources/courses/thesis_301.tres" id="62_dspdf"]
+[ext_resource type="Resource" path="res://resources/courses/applied_wardcraft_301.tres" id="63_c5h7y"]
+[ext_resource type="Resource" path="res://resources/courses/viva_voce_350.tres" id="64_duvfl"]
+[ext_resource type="Resource" path="res://resources/courses/comprehensive_exam.tres" id="65_soadk"]
 
 [resource]
 script = ExtResource("1")
 cards = Array[ExtResource("1_qutnj")]([ExtResource("2"), ExtResource("3"), ExtResource("4_ive1p"), ExtResource("5_f2hwk"), ExtResource("6_o2aaw"), ExtResource("7_w3a8u"), ExtResource("8_3uubg"), ExtResource("9_galtt"), ExtResource("10_2rbvx"), ExtResource("11_lotx8"), ExtResource("12_y1v0d"), ExtResource("13_35plr"), ExtResource("14_wjvce"), ExtResource("15_7natg"), ExtResource("16_pasft"), ExtResource("17_6ii6x"), ExtResource("18_mgbki"), ExtResource("19_ajq0p"), ExtResource("20_f1wd8"), ExtResource("21_36i3r"), ExtResource("22_5cg1j"), ExtResource("23_dt6id"), ExtResource("24_m3utf"), ExtResource("25_lqoyj"), ExtResource("26_oqpp6"), ExtResource("27_nkoh0"), ExtResource("28_0ahg0"), ExtResource("29_5cjkh"), ExtResource("30_8q3xo"), ExtResource("31_e82my"), ExtResource("32_mpkl0"), ExtResource("33_hinix"), ExtResource("34_f8smh"), ExtResource("35_y6ct5"), ExtResource("36_iwxa4"), ExtResource("37_dspdf"), ExtResource("38_c5h7y"), ExtResource("39_duvfl"), ExtResource("40_soadk"), ExtResource("41_msces"), ExtResource("42_smvhf"), ExtResource("43_plxau"), ExtResource("44_06yis"), ExtResource("45_0yrjt"), ExtResource("46_3hv5c"), ExtResource("47_fnpa3"), ExtResource("48_5emdn"), ExtResource("49_3pec6")])
 enemies = Array[ExtResource("51_xochb")]([ExtResource("4"), ExtResource("53_lotx8"), ExtResource("54_y1v0d"), ExtResource("55_35plr"), ExtResource("56_wjvce"), ExtResource("57_7natg"), ExtResource("58_pasft"), ExtResource("59_6ii6x"), ExtResource("60_mgbki")])
+courses = Array[ExtResource("50_0t1gm")]([ExtResource("51_oqpp6"), ExtResource("52_nkoh0"), ExtResource("53_0ahg0"), ExtResource("54_5cjkh"), ExtResource("55_8q3xo"), ExtResource("56_e82my"), ExtResource("57_mpkl0"), ExtResource("58_hinix"), ExtResource("59_f8smh"), ExtResource("60_y6ct5"), ExtResource("61_iwxa4"), ExtResource("62_dspdf"), ExtResource("63_c5h7y"), ExtResource("64_duvfl"), ExtResource("65_soadk")])
 starting_deck = Array[ExtResource("1_qutnj")]([ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("40_soadk"), ExtResource("40_soadk"), ExtResource("40_soadk"), ExtResource("40_soadk"), ExtResource("22_5cg1j"), ExtResource("22_5cg1j")])
