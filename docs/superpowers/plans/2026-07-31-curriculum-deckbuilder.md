@@ -146,6 +146,7 @@ config_version=5
 
 config/name="Curriculum"
 config/description="A roguelike deckbuilder set in a dangerous magical academy."
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 boot_splash/show_image=false
