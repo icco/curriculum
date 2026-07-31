@@ -2903,7 +2903,7 @@ git push
 
 **Interfaces:**
 - Consumes: `EnemyData` (7), `CardData` (3), `Grading` (10).
-- Produces: `CourseData` with `course_name: String`, `tier: int`, `prerequisites: Array[CourseData]`, `prerequisites_required: int` (0 means all), `examiner: EnemyData`, `par_turns: int`, `xp_par: int`, `guaranteed_card_drop: CardData`, `is_honors: bool`, `honors_of: CourseData`; and `Catalog.new(courses: Array)` with `available(grades: Dictionary) -> Array`, `is_available(course, grades) -> bool`, `is_passed(course, grades) -> bool`, `revealed(grades) -> Array`, `validate() -> Array` returning a list of problem strings.
+- Produces: `CourseData` with `course_name: String`, `tier: int`, `prerequisites: Array[CourseData]`, `prerequisites_required: int` (0 means all), `examiner: EnemyData`, `par_turns: int`, `xp_par: int`, `guaranteed_card_drop: CardData`, `is_honors: bool`, `is_final: bool`; and `Catalog.new(courses: Array)` with `available(grades: Dictionary) -> Array`, `is_available(course, grades) -> bool`, `is_passed(course, grades) -> bool`, `revealed(grades) -> Array`, `validate() -> Array` returning a list of problem strings.
 
 `grades` maps course name → `Grading.Grade`. A course is passed at C or better.
 `validate()` asserts the two structural rules: no honors node is a prerequisite of any
