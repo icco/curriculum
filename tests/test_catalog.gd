@@ -44,6 +44,41 @@ func run() -> void:
 	_test_validate_gate_exemption()
 	_test_validate_final_exemption()
 
+	# The SHIPPED catalog must satisfy both structural rules. This is the assertion
+	# that makes two-F permadeath fair.
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	eq(library.courses.size(), 15, "fifteen courses")
+	var shipped := library.catalog()
+	var shipped_problems := shipped.validate()
+	for problem in shipped_problems:
+		check(false, "shipped catalog problem: %s" % problem)
+	eq(shipped_problems.size(), 0, "shipped catalog is structurally sound")
+
+	# Three courses have no prerequisites, so a run always has somewhere to start.
+	var entry := 0
+	for course in library.courses:
+		if course.prerequisites.is_empty():
+			entry += 1
+	eq(entry, 3, "three entry courses")
+
+	# Exactly one final, and it is reachable at C throughout.
+	var finals := 0
+	for course in library.courses:
+		if course.is_final:
+			finals += 1
+	eq(finals, 1, "one final")
+
+	# Every course authors both pars, or grading divides by zero.
+	for course in library.courses:
+		check(course.par_turns > 0, "%s authors par_turns" % course.course_name)
+		check(course.xp_par > 0, "%s authors xp_par" % course.course_name)
+		check(course.examiner != null, "%s has an examiner" % course.course_name)
+		if not course.is_final:
+			check(
+				course.guaranteed_card_drop != null,
+				"%s has a syllabus card" % course.course_name
+			)
+
 
 func _test_availability_and_grading() -> void:
 	var novice := _enemy("Novice")

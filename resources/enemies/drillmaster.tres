@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_af38y"]
+[ext_resource type="Resource" path="res://resources/cards/frost_lance.tres" id="2_28m17"]
+[ext_resource type="Resource" path="res://resources/cards/hoarfrost.tres" id="3_crhv3"]
+[ext_resource type="Resource" path="res://resources/cards/glass_shard.tres" id="4_df51r"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="5_bg4bv"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_b3524"]
+
+[resource]
+script = ExtResource("6_b3524")
+enemy_name = "Drillmaster"
+max_hp = 42
+deck = Array[ExtResource("1_af38y")]([ExtResource("2_28m17"), ExtResource("2_28m17"), ExtResource("3_crhv3"), ExtResource("4_df51r"), ExtResource("5_bg4bv")])
+art_id = "entities/drillmaster"

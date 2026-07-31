@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_idcsh"]
+[ext_resource type="Resource" path="res://resources/cards/ink_blot.tres" id="2_ao60s"]
+[ext_resource type="Resource" path="res://resources/cards/cite_source.tres" id="3_itrna"]
+[ext_resource type="Resource" path="res://resources/cards/marginalia.tres" id="4_nrttl"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="5_6sw3n"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_5nnpr"]
+
+[resource]
+script = ExtResource("6_5nnpr")
+enemy_name = "Glass Tutor"
+max_hp = 34
+deck = Array[ExtResource("1_idcsh")]([ExtResource("2_ao60s"), ExtResource("3_itrna"), ExtResource("4_nrttl"), ExtResource("5_6sw3n"), ExtResource("2_ao60s")])
+warded_school = 2
+art_id = "entities/glass_tutor"

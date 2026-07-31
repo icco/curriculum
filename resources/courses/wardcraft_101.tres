@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/hall_monitor.tres" id="1_llmtr"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="2_5oalo"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_g0c8b"]
+
+[resource]
+script = ExtResource("3_g0c8b")
+course_name = "Wardcraft 101"
+examiner = ExtResource("1_llmtr")
+par_turns = 6
+xp_par = 16
+guaranteed_card_drop = ExtResource("2_5oalo")

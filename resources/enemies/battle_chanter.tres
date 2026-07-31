@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_w20j6"]
+[ext_resource type="Resource" path="res://resources/cards/cinder_burst.tres" id="2_bf2ru"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="3_gmtxn"]
+[ext_resource type="Resource" path="res://resources/cards/scorch_notes.tres" id="4_s4mrt"]
+[ext_resource type="Resource" path="res://resources/cards/kindle.tres" id="5_nocb8"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="6_sntat"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_d51qh"]
+
+[resource]
+script = ExtResource("7_d51qh")
+enemy_name = "Battle Chanter"
+max_hp = 44
+deck = Array[ExtResource("1_w20j6")]([ExtResource("2_bf2ru"), ExtResource("3_gmtxn"), ExtResource("4_s4mrt"), ExtResource("5_nocb8"), ExtResource("6_sntat")])
+weak_school = 1
+warded_school = 0
+art_id = "entities/battle_chanter"

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/glass_tutor.tres" id="1_1dsyq"]
+[ext_resource type="Resource" path="res://resources/cards/ink_blot.tres" id="2_hyisc"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_b3hnf"]
+[ext_resource type="Resource" path="res://resources/courses/proctors_inspection.tres" id="4_hyisc"]
+
+[resource]
+script = ExtResource("3_b3hnf")
+course_name = "Marginalia 201"
+tier = 2
+prerequisites = Array[ExtResource("3_b3hnf")]([ExtResource("4_hyisc")])
+examiner = ExtResource("1_1dsyq")
+par_turns = 7
+xp_par = 20
+guaranteed_card_drop = ExtResource("2_hyisc")

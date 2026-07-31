@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_s2nh2"]
+[ext_resource type="Resource" path="res://resources/cards/valedictory_blaze.tres" id="2_ph8q5"]
+[ext_resource type="Resource" path="res://resources/cards/long_winter.tres" id="3_0hvye"]
+[ext_resource type="Resource" path="res://resources/cards/defended_thesis.tres" id="4_m6u1b"]
+[ext_resource type="Resource" path="res://resources/cards/bitter_mastery.tres" id="5_spj5a"]
+[ext_resource type="Resource" path="res://resources/cards/valedictory_sigil.tres" id="6_7sdpk"]
+[ext_resource type="Resource" path="res://resources/cards/immolate_notes.tres" id="7_76pl7"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="8_a0e4k"]
+
+[resource]
+script = ExtResource("8_a0e4k")
+enemy_name = "Rector"
+max_hp = 120
+mana_per_turn = 3
+deck = Array[ExtResource("1_s2nh2")]([ExtResource("2_ph8q5"), ExtResource("3_0hvye"), ExtResource("4_m6u1b"), ExtResource("5_spj5a"), ExtResource("6_7sdpk"), ExtResource("7_76pl7")])
+weak_school = 3
+warded_school = 4
+art_id = "entities/rector"

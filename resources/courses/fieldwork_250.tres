@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CourseData" format=3]
+
+[ext_resource type="Resource" path="res://resources/enemies/battle_chanter.tres" id="1_firg8"]
+[ext_resource type="Resource" path="res://resources/cards/final_recitation.tres" id="2_wo28q"]
+[ext_resource type="Script" path="res://scripts/data/CourseData.gd" id="3_p57ja"]
+[ext_resource type="Resource" path="res://resources/courses/pyromancy_201.tres" id="4_p4q27"]
+[ext_resource type="Resource" path="res://resources/courses/cryomancy_201.tres" id="5_xvolf"]
+[ext_resource type="Resource" path="res://resources/courses/necrology_201.tres" id="6_1ewl5"]
+[ext_resource type="Resource" path="res://resources/courses/marginalia_201.tres" id="7_d713r"]
+
+[resource]
+script = ExtResource("3_p57ja")
+course_name = "Fieldwork 250"
+tier = 2
+prerequisites = Array[ExtResource("3_p57ja")]([ExtResource("4_p4q27"), ExtResource("5_xvolf"), ExtResource("6_1ewl5"), ExtResource("7_d713r")])
+prerequisites_required = 1
+examiner = ExtResource("1_firg8")
+par_turns = 8
+xp_par = 22
+guaranteed_card_drop = ExtResource("2_wo28q")
+is_honors = true

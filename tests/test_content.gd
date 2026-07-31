@@ -77,9 +77,14 @@ func run() -> void:
 				"%s status %s is a real Statuses.Kind" % [card.card_name, effect.get("status", -1)]
 			)
 
-	# Every school must be a real Schools.School value. The generator hardcodes the
-	# enum values as integers rather than referencing Schools.School, so a reordered
-	# enum would silently reassign every card's school without this check noticing.
+	# Every school must be a real Schools.School value. This is a membership check
+	# only: it catches an out-of-range value (e.g. a typo'd constant), but a
+	# reordered Schools.School enum produces integers that are all still in
+	# range, so this alone would not notice every card's school silently
+	# reassigning. tools/generate_content.gd closes that gap at the source by
+	# reading Schools.School directly instead of mirroring it as hardcoded ints;
+	# the identity checks below (Spark is Cinder, etc.) are what actually pin a
+	# specific card to a specific school.
 	var valid_schools := Schools.ALL
 	for card in library.cards:
 		check(
@@ -92,6 +97,21 @@ func run() -> void:
 	for card in library.cards:
 		by_school[card.school] = int(by_school.get(card.school, 0)) + 1
 	eq(by_school.size(), 5, "all five schools have cards")
+
+	# Identity checks: one named card per school, and one named status. A
+	# membership check (school in Schools.ALL) cannot tell CINDER from FROST if
+	# the enum reorders — these can, because they compare against a specific
+	# named enum member rather than "any valid value."
+	eq(library.card_named("Spark").school, Schools.School.CINDER, "spark is cinder")
+	eq(library.card_named("Frost Lance").school, Schools.School.FROST, "frost lance is frost")
+	eq(library.card_named("Ink Blot").school, Schools.School.INK, "ink blot is ink")
+	eq(library.card_named("Rot Seed").school, Schools.School.ROT, "rot seed is rot")
+	eq(library.card_named("Guard").school, Schools.School.WARD, "guard is ward")
+
+	var kindle := library.card_named("Kindle")
+	check(kindle != null, "kindle exists")
+	if kindle != null:
+		eq(kindle.effects[0]["status"], Statuses.Kind.BURN, "kindle burns, specifically")
 
 	# Spot-check the table against the spec.
 	var spark := library.card_named("Spark")
@@ -110,3 +130,36 @@ func run() -> void:
 	eq(starting.get("Spark", 0), 4, "four sparks")
 	eq(starting.get("Guard", 0), 4, "four guards")
 	eq(starting.get("Ink Blot", 0), 2, "two ink blots")
+
+	# Examiners: six regular plus two gates plus the final.
+	eq(library.enemies.size(), 9, "nine examiners")
+	var gates := 0
+	for enemy in library.enemies:
+		check(enemy.enemy_name != "", "every examiner is named")
+		check(enemy.max_hp > 0, "%s has hit points" % enemy.enemy_name)
+		check(enemy.mana_per_turn > 0, "%s has mana" % enemy.enemy_name)
+		check(enemy.deck.size() >= 3, "%s has a deck of at least three" % enemy.enemy_name)
+		check(enemy.art_id != "", "%s declares art" % enemy.enemy_name)
+		neq(enemy.weak_school, enemy.warded_school, "%s weak != warded" % enemy.enemy_name)
+		for card in enemy.deck:
+			check(card != null, "%s deck has no holes" % enemy.enemy_name)
+			# An examiner must be able to afford at least one card, or it hesitates
+			# forever and the battle cannot end.
+		var affordable := false
+		for card in enemy.deck:
+			if card != null and card.cost <= enemy.mana_per_turn:
+				affordable = true
+		check(affordable, "%s can afford something in its own deck" % enemy.enemy_name)
+		if enemy.is_gate:
+			gates += 1
+	eq(gates, 2, "two gate examiners")
+
+	# Every school is somebody's weakness and somebody's ward, so no school is dead
+	# weight and none is a universal answer.
+	var weak_schools := {}
+	var warded_schools := {}
+	for enemy in library.enemies:
+		weak_schools[enemy.weak_school] = true
+		warded_schools[enemy.warded_school] = true
+	eq(weak_schools.size(), 5, "all five schools are somebody's weakness")
+	eq(warded_schools.size(), 5, "all five schools are somebody's ward")

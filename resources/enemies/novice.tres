@@ -1,15 +1,15 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="EnemyData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="1"]
-[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_6owys"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="2_pqgs7"]
+[ext_resource type="Resource" path="res://resources/cards/kindle.tres" id="3_vxgw7"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="4_3ah2e"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="5_61hkx"]
 
 [resource]
-script = ExtResource("1")
+script = ExtResource("5_61hkx")
 enemy_name = "Novice"
 max_hp = 28
-mana_per_turn = 2
-deck = [ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("2")]
+deck = Array[ExtResource("1_6owys")]([ExtResource("2_pqgs7"), ExtResource("2_pqgs7"), ExtResource("3_vxgw7"), ExtResource("4_3ah2e")])
 weak_school = 2
-warded_school = 1
 art_id = "entities/novice"
-is_gate = false
