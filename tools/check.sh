@@ -25,16 +25,21 @@ fi
 run_limited() {
   local limit="$1"
   shift
-  if command -v timeout >/dev/null 2>&1; then
+  if [ -z "${CHECK_FORCE_SHIM:-}" ] && command -v timeout >/dev/null 2>&1; then
     timeout "$limit" "$@"
     return $?
   fi
   "$@" &
   local pid=$!
+  # The `>/dev/null 2>&1` on the watcher is load-bearing, not tidiness. Without it the
+  # subshell and its `sleep` child inherit this function's stdout. Killing the subshell
+  # orphans the `sleep`, which keeps the write end of the caller's command-substitution
+  # pipe open, so `$(run_limited ...)` blocks for the FULL limit even when the wrapped
+  # command exited instantly — turning a fail-fast guard into a far worse hang.
   (
     sleep "$limit"
-    kill -9 "$pid" 2>/dev/null && exit 0
-  ) &
+    kill -9 "$pid" 2>/dev/null
+  ) >/dev/null 2>&1 &
   local watcher=$!
   wait "$pid" 2>/dev/null
   local status=$?
@@ -54,8 +59,8 @@ run_limited() {
 # assertion failure somewhere unrelated.
 #
 # Note the limit of this check: --import scans assets but does not eagerly load an
-# unreferenced .tres, so an orphaned broken resource slips past it. test_content walks
-# resources/ for exactly that reason.
+# unreferenced .tres, so an orphaned broken resource slips past it. Catching that is
+# test_content's job, via a walk of resources/ added when generated content lands.
 import_output=$(run_limited "$IMPORT_TIMEOUT" "$GODOT" --headless --import --path . 2>&1)
 import_status=$?
 if [ "$import_status" -eq 124 ]; then
