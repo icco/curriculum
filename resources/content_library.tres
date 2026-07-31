@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ContentLibrary" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/ContentLibrary.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="2"]
+[ext_resource type="Resource" path="res://resources/cards/ember_lance.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/enemies/novice.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+cards = [ExtResource("2"), ExtResource("3")]
+enemies = [ExtResource("4")]
+courses = []
+starting_deck = [ExtResource("2"), ExtResource("2"), ExtResource("2"), ExtResource("2")]
