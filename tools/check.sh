@@ -68,7 +68,19 @@ if [ "$import_status" -eq 124 ]; then
   echo "check: import hung for ${IMPORT_TIMEOUT}s — a script almost certainly failed to compile" >&2
   exit 1
 fi
-if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_output"; then
+# Two teardown lines are filtered out before the check, and the reason matters.
+# CourseData exports a self-referential `Array[CourseData]` for its prerequisites, which
+# is legal and required. Godot's exit-time accounting reports the resulting reference as
+# "resources still in use at exit" plus a leaked-ObjectDB count. That is Godot noticing
+# its own cleanup order, not a broken import.
+#
+# A blanket 'ERROR' match therefore failed the build for a benign message — and the cost
+# was paid in the code: it forced GameManager to reference Run and SaveGame via load()
+# instead of by class_name, purely so `--import` would not resolve CourseData while
+# building autoloads. Narrowing the pattern here is the correct fix; contorting call
+# sites to keep an over-broad grep happy is not.
+import_signal=$(grep -vE 'resources still in use at exit|ObjectDB instances leaked' <<<"$import_output")
+if grep -qE 'ERROR|Parse Error|Failed loading|Failed to load' <<<"$import_signal"; then
   echo "$import_output" >&2
   echo "check: import reported errors" >&2
   exit 1
