@@ -2345,7 +2345,9 @@ func _apply(
 
 	match kind:
 		CardData.DAMAGE:
-			var dealt := int(roundf(float(scaled) * chill_scale))
+			# One rounding over the combined product. Rounding `scaled` first and then
+			# again after chill_scale double-rounds and drifts off the intended number.
+			var dealt := int(roundf(float(raw) * scale * chill_scale))
 			target.take_damage(dealt)
 			return [
 				{"type": "damage", "target": target_label, "amount": dealt, "text": "%d damage" % dealt}
@@ -2353,7 +2355,7 @@ func _apply(
 		CardData.BONUS_IF_CHILLED:
 			if target.statuses.amount(Statuses.Kind.CHILL) <= 0:
 				return []
-			var bonus := int(roundf(float(scaled) * chill_scale))
+			var bonus := int(roundf(float(raw) * scale * chill_scale))
 			target.take_damage(bonus)
 			return [
 				{"type": "damage", "target": target_label, "amount": bonus, "text": "+%d, chilled" % bonus}
