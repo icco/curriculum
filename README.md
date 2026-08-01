@@ -101,17 +101,28 @@ Two headless harnesses. Neither is part of the CI gate; both are seeded, so runs
 reproducible.
 
 ```sh
-godot --headless --path . --script tools/simulate.gd     -- 40
-godot --headless --path . --script tools/policy_probe.gd -- 30
+godot --headless --path . --script tools/simulate.gd     -- 100
+godot --headless --path . --script tools/policy_probe.gd -- 60
 ```
 
-`simulate.gd` plays N runs with a greedy bot and reports wins, the grade
-distribution, and which courses runs died on — the difficulty curve.
+`simulate.gd` plays N runs with a greedy bot and reports graduations, the grade
+distribution, and a per-course table: attempts, loss rate, and the hit points the
+player walks in and out with. Since hit points carry between courses, *where* a run
+dies matters much less than what it arrived with — a course losing 60% of its
+attempts but only ever entered at 20 hp is a symptom of the two courses before it.
 
 `policy_probe.gd` plays the same runs under several deliberately different policies
-(never defend, waste your mana, only defend) and compares their grades. It answers a
-different question: *does playing well matter?* If a policy that throws away a real
-resource scores the same as the greedy one, that resource is not a decision.
+(never defend, waste your mana, only defend, throw a fight to bank the F's full heal)
+and compares them. It answers a different question: *does playing well matter?* If a
+policy that throws away a real resource scores the same as the greedy one, that
+resource is not a decision.
+
+A policy that never actually engages will report a near-greedy score and read as a
+cleared exploit, so check any divergence counter it prints before trusting a null
+result.
+
+The single global difficulty dial is `Grading._RECOVERY` — how much passing a course
+heals. It moves every course at once, where an examiner's stats move one or two.
 
 ## Looking at it
 

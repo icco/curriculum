@@ -26,10 +26,23 @@ func _params(overrides: Dictionary) -> Dictionary:
 
 
 func run() -> void:
-	# Efficiency: full marks at or under par, scaling down after.
-	almost(Grading.score(_params({"turns_taken": 5, "par_turns": 5}))["efficiency"], 25.0, "at par")
-	almost(Grading.score(_params({"turns_taken": 3, "par_turns": 5}))["efficiency"], 25.0, "under par caps")
-	almost(Grading.score(_params({"turns_taken": 10, "par_turns": 5}))["efficiency"], 12.5, "double par is half")
+	# Efficiency: par is the TARGET, not the floor. Finishing exactly at par earns
+	# 25 / PAR_TARGET; the last points are bought by finishing inside par. Clamped at
+	# full marks so beating it by a mile is not worth more than beating it.
+	almost(Grading.score(_params({"turns_taken": 5, "par_turns": 5}))["efficiency"], 20.0, "at par")
+	almost(
+		Grading.score(_params({"turns_taken": 4, "par_turns": 5}))["efficiency"],
+		25.0,
+		"four fifths of par is exactly full marks"
+	)
+	almost(Grading.score(_params({"turns_taken": 3, "par_turns": 5}))["efficiency"], 25.0, "well under par caps")
+	almost(Grading.score(_params({"turns_taken": 10, "par_turns": 5}))["efficiency"], 10.0, "double par")
+	# The gradient has to be strictly increasing between par and the cap, or "beat
+	# par" is just a second clamp with extra steps.
+	var slower: float = Grading.score(_params({"turns_taken": 6, "par_turns": 5}))["efficiency"]
+	var at_par: float = Grading.score(_params({"turns_taken": 5, "par_turns": 5}))["efficiency"]
+	var faster: float = Grading.score(_params({"turns_taken": 4, "par_turns": 5}))["efficiency"]
+	check(slower < at_par and at_par < faster, "efficiency strictly improves as turns drop")
 
 	# Survival: proportional to hit points kept.
 	almost(Grading.score(_params({"hp_end": 60}))["survival"], 25.0, "untouched")
@@ -52,7 +65,7 @@ func run() -> void:
 
 	# A perfect battle totals 100 and earns an S.
 	var perfect_params := {
-		"turns_taken": 5,
+		"turns_taken": 4,
 		"par_turns": 5,
 		"hp_end": 60,
 		"xp_banked": 15,
@@ -67,23 +80,46 @@ func run() -> void:
 	# score() must grade its OWN total through grade_for(), not just special-case
 	# S/F around `won` — a won battle at a middle tier proves the wiring, since every
 	# other score()-level grade assertion in this suite lands on S or F.
+	# 20 efficiency (at par) + 25 survival + 0 learning + 19 discovery. Deliberately
+	# not landing on a tier cutoff, so this case proves the routing rather than the
+	# boundary handling that the grade_for assertions below already pin.
 	var mid := Grading.score(
-		_params({"turns_taken": 5, "par_turns": 5, "hp_end": 60, "weakness_known": true})
+		_params({
+			"turns_taken": 5, "par_turns": 5, "hp_end": 60,
+			"weakness_known": true, "distinct_schools": 2,
+		})
 	)
-	almost(mid["total"], 65.0, "mid-tier total")
-	eq(mid["grade"], Grading.Grade.B, "a 65 total grades B through score()")
+	almost(mid["total"], 64.0, "mid-tier total")
+	eq(mid["grade"], Grading.Grade.B, "a 64 total grades B through score()")
+
+	# Recovery is a grade's other payout besides the draft, so it is pinned here
+	# alongside draft_allowance rather than only in test_run: the two together are
+	# what make a grade worth chasing.
+	check(
+		(
+			Grading.recovery_fraction(Grading.Grade.S)
+			> Grading.recovery_fraction(Grading.Grade.A)
+			and Grading.recovery_fraction(Grading.Grade.A)
+			> Grading.recovery_fraction(Grading.Grade.B)
+			and Grading.recovery_fraction(Grading.Grade.B)
+			> Grading.recovery_fraction(Grading.Grade.C)
+			and Grading.recovery_fraction(Grading.Grade.C) > 0.0
+		),
+		"recovery strictly increases with the grade earned"
+	)
+	almost(Grading.recovery_fraction(Grading.Grade.F), 0.0, "an F recovers nothing HERE")
 
 	# Thresholds — pin each of the four cutoffs exactly at its value AND just below,
 	# so a `>=` weakened to `>` (which would kick the exact-cutoff value down a tier)
 	# and a cutoff placed too low (which would let the just-below value pass) both fail.
 	eq(Grading.grade_for(90.0), Grading.Grade.S, "90 is S")
 	eq(Grading.grade_for(89.9), Grading.Grade.A, "just under 90 is A")
-	eq(Grading.grade_for(75.0), Grading.Grade.A, "75 is A")
-	eq(Grading.grade_for(74.9), Grading.Grade.B, "just under 75 is B")
-	eq(Grading.grade_for(60.0), Grading.Grade.B, "60 is B")
-	eq(Grading.grade_for(59.9), Grading.Grade.C, "just under 60 is C")
-	eq(Grading.grade_for(40.0), Grading.Grade.C, "40 is C")
-	eq(Grading.grade_for(39.9), Grading.Grade.F, "under 40 is F")
+	eq(Grading.grade_for(78.0), Grading.Grade.A, "78 is A")
+	eq(Grading.grade_for(77.9), Grading.Grade.B, "just under 78 is B")
+	eq(Grading.grade_for(64.0), Grading.Grade.B, "64 is B")
+	eq(Grading.grade_for(63.9), Grading.Grade.C, "just under 64 is C")
+	eq(Grading.grade_for(44.0), Grading.Grade.C, "44 is C")
+	eq(Grading.grade_for(43.9), Grading.Grade.F, "under 44 is F")
 	eq(Grading.grade_for(0.0), Grading.Grade.F, "zero is F")
 
 	# Losing is an F however well it otherwise went — use the SAME params as the

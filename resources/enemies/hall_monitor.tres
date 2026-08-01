@@ -1,17 +1,18 @@
 [gd_resource type="Resource" script_class="EnemyData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_wxrhi"]
-[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="2_gqa6u"]
-[ext_resource type="Resource" path="res://resources/cards/warded_bracers.tres" id="3_5qfbs"]
-[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="4_77u40"]
-[ext_resource type="Resource" path="res://resources/cards/study_break.tres" id="5_mhqa0"]
-[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_edod4"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_gqa6u"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="2_5qfbs"]
+[ext_resource type="Resource" path="res://resources/cards/warded_bracers.tres" id="3_77u40"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="4_mhqa0"]
+[ext_resource type="Resource" path="res://resources/cards/study_break.tres" id="5_edod4"]
+[ext_resource type="Resource" path="res://resources/cards/scorch_notes.tres" id="6_m46td"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_y34n4"]
 
 [resource]
-script = ExtResource("6_edod4")
+script = ExtResource("7_y34n4")
 enemy_name = "Hall Monitor"
-max_hp = 38
-deck = Array[ExtResource("1_wxrhi")]([ExtResource("2_gqa6u"), ExtResource("2_gqa6u"), ExtResource("3_5qfbs"), ExtResource("4_77u40"), ExtResource("5_mhqa0")])
+max_hp = 40
+deck = Array[ExtResource("1_gqa6u")]([ExtResource("2_5qfbs"), ExtResource("3_77u40"), ExtResource("4_mhqa0"), ExtResource("5_edod4"), ExtResource("6_m46td")])
 weak_school = 3
 warded_school = 4
 art_id = "entities/hall_monitor"

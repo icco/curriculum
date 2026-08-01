@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("5_61hkx")
 enemy_name = "Novice"
-max_hp = 28
+max_hp = 32
 deck = Array[ExtResource("1_6owys")]([ExtResource("2_pqgs7"), ExtResource("2_pqgs7"), ExtResource("3_vxgw7"), ExtResource("4_3ah2e")])
 weak_school = 2
 art_id = "entities/novice"
