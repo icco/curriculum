@@ -9,7 +9,23 @@ extends Node
 ## to draft from a loss -- and goes straight back to the catalog after the report
 ## card. Autosaves on every return to the catalog; deletes the save on expulsion.
 
-var run: Run = null
+## Backed by GameManager rather than stored here. The two used to be separate fields
+## assigned side by side (`run = ...` then `GameManager.run = run`, in two places),
+## which is two references to one object with nothing keeping them in step — a
+## reassignment that missed one line would have left the autoload pointing at a stale
+## run and nothing would have failed loudly. The autoload is the single storage
+## location; this is a view onto it, so `main.run` still reads naturally here and in
+## the suites.
+##
+## The three autoloads are NOT removable, whatever their thinness suggests: the brief
+## (assets/prompts/init.md, section A) names GameManager, DeckManager and GradeManager
+## as required singletons, and spec 10.3 records the compromise they implement.
+var run: Run:
+	get:
+		return GameManager.run
+	set(value):
+		GameManager.run = value
+
 var battle: Battle = null
 
 var library: ContentLibrary = null
@@ -72,7 +88,6 @@ func _show_menu() -> void:
 
 func start_new_run() -> void:
 	run = Run.new(library.new_starting_deck())
-	GameManager.run = run
 	SaveGame.save(run)
 	_show_catalog()
 
@@ -82,7 +97,6 @@ func _continue_run() -> void:
 	if run == null:
 		start_new_run()
 		return
-	GameManager.run = run
 	_show_catalog()
 
 
@@ -113,6 +127,9 @@ func enter_course(course: CourseData) -> void:
 
 
 func _on_battle_finished() -> void:
+	# The battle's piles are gone the moment it is graded; leaving them on the
+	# autoload means it spends the rest of the session pointing at a finished fight.
+	DeckManager.end_battle()
 	finish_battle_headless(battle.player_won)
 
 

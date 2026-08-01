@@ -8,7 +8,7 @@ script = ExtResource("2_b2hoq")
 card_name = "Black Ice"
 school = 1
 effects = Array[Dictionary]([{
-"amount": 5,
+"amount": 4,
 "kind": "status",
 "status": 1
 }, {
