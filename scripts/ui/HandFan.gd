@@ -45,6 +45,11 @@ static func fan_transform(index: int, count: int, width: float) -> Dictionary:
 func _init() -> void:
 	# The fan itself must not eat taps; only the CardViews inside it do.
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# set_hand() runs before the parent container has sorted its children, so the first
+	# layout() sees size.x == 0 and falls back to the full 1080. Re-fanning on resize is
+	# what makes the fan honour the width it is actually given -- without it, the cards
+	# stay spread for a screen wider than the one they are on and hang over the gutter.
+	resized.connect(layout)
 
 
 func set_hand(cards: Array) -> void:

@@ -17,6 +17,12 @@ var catalog: Catalog = null
 
 var _screen: Control = null
 var _screen_name := ""
+## Every screen is mounted inside this, so the edge gutter is defined in exactly one
+## place instead of seven. A screen therefore never sees the full viewport width: its
+## own `size.x` is already the padded content width, which is what any screen doing
+## its own layout maths (CourseCatalog's tier columns, HandFan's spread) should be
+## measuring against anyway.
+var _frame: MarginContainer = null
 var _course = null
 var _rng := RandomNumberGenerator.new()
 
@@ -39,13 +45,19 @@ func current_screen_name() -> String:
 
 
 func _swap(screen: Control, name: String) -> void:
-	if _screen != null and _screen.get_parent() == self:
-		remove_child(_screen)
+	if _frame == null:
+		_frame = UIKit.screen_margin()
+		add_child(_frame)
+	# Compared against _frame, not self: screens are mounted one level down now, so a
+	# `get_parent() == self` check would never match and every screen would be left
+	# stacked on top of the last.
+	if _screen != null and _screen.get_parent() == _frame:
+		_frame.remove_child(_screen)
 		_screen.queue_free()
 	_screen = screen
 	_screen_name = name
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(screen)
+	_frame.add_child(screen)
 
 
 func _show_menu() -> void:
