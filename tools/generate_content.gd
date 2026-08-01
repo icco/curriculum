@@ -355,10 +355,21 @@ func _process(_delta: float) -> bool:
 	# 120, so every run starts from a clean slate for cards this generator owns:
 	# everything, since the whole set is regenerated from the table every time.
 	var stale_dir := DirAccess.open(OUT_DIR)
-	if stale_dir != null:
-		for file in stale_dir.get_files():
-			if file.ends_with(".tres") or file.ends_with(".tres.import"):
-				stale_dir.remove(file)
+	if stale_dir == null:
+		printerr("cannot open %s to clear stale cards" % OUT_DIR)
+		quit(1)
+		return true
+	for file in stale_dir.get_files():
+		if not (file.ends_with(".tres") or file.ends_with(".tres.import")):
+			continue
+		# A failed delete has to stop the run. Carrying on would leave a stale card
+		# on disk that still loads, inflating the set past 120 and making the count
+		# this generator reports a lie -- the exact failure the wipe exists to prevent.
+		var err := stale_dir.remove(file)
+		if err != OK:
+			printerr("failed to remove stale %s/%s: %d" % [OUT_DIR, file, err])
+			quit(1)
+			return true
 
 	var written := 0
 	var all: Array[CardData] = []
