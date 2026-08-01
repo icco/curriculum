@@ -12,7 +12,7 @@
 [resource]
 script = ExtResource("8_a0e4k")
 enemy_name = "Rector"
-max_hp = 55
+max_hp = 48
 mana_per_turn = 3
 deck = Array[ExtResource("1_s2nh2")]([ExtResource("2_ph8q5"), ExtResource("3_0hvye"), ExtResource("4_m6u1b"), ExtResource("5_spj5a"), ExtResource("6_7sdpk"), ExtResource("7_76pl7")])
 weak_school = 3

@@ -32,7 +32,7 @@ func roster() -> Array:
 			["bulwark", "rime_lance", "rime_lance", "glass_shard", "mirror_shard"]],
 		["Vice-Chancellor", 45, 3, FROST, INK, "vice_chancellor", true,
 			["spilled_ledger", "blightseed", "immolate_notes", "cite_chapter_and_verse", "bulwark"]],
-		["Rector", 55, 3, ROT, WARD, "rector", false,
+		["Rector", 48, 3, ROT, WARD, "rector", false,
 			["valedictory_blaze", "long_winter", "defended_thesis", "spark",
 			 "valedictory_sigil", "immolate_notes"]],
 	]
