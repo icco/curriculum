@@ -52,6 +52,15 @@ func _library(roster: Array, opening: Array = []) -> ContentLibrary:
 	for school in opening:
 		start.append(_card(school, CardData.DAMAGE, 6))
 	lib.starting_deck = start
+	# The card index has to hold every card the roster plays, or CardPool has no candidate
+	# for any slot and every deck falls back to its authored self -- which would leave this
+	# suite testing the school rolls against a deck roll that silently did nothing.
+	var cards: Array[CardData] = []
+	for enemy in roster:
+		for card in enemy.deck:
+			if not cards.has(card):
+				cards.append(card)
+	lib.cards = cards
 	return lib
 
 
@@ -99,7 +108,15 @@ func run() -> void:
 		var variant: EnemyData = faculty.examiner(roster[i])
 		neq(variant, roster[i], "the variant is a distinct object")
 		eq(variant.enemy_name, roster[i].enemy_name, "the name survives -- it is the Bestiary's key")
-		eq(variant.weak_school, roster[i].weak_school, "the weak school is left as authored")
+		# Non-aliasing has to be probed by writing, not by comparing: GDScript compares
+		# arrays element-wise, so a variant deck that IS the roster's array compares equal
+		# to it and so does an independent copy with the same contents. Only a write tells
+		# them apart -- and aliasing here is the leak that would put a rolled deck onto the
+		# library's shared EnemyData for the rest of the session.
+		var roster_size: int = roster[i].deck.size()
+		variant.deck.append(variant.deck[0])
+		eq(roster[i].deck.size(), roster_size, "the variant's deck is its own array, not the roster's")
+		variant.deck.resize(roster_size)
 
 	# Spec section 5: never weak and warded to the same school, at any seed.
 	# Also: a defensive examiner is never warded against a school the player opens
@@ -128,3 +145,123 @@ func run() -> void:
 	var untouched := _enemy("Solo", Schools.School.ROT, Schools.School.INK, [])
 	eq(bare.examiner(untouched), untouched, "an unknown examiner falls back to its own resource")
 	eq(bare.examiner(null), null, "a null examiner does not crash the lookup")
+
+	_check_generated_rosters()
+
+
+## The rules the generator has to hold against the REAL content, which is the only content
+## whose difficulty was ever measured. A synthetic three-examiner roster cannot exercise
+## the cost curve, the status profile or the evolution ladder these depend on.
+func _check_generated_rosters() -> void:
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var opening := library.opening_schools()
+	var syllabus := {}  ## examiner name -> schools of the syllabus cards it hands out
+	var earliest := {}  ## examiner name -> lowest tier it is met at
+	for course in library.courses:
+		if course.examiner == null:
+			continue
+		var key: String = course.examiner.enemy_name
+		earliest[key] = mini(int(earliest.get(key, 99)), int(course.tier))
+		if not syllabus.has(key):
+			syllabus[key] = []
+		if course.guaranteed_card_drop != null:
+			syllabus[key].append(course.guaranteed_card_drop.school)
+
+	var authored := {}
+	for enemy in library.enemies:
+		authored[enemy.enemy_name] = enemy
+
+	var substituted := 0
+	var total_slots := 0
+	var seeds := 25
+	for seed_value in range(1, seeds):
+		var faculty := Faculty.new(library, seed_value)
+		substituted += faculty.slots_substituted
+		total_slots += faculty.slots_filled
+		for enemy in faculty.all():
+			var base: EnemyData = authored[enemy.enemy_name]
+			var where := "seed %d, %s" % [seed_value, enemy.enemy_name]
+
+			# --- the deck keeps the shape its difficulty was tuned against ---
+			eq(enemy.deck.size(), base.deck.size(), "%s: deck size held" % where)
+			var teaches := []
+			var cost := 0
+			var base_cost := 0
+			var damage := 0
+			var base_damage := 0
+			var statuses := {}
+			var base_statuses := {}
+			var heals := false
+			for i in enemy.deck.size():
+				var card: CardData = enemy.deck[i]
+				var was: CardData = base.deck[i]
+				# Library cards only. A generated CardData has no resource_path, and
+				# SaveGame serialises a drafted card BY path -- so an invented card would
+				# vanish from the player's deck on the next load.
+				check(
+					card.resource_path != "" and library.cards.has(card),
+					"%s: slot %d is a real library card (%s)" % [where, i, card.card_name]
+				)
+				if not teaches.has(card.school):
+					teaches.append(card.school)
+				cost += card.cost
+				base_cost += was.cost
+				damage += CardPool.direct_damage(card)
+				base_damage += CardPool.direct_damage(was)
+				heals = heals or CardPool.heals(card)
+				for kind in CardPool.statuses_applied(card):
+					statuses[kind] = int(statuses.get(kind, 0)) + int(
+						CardPool.statuses_applied(card)[kind]
+					)
+				for kind in CardPool.statuses_applied(was):
+					base_statuses[kind] = int(base_statuses.get(kind, 0)) + int(
+						CardPool.statuses_applied(was)[kind]
+					)
+
+			# The cost curve is the tuning rule generate_enemies.gd spends a paragraph on:
+			# at 2 mana an all-1-cost deck plays TWO cards a turn, and dropping Alchemy
+			# Master's only 2-cost card took Necrology 201 from a 37% loss to 53%. It has
+			# to survive a re-roll exactly, not approximately.
+			eq(cost, base_cost, "%s: total mana cost unchanged" % where)
+			# The status profile likewise, and exactly: Chill and Blot are non-linear in
+			# their own stack count, so "close" is not a defence.
+			eq(statuses, base_statuses, "%s: status profile unchanged" % where)
+			check(
+				absi(damage - base_damage) <= maxi(4, int(0.2 * float(base_damage))),
+				"%s: direct damage within tolerance (%d vs %d)" % [where, damage, base_damage]
+			)
+			# A Decay examiner must never also carry sustain: nothing shrinks a Decay
+			# stack and it grows every tick, so healing through it heals into an unbounded
+			# number. Structural now -- statuses cannot move between slots -- but asserted
+			# because it is the invariant, not the mechanism, that matters.
+			check(
+				not (heals and int(statuses.get(Statuses.Kind.DECAY, 0)) > 0),
+				"%s: does not pair Decay with sustain" % where
+			)
+
+			# --- the schools stay learnable ---
+			neq(enemy.warded_school, enemy.weak_school, "%s: not both weak and warded alike" % where)
+			for school in syllabus.get(enemy.enemy_name, []):
+				if not teaches.has(school):
+					teaches.append(school)
+			check(
+				teaches.has(enemy.weak_school),
+				"%s: weak to a school it teaches" % where
+			)
+			if int(earliest.get(enemy.enemy_name, 99)) <= 1:
+				check(
+					opening.has(enemy.weak_school),
+					"%s: a tier-1 examiner is weak to a school the player opens with" % where
+				)
+				check(
+					enemy.warded_school != Schools.School.CINDER,
+					"%s: a tier-1 examiner is not warded against the opening damage school" % where
+				)
+
+	# The anti-no-op assertion. Every rule above is satisfied perfectly by a generator that
+	# returns the authored deck for every slot -- which would pass this whole suite while
+	# having generated nothing, the same way a probe policy that never fires reads as a
+	# cleared exploit. Measured at ~39%; the floor is set well below that to leave tuning
+	# room without letting it fall to zero unnoticed.
+	var rate := 100.0 * float(substituted) / maxf(1.0, float(total_slots))
+	check(rate > 20.0, "the generator actually substitutes (%.0f%% of slots)" % rate)

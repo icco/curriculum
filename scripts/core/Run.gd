@@ -31,10 +31,21 @@ var faculty: Faculty = null
 ## the player opens with off the library's authored starting deck, not off this run's
 ## deck — on a load, `starting_deck` here is the drafted mid-run deck, and feeding that
 ## to the generator would rebuild a different faculty from the same seed.
-func _init(starting_deck: Array, content: ContentLibrary = null, seed_value: int = 0) -> void:
+##
+## `rolls` is measurement scaffolding and the game never passes it: tools/simulate.gd uses
+## it to run the whole generator with its output pinned to the authored content, which is
+## the only way to tell a difficulty change caused by the generator from one caused by the
+## plumbing around it. It is deliberately not saved — a pinned run is a measurement, not a
+## game state worth restoring.
+func _init(
+	starting_deck: Array,
+	content: ContentLibrary = null,
+	seed_value: int = 0,
+	rolls := Faculty.Rolls.GENERATIVE
+) -> void:
 	deck = starting_deck.duplicate()
 	content_seed = seed_value if seed_value != 0 else _fresh_seed()
-	faculty = Faculty.new(content, content_seed)
+	faculty = Faculty.new(content, content_seed, rolls)
 
 
 static func _fresh_seed() -> int:

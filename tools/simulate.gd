@@ -2,7 +2,26 @@ extends SceneTree
 
 ## Plays N headless runs with the greedy policy and reports how far they got. Balance
 ## work only; the gate is check.sh.
-##   godot --headless --path . --script tools/simulate.gd -- 20
+##   godot --headless --path . --script tools/simulate.gd -- <runs> <worlds> <rolls>
+##   godot --headless --path . --script tools/simulate.gd -- 120 12
+##
+## `rolls` pins the content generator, and exists so a measurement can be attributed. Run
+## a CONTROL before believing anything a generated world says: keep all the plumbing in
+## place and pin its output to the authored roster, and if the control does not reproduce
+## the baseline then the plumbing is broken and the generator is not the story.
+##   none      the authored roster, through all of the generative machinery
+##   wards     wards only — what shipped before decks and weaknesses became generative
+##   decks     decks only, authored schools
+##   schools   weaknesses and wards, authored decks
+##   generative (default) everything
+
+const ROLL_MODES := {
+	"generative": Faculty.Rolls.GENERATIVE,
+	"none": Faculty.Rolls.NONE,
+	"wards": Faculty.Rolls.WARDS,
+	"schools": Faculty.Rolls.SCHOOLS,
+	"decks": Faculty.Rolls.DECKS,
+}
 
 
 func _process(_delta: float) -> bool:
@@ -18,8 +37,17 @@ func _process(_delta: float) -> bool:
 	var worlds := 10
 	if args.size() > 1 and args[1].is_valid_int():
 		worlds = maxi(1, args[1].to_int())
+	var roll_name := "generative"
+	if args.size() > 2 and ROLL_MODES.has(args[2]):
+		roll_name = args[2]
+	var rolls: Faculty.Rolls = ROLL_MODES[roll_name]
 
 	var library: ContentLibrary = load("res://resources/content_library.tres")
+	# How much of each deck the generator actually rebuilt. A generator whose every slot
+	# falls back to its authored card ships the authored roster with new plumbing over the
+	# top and passes every test while having generated nothing.
+	var slots_filled := 0
+	var slots_substituted := 0
 	var wins := 0
 	var total_courses := 0
 	var grade_counts := {}
@@ -44,7 +72,9 @@ func _process(_delta: float) -> bool:
 		# and differ only in their draws.
 		var world := i % worlds
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library, 500 + world)
+		var game := Run.new(library.new_starting_deck(), library, 500 + world, rolls)
+		slots_filled += game.faculty.slots_filled
+		slots_substituted += game.faculty.slots_substituted
 		var catalog := library.catalog()
 		var guard := 0
 		var last_course_lost: String = ""
@@ -135,7 +165,25 @@ func _process(_delta: float) -> bool:
 		total_courses += game.courses_passed
 		courses_passed_counts[game.courses_passed] = int(courses_passed_counts.get(game.courses_passed, 0)) + 1
 
-	print("%d runs: %d wins, %.1f courses passed on average" % [count, wins, float(total_courses) / float(count)])
+	print(
+		"%d runs over %d worlds, rolling %s: %d wins (%.1f%%), %.1f courses passed on average"
+		% [
+			count,
+			worlds,
+			roll_name,
+			wins,
+			100.0 * float(wins) / float(count),
+			float(total_courses) / float(count),
+		]
+	)
+	print(
+		"deck slots: %d filled, %d substituted (%.0f%% of the roster rebuilt per run)"
+		% [
+			slots_filled,
+			slots_substituted,
+			100.0 * float(slots_substituted) / maxf(1.0, float(slots_filled)),
+		]
+	)
 	print("grades: %s" % grade_counts)
 	print(
 		"endings: %d graduated, %d expelled (2 strikes), %d lost the final/ran dry, %d other"
