@@ -127,7 +127,9 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 		pool = CardPool.new(content.cards)
 		tier_of = _earliest_tiers(content.courses)
 		syllabus_of = _syllabus_schools(content.courses)
-	var opening_offence := _offensive_schools(content)
+	var opening_offence := _damage_schools(content.starting_deck if content != null else [])
+	# Every school the LIBRARY has a damage card in, which is every school but Ward.
+	var offensive_schools := _damage_schools(content.cards if content != null else [])
 
 	# Dealt from a stratified bag rather than rolled independently. Uniform rolls cluster:
 	# with nine examiners and five schools, worlds where one school is nobody's ward are
@@ -152,11 +154,14 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 		# fix-up ran after the defensive rule and could hand the ward straight back to a
 		# starting school, which test_faculty caught at 5 seeds in 60. The weakness is
 		# settled first so the ward can be constrained against its final value.
-		var teaches := _teaches(deck, syllabus_of.get(base.enemy_name, []))
+		var syllabus: Array = syllabus_of.get(base.enemy_name, [])
+		var teaches := _teaches(deck, syllabus)
 
 		var weak := base.weak_school
 		if rolls == Rolls.GENERATIVE or rolls == Rolls.SCHOOLS:
-			weak = _weak_candidates(teaches, tier, starting_schools, rng, dealt_weak[i])
+			weak = _weak_candidates(
+				teaches, offensive_schools, tier, starting_schools, rng, dealt_weak[i]
+			)
 
 		var ward := base.warded_school
 		if rolls == Rolls.GENERATIVE or rolls == Rolls.SCHOOLS or rolls == Rolls.WARDS:
@@ -167,7 +172,7 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 				tier,
 				starting_schools,
 				opening_offence,
-				teaches,
+				syllabus,
 				rng
 			)
 
@@ -318,18 +323,51 @@ static func _within(got: int, want: int) -> bool:
 ##
 ## Tier 1 narrows it further, to something the player opens with, so the first courses
 ## still teach the mechanic against the deck they actually hold.
+## A WEAKNESS MUST BE SOMETHING THE PLAYER CAN KILL WITH. `offensive` is the set of schools
+## that have any damage-dealing card at all, and Ward has none — its whole line is Block and
+## healing. Weak-to-Ward multiplies the player's Block by 1.5 and does nothing whatever to
+## shorten the fight, so as a weakness it is close to null.
+##
+## One of those on the roster is survivable; the authored table has exactly one, on the
+## Alchemy Master, and measures fine. Five is not, and five is what an unfiltered roll
+## produces, because every examiner deck carries a Guard and so teaches Ward. In the world
+## seeded 504, five of nine examiners came out weak to Ward, and Midterm Review — whose
+## Vice-Chancellor was weak to Ward AND warded against Cinder, the player's damage school —
+## lost 76% of runs over 13.1 turns. That is the unbreakable-rather-than-hard failure the
+## defensive-ward rule already names, arriving through the weakness instead.
 static func _weak_candidates(
-	teaches: Array, tier: int, starting_schools: Array, rng: RandomNumberGenerator, dealt: int
+	teaches: Array,
+	offensive: Array,
+	tier: int,
+	starting_schools: Array,
+	rng: RandomNumberGenerator,
+	dealt: int
 ) -> int:
+	var killable: Array[int] = []
+	for school in teaches:
+		if offensive.is_empty() or offensive.has(school):
+			killable.append(school)
+
 	# Preference order, most constrained first. Each falls through only when the previous
 	# leaves nothing, which a narrow rolled deck can do.
 	var ladders: Array = []
 	if tier <= 1 and not starting_schools.is_empty():
+		# AT TIER 1 THE TUTORIAL OUTRANKS THE FLAVOUR RULE: the weakness is drawn from what
+		# the player can hit with on day one, whether or not the examiner teaches it. Some
+		# examiners teach nothing the opening deck can use — Proctor's deck is Ward and
+		# Frost, and Drillmaster's is Frost — and "weak to what it teaches" hands those a
+		# Frost weakness against a player who owns no Frost and has not passed a course yet.
+		# Measured, that is what made Proctor's Inspection, the required tier-1 gate, lose
+		# 16 of 40 runs in the world seeded 502.
+		#
+		# The authored table resolves it exactly the same way: Proctor is authored weak to
+		# Cinder, which is not a school it ever plays.
 		var opening: Array[int] = []
-		for school in teaches:
-			if starting_schools.has(school):
+		for school in starting_schools:
+			if offensive.is_empty() or offensive.has(school):
 				opening.append(school)
 		ladders.append(opening)
+	ladders.append(killable)
 	ladders.append(teaches)
 	ladders.append(Schools.ALL)
 
@@ -371,10 +409,17 @@ static func _teaches(deck: Array[CardData], syllabus: Array) -> Array[int]:
 ##    Guard and two Ink Blot: there is no second damage school to fall back on and no draft
 ##    has happened yet. On main this was measurably the worst thing a random ward did —
 ##    Basic Arcana 101, the first course in the game, lost 28% of runs over 10.8 turns.
-## D. An examiner is not warded against a school it teaches. The weakness is drawn FROM
-##    what it teaches, so this is the other half of one idea: what an examiner hands you is
-##    what beats it, and what it resists is what it never showed you. Without it, an
-##    examiner could hand the player a school over two courses and halve it on the rematch.
+## D. An examiner is not warded against a school it is GUARANTEED to hand out — the school
+##    of its courses' syllabus cards, which Draft offers whatever the grade. Handing the
+##    player a card over two courses and then halving it on the rematch is a trap rather
+##    than a matchup.
+##
+##    Scoped to the syllabus rather than to the whole deck, and that scoping is load-bearing
+##    rather than fussy. Against the whole deck the rule is nearly unsatisfiable: examiner
+##    decks run three or four schools, so the complement is one or two, and in the world
+##    seeded 504 SEVEN of nine examiners collapsed onto a Rot ward — every school they did
+##    not teach was Rot. A constraint that leaves one legal answer is not a constraint, it
+##    is a hardcoded value with extra steps.
 static func _ward_allowed(
 	school: int,
 	weak: int,
@@ -382,7 +427,7 @@ static func _ward_allowed(
 	tier: int,
 	starting_schools: Array,
 	opening_offence: Array,
-	teaches: Array
+	syllabus: Array
 ) -> bool:
 	if school == weak:
 		return false
@@ -390,7 +435,7 @@ static func _ward_allowed(
 		return false
 	if tier <= 1 and opening_offence.has(school):
 		return false
-	if teaches.has(school):
+	if syllabus.has(school):
 		return false
 	return true
 
@@ -402,10 +447,10 @@ static func _resolve_ward(
 	tier: int,
 	starting_schools: Array,
 	opening_offence: Array,
-	teaches: Array,
+	syllabus: Array,
 	rng: RandomNumberGenerator
 ) -> int:
-	if _ward_allowed(dealt, weak, defensive, tier, starting_schools, opening_offence, teaches):
+	if _ward_allowed(dealt, weak, defensive, tier, starting_schools, opening_offence, syllabus):
 		return dealt
 	# Relaxed one preference at a time, rule A last and never: it is the spec's, where the
 	# rest are difficulty guards that a narrow school set may make unsatisfiable together.
@@ -414,7 +459,7 @@ static func _resolve_ward(
 	for relax in [0, 1, 2, 3]:
 		var allowed: Array[int] = []
 		for school in Schools.ALL:
-			var soft_teaches: Array = teaches if relax < 1 else []
+			var soft_syllabus: Array = syllabus if relax < 1 else []
 			var soft_defensive: bool = defensive and relax < 2
 			var soft_tier: int = 99 if relax >= 3 else tier
 			if _ward_allowed(
@@ -424,7 +469,7 @@ static func _resolve_ward(
 				soft_tier,
 				starting_schools,
 				opening_offence,
-				soft_teaches
+				soft_syllabus
 			):
 				allowed.append(school)
 		if not allowed.is_empty():
@@ -446,14 +491,12 @@ static func _is_defensive(deck: Array[CardData]) -> bool:
 	return float(defensive) / float(deck.size()) >= 0.4
 
 
-## The schools the player opens with a DAMAGE card in — Cinder alone, from the starting
-## deck's Sparks. Their Guards are Block and their Ink Blots are a status, so neither is
-## something a ward can take away from them.
-static func _offensive_schools(content: ContentLibrary) -> Array[int]:
+## The schools any of `cards` deals damage in. Over the starting deck that is Cinder alone —
+## the player's Guards are Block and their Ink Blots are a status, so neither is something a
+## ward can take away from them. Over the whole library it is every school but Ward.
+static func _damage_schools(cards: Array) -> Array[int]:
 	var out: Array[int] = []
-	if content == null:
-		return out
-	for card in content.starting_deck:
+	for card in cards:
 		if card != null and CardPool.direct_damage(card) > 0 and not out.has(card.school):
 			out.append(card.school)
 	return out

@@ -244,11 +244,18 @@ func _check_generated_rosters() -> void:
 			for school in syllabus.get(enemy.enemy_name, []):
 				if not teaches.has(school):
 					teaches.append(school)
-			check(
-				teaches.has(enemy.weak_school),
-				"%s: weak to a school it teaches" % where
+			# Never weak to a school nothing can deal damage in. Ward's whole line is Block
+			# and healing, so weak-to-Ward multiplies the player's Block and does nothing to
+			# shorten the fight -- five of those on one roster is what made the world seeded
+			# 504 unwinnable.
+			neq(
+				enemy.weak_school,
+				Schools.School.WARD,
+				"%s: not weak to a school with no damage cards" % where
 			)
 			if int(earliest.get(enemy.enemy_name, 99)) <= 1:
+				# Tier 1 is the tutorial and its guarantee outranks the flavour rule: the
+				# weakness is something the opening deck can hit with, taught or not.
 				check(
 					opening.has(enemy.weak_school),
 					"%s: a tier-1 examiner is weak to a school the player opens with" % where
@@ -256,6 +263,11 @@ func _check_generated_rosters() -> void:
 				check(
 					enemy.warded_school != Schools.School.CINDER,
 					"%s: a tier-1 examiner is not warded against the opening damage school" % where
+				)
+			else:
+				check(
+					teaches.has(enemy.weak_school),
+					"%s: weak to a school it teaches" % where
 				)
 
 	# The anti-no-op assertion. Every rule above is satisfied perfectly by a generator that

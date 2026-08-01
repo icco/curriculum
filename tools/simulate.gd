@@ -41,6 +41,12 @@ func _process(_delta: float) -> bool:
 	if args.size() > 2 and ROLL_MODES.has(args[2]):
 		roll_name = args[2]
 	var rolls: Faculty.Rolls = ROLL_MODES[roll_name]
+	# Which content seed world 0 is. Defaulted so the numbers in the docs stay reproducible;
+	# passed so a world that measured badly can be re-run on its own at a useful run count.
+	#   simulate.gd -- 40 1 generative 507   # 40 runs, all in the world seeded 507
+	var base_seed := 500
+	if args.size() > 3 and args[3].is_valid_int():
+		base_seed = args[3].to_int()
 
 	var library: ContentLibrary = load("res://resources/content_library.tres")
 	# How much of each deck the generator actually rebuilt. A generator whose every slot
@@ -72,7 +78,7 @@ func _process(_delta: float) -> bool:
 		# and differ only in their draws.
 		var world := i % worlds
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library, 500 + world, rolls)
+		var game := Run.new(library.new_starting_deck(), library, base_seed + world, rolls)
 		slots_filled += game.faculty.slots_filled
 		slots_substituted += game.faculty.slots_substituted
 		var catalog := library.catalog()
@@ -194,14 +200,22 @@ func _process(_delta: float) -> bool:
 
 	# Per-world graduation, so a generator that makes some worlds unplayable cannot
 	# hide behind a healthy average.
+	# Reported WITH the content seed that produced each rate, not just as a sorted spread.
+	# A world at 0% is the one measurement worth chasing, and chasing it means being able to
+	# re-run that exact world concentrated — ten runs cannot tell an unwinnable world from
+	# an unlucky one, and an anonymous "0%" in a sorted list gives you nothing to re-run.
 	var rates: Array[float] = []
+	var by_rate: Array = []
 	for world in world_runs:
-		rates.append(100.0 * float(world_wins.get(world, 0)) / float(world_runs[world]))
+		var rate := 100.0 * float(world_wins.get(world, 0)) / float(world_runs[world])
+		rates.append(rate)
+		by_rate.append([rate, base_seed + int(world)])
 	rates.sort()
+	by_rate.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	if rates.size() > 1:
 		var spread := ""
-		for r in rates:
-			spread += "%.0f%% " % r
+		for entry in by_rate:
+			spread += "seed %d %.0f%%  " % [entry[1], entry[0]]
 		print(
 			"graduation by world (%d worlds, %d runs each): %s-- lowest %.0f%%, highest %.0f%%"
 			% [
