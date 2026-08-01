@@ -78,6 +78,7 @@ func _build() -> void:
 	var name_box := UIKit.label(card.data.card_name, 22)
 	name_box.position = Vector2(10, CARD_SIZE.y - 50)
 	name_box.size = Vector2(CARD_SIZE.x - 20, 30)
+	name_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_paint_card_text(name_box, text_colour)
 	add_child(name_box)
 
