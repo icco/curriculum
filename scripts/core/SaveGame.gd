@@ -47,6 +47,9 @@ static func save(run: Run) -> bool:
 		"grades": grades,
 		"deck": cards,
 		"bestiary": run.bestiary.to_dict(),
+		# One integer instead of nine serialised examiners: the faculty is a pure
+		# function of (roster, seed), so replaying the seed rebuilds it exactly.
+		"content_seed": run.content_seed,
 	}
 
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
@@ -57,7 +60,10 @@ static func save(run: Run) -> bool:
 	return true
 
 
-static func load_run() -> Run:
+## `enemies` is the content library's roster, needed to rebuild this run's examiner
+## variants from the saved seed. Defaulted so suites can round-trip a Run without one;
+## the examiners then fall back to their authored schools.
+static func load_run(enemies: Array = []) -> Run:
 	if not has_save():
 		return null
 	var file := FileAccess.open(PATH, FileAccess.READ)
@@ -80,7 +86,10 @@ static func load_run() -> Run:
 			continue
 		cards.append(CardInstance.new(data, int(entry.get("xp", 0))))
 
-	var run := Run.new(cards)
+	# A save written before per-run faculties has no seed. Passing 0 rolls a fresh one
+	# rather than failing the load; that run simply gets a new set of weaknesses, which
+	# is the least-bad outcome for a save that never had them recorded.
+	var run := Run.new(cards, enemies, int(parsed.get("content_seed", 0)))
 	run.hp = int(parsed.get("hp", Run.STARTING_HP))
 	run.max_hp = int(parsed.get("max_hp", Run.STARTING_HP))
 	run.strikes = int(parsed.get("strikes", 0))

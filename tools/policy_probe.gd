@@ -103,7 +103,7 @@ func run_policy(count: int) -> Dictionary:
 	for i in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck())
+		var game := Run.new(library.new_starting_deck(), library.enemies, 500 + i)
 		var catalog := library.catalog()
 		var guard := 0
 		while not game.is_over() and guard < 30:
@@ -112,7 +112,9 @@ func run_policy(count: int) -> Dictionary:
 			if open.is_empty():
 				break
 			var course = open[0]
-			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng, game.hp)
+			var battle := Battle.new(
+				game.deck, game.examiner_for(course.examiner), game.bestiary, rng, game.hp
+			)
 			battle.start()
 			var turn_guard := 0
 			while not battle.finished and turn_guard < 200:
@@ -153,7 +155,10 @@ func run_policy(count: int) -> Dictionary:
 			game.record_result(course, scored["grade"], battle.player.hp)
 			if battle.player_won and not game.is_over():
 				var draft := Draft.new(
-					game.deck, course.examiner.deck, course.guaranteed_card_drop, scored["grade"]
+					game.deck,
+					game.examiner_for(course.examiner).deck,
+					course.guaranteed_card_drop,
+					scored["grade"]
 				)
 				draft.cap = game.deck_cap()
 				var selection: Array = []
