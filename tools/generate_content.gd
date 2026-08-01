@@ -244,12 +244,48 @@ static func scale_line_effects(level1: Array, level2: Array) -> Array:
 			if kind_of[key] == CardData.DRAW:
 				var cap: int = lookup_amount(level2, key) + 1
 				cur[key] = mini(int(cur[key]), cap)
+			# Chill and Blot are reductions that bottom out: both are applied as
+			# maxf(0, 1 - reduction * stacks) and consumed whole by one card, so past
+			# their saturation point every further stack is silently discarded.
+			# Uncapped, the evolution track kept inflating them anyway — Winter
+			# Eternal applied 8 Chill where 4 is already total, spending two levels of
+			# stat budget on nothing the player could ever observe at a neutral
+			# multiplier. Ten card levels were doing this.
+			cur[key] = mini(int(cur[key]), status_ceiling(kind_of[key], status_of.get(key, -1)))
 			var built := {"kind": kind_of[key], "amount": cur[key]}
 			if status_of.has(key):
 				built["status"] = status_of[key]
 			effects.append(built)
 		levels.append(effects)
 	return levels
+
+
+## The largest amount worth authoring for a status, or a huge number for statuses
+## that do not saturate. Burn and Decay are damage over time and scale forever; Chill
+## and Blot are reductions with a floor at zero. Derived from Battle rather than
+## restated, so changing a reduction constant moves the cap with it.
+static func status_ceiling(kind: String, status: int) -> int:
+	if kind != CardData.STATUS:
+		return 1 << 30
+	match status:
+		Statuses.Kind.CHILL:
+			return Battle.saturation_stacks(Battle.CHILL_REDUCTION)
+		Statuses.Kind.BLOT:
+			return Battle.saturation_stacks(Battle.BLOT_REDUCTION)
+	return 1 << 30
+
+
+## Clamps every saturating status in an authored effect list. Returns a new list;
+## the table's own dictionaries are shared between levels and must not be mutated.
+static func clamp_saturating(effects: Array) -> Array:
+	var out: Array = []
+	for effect in effects:
+		var copy: Dictionary = effect.duplicate()
+		if copy.get("kind", "") == CardData.STATUS and copy.has("amount"):
+			var ceiling := status_ceiling(copy["kind"], int(copy.get("status", -1)))
+			copy["amount"] = mini(int(copy["amount"]), ceiling)
+		out.append(copy)
+	return out
 
 
 ## How many times one copy of a card can be cast in a single 3-mana turn.
@@ -399,7 +435,15 @@ func _process(_delta: float) -> bool:
 		var retain: bool = row[11]
 
 		var scaled := scale_line_effects(effects1, effects2)
-		var effects_by_level := [effects1, effects2, scaled[0], scaled[1], scaled[2]]
+		# The hand-authored levels need the saturation clamp too, not just the derived
+		# ones: Long Winter was authored at 5 Chill where 4 is already total.
+		var effects_by_level := [
+			clamp_saturating(effects1),
+			clamp_saturating(effects2),
+			scaled[0],
+			scaled[1],
+			scaled[2],
+		]
 		# Cost stays flat at the level2 value for levels 3-5. A line that gets
 		# cheaper from level1 to level2 (Marginalia 1 -> 0, Cram 2 -> 1, Thesis
 		# Statement 3 -> 2) keeps that identity rather than continuing to drop.

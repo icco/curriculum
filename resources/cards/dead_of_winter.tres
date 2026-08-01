@@ -12,7 +12,7 @@ effects = Array[Dictionary]([{
 "amount": 27,
 "kind": "damage"
 }, {
-"amount": 7,
+"amount": 4,
 "kind": "status",
 "status": 1
 }])

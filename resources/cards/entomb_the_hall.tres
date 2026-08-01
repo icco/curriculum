@@ -8,7 +8,7 @@ card_name = "Entomb the Hall"
 school = 1
 cost = 2
 effects = Array[Dictionary]([{
-"amount": 6,
+"amount": 4,
 "kind": "status",
 "status": 1
 }, {

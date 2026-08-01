@@ -67,6 +67,20 @@ func _init(
 	examiner_deck = Deck.new(examiner_instances, rng)
 
 
+## The stack count at which Chill or Blot already reduces its target to nothing.
+##
+## Both are applied as maxf(0.0, 1.0 - reduction * stacks) and are consumed WHOLE by
+## one card, so surplus stacks are not banked — they are discarded. Four Chill and
+## three Blot are therefore total, and an authored card that applies more is spending
+## its stat budget on a number the mechanic cannot use. tools/generate_content.gd
+## clamps to this so the five-level evolution track cannot keep inflating a dead
+## stat; it lives here because Battle owns the reduction constants it derives from.
+static func saturation_stacks(reduction: float) -> int:
+	if reduction <= 0.0:
+		return 0
+	return int(ceil(1.0 / reduction))
+
+
 func schools_played() -> int:
 	return _schools_played.size()
 
