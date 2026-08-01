@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Resource" path="res://resources/cards/cataclysm.tres" id="1_3e5sc"]
+[ext_resource type="Resource" path="res://resources/cards/everburning.tres" id="1_3e5sc"]
 [ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ec3fk"]
 
 [resource]
