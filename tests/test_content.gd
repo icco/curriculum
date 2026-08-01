@@ -22,7 +22,7 @@ func _library() -> ContentLibrary:
 
 ## Same-turn direct damage only (Burn/Decay pay out over several turns, a
 ## different balance question from one turn's burst) x however many times one
-## copy can be cast on 3 mana (1, if exhaust or free).
+## copy can be cast on 3 mana.
 func _turn_ceiling(card: CardData) -> int:
 	var per_cast := 0
 	for effect in card.effects:
@@ -31,7 +31,12 @@ func _turn_ceiling(card: CardData) -> int:
 			per_cast += int(effect.get("amount", 0))
 	if per_cast == 0:
 		return 0
-	var casts := 1 if (card.exhaust or card.cost <= 0) else maxi(1, int(floor(3.0 / card.cost)))
+	if card.cost <= 0 and not card.exhaust:
+		# Free and repeatable: as many copies as fit in hand, no mana ceiling at
+		# all. There's no finite number to compute here, so fail the cap check
+		# below outright rather than treat this as a harmless single cast.
+		return 999999
+	var casts := 1 if card.exhaust else maxi(1, int(floor(3.0 / card.cost)))
 	return per_cast * casts
 
 

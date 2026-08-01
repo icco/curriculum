@@ -253,6 +253,10 @@ static func scale_line_effects(level1: Array, level2: Array) -> Array:
 
 
 ## How many times one copy of a card can be cast in a single 3-mana turn.
+## A free, non-exhaust card is uncapped (as many copies as fit in hand), which
+## breaks this model entirely rather than just being "a lot of casts" — see
+## the guard in _process() that refuses to generate such a card if it deals
+## direct damage, instead of silently treating it as a single cast here.
 static func casts_per_turn(cost: int, exhaust: bool) -> int:
 	if exhaust or cost <= 0:
 		return 1
@@ -391,6 +395,16 @@ func _process(_delta: float) -> bool:
 				effects_by_level[lvl] = _with_self_damage(effects_by_level[lvl], self_damage_by_level[lvl])
 
 		for lvl in range(5):
+			# A free, non-exhaust card that deals direct damage is uncapped by mana
+			# at all (as many copies as fit in hand) — TURN_DAMAGE_CAP has no finite
+			# ceiling to enforce there, so this must fail the build rather than let
+			# enforce_turn_cap silently treat it as a single, safe cast.
+			if costs[lvl] <= 0 and not exhaust and direct_damage_total(effects_by_level[lvl]) > 0:
+				printerr(
+					"%s (level %d) deals direct damage at cost 0 without exhaust — uncapped casts per turn" % [names[lvl], lvl + 1]
+				)
+				quit(1)
+				return true
 			effects_by_level[lvl] = enforce_turn_cap(effects_by_level[lvl], costs[lvl], exhaust)
 
 		# Every level gets its own art_id, derived from its own name the same way
