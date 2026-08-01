@@ -39,6 +39,10 @@ func show_result(scored: Dictionary, result: Dictionary, course) -> void:
 	)
 	_rows.add_child(UIKit.label(allowance_text, 26))
 
+	# Hit points carry from course to course now, and a pass is the only thing that
+	# restores any, so what the grade bought has to be stated here. Left implicit, the
+	# player has no way to learn that a better grade heals more — the one place the
+	# grade touches the run's scarcest resource would be invisible.
 	if bool(result.get("strike", false)):
 		var strikes := int(result.get("strikes", 0))
 		_rows.add_child(
@@ -47,6 +51,13 @@ func show_result(scored: Dictionary, result: Dictionary, course) -> void:
 			)
 		)
 		_rows.add_child(UIKit.label("Your hit points have been restored.", 24))
+	else:
+		var healed := int(result.get("healed", 0))
+		if healed > 0:
+			_rows.add_child(UIKit.label("A %s restores %d hit points." % [
+				Grading.letter(scored["grade"]), healed
+			], 26))
+	_rows.add_child(UIKit.label("You leave with %d hit points." % int(result.get("hp", 0)), 26))
 
 	var button := UIKit.button("Continue")
 	button.pressed.connect(func(): continued.emit())

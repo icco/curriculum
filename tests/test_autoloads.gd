@@ -51,7 +51,7 @@ func run() -> void:
 	# or drops a param before calling Grading cannot pass by accident.
 	var params := {
 		"won": true,
-		"turns_taken": 5,
+		"turns_taken": 4,
 		"par_turns": 5,
 		"hp_end": 60,
 		"hp_start": 60,

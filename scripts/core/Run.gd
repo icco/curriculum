@@ -30,9 +30,17 @@ func deck_cap() -> int:
 ## Dropping to zero hit points is an F, not death: hit points are restored and the
 ## run continues. Permadeath is the second F and nothing else. An F is also not a
 ## pass, so it neither increments courses_passed nor grows the deck cap.
+##
+## A pass restores a share of maximum hit points scaled by the grade earned
+## (Grading.recovery_fraction). This is the ONLY recovery in the game — without it,
+## hit points carrying between courses is a one-way ratchet and every run ends in a
+## death spiral around the sixth course. Scaling it by grade rather than paying it
+## flat is what keeps the pillar attached to the scarcest resource: a good grade is
+## the rest site.
 func record_result(course: CourseData, grade, hp_end: int) -> Dictionary:
 	grades[course.course_name] = grade
 	var struck: bool = grade == Grading.Grade.F
+	var healed := 0
 
 	if struck:
 		strikes += 1
@@ -41,7 +49,11 @@ func record_result(course: CourseData, grade, hp_end: int) -> Dictionary:
 			expelled = true
 	else:
 		courses_passed += 1
-		hp = clampi(hp_end, 1, max_hp)  # a win never leaves you at zero
+		var survived := clampi(hp_end, 1, max_hp)  # a win never leaves you at zero
+		hp = clampi(
+			survived + int(roundf(Grading.recovery_fraction(grade) * float(max_hp))), 1, max_hp
+		)
+		healed = hp - survived
 		if course.is_final:
 			won = true
 
@@ -52,6 +64,7 @@ func record_result(course: CourseData, grade, hp_end: int) -> Dictionary:
 		"expelled": expelled,
 		"won": won,
 		"hp": hp,
+		"healed": healed,
 	}
 
 

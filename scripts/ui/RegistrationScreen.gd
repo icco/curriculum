@@ -40,16 +40,11 @@ func _build() -> void:
 	for child in get_children():
 		child.free()
 
-	var margin := UIKit.transparent(MarginContainer.new())
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 20)
-	margin.add_theme_constant_override("margin_right", 20)
-	margin.add_theme_constant_override("margin_top", 16)
-	margin.add_theme_constant_override("margin_bottom", 16)
-	add_child(margin)
-
+	# No edge margin of its own: Main mounts every screen inside one shared gutter
+	# (UIKit.SCREEN_MARGIN), so a second one here would just double it on this screen.
 	var root := UIKit.transparent(VBoxContainer.new())
-	margin.add_child(root)
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
 
 	root.add_child(UIKit.label("Registration", 40))
 	_counter = UIKit.label("", 28)

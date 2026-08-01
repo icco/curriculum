@@ -2,16 +2,16 @@
 
 [ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_wqlfj"]
 [ext_resource type="Resource" path="res://resources/cards/rot_seed.tres" id="2_khlbc"]
-[ext_resource type="Resource" path="res://resources/cards/necrology_note.tres" id="3_605aq"]
-[ext_resource type="Resource" path="res://resources/cards/bitter_recall.tres" id="4_qwkj4"]
-[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="5_3dgh0"]
+[ext_resource type="Resource" path="res://resources/cards/spark.tres" id="3_605aq"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="4_qwkj4"]
+[ext_resource type="Resource" path="res://resources/cards/scorch_notes.tres" id="5_3dgh0"]
 [ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_ra15q"]
 
 [resource]
 script = ExtResource("6_ra15q")
 enemy_name = "Alchemy Master"
-max_hp = 46
-deck = Array[ExtResource("1_wqlfj")]([ExtResource("2_khlbc"), ExtResource("3_605aq"), ExtResource("2_khlbc"), ExtResource("4_qwkj4"), ExtResource("5_3dgh0")])
+max_hp = 42
+deck = Array[ExtResource("1_wqlfj")]([ExtResource("2_khlbc"), ExtResource("3_605aq"), ExtResource("4_qwkj4"), ExtResource("5_3dgh0"), ExtResource("3_605aq")])
 weak_school = 4
 warded_school = 3
 art_id = "entities/alchemy_master"

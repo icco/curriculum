@@ -17,6 +17,12 @@ var catalog: Catalog = null
 
 var _screen: Control = null
 var _screen_name := ""
+## Every screen is mounted inside this, so the edge gutter is defined in exactly one
+## place instead of seven. A screen therefore never sees the full viewport width: its
+## own `size.x` is already the padded content width, which is what any screen doing
+## its own layout maths (CourseCatalog's tier columns, HandFan's spread) should be
+## measuring against anyway.
+var _frame: MarginContainer = null
 var _course = null
 var _rng := RandomNumberGenerator.new()
 
@@ -39,13 +45,20 @@ func current_screen_name() -> String:
 
 
 func _swap(screen: Control, name: String) -> void:
-	if _screen != null and _screen.get_parent() == self:
-		remove_child(_screen)
+	if _frame == null:
+		_frame = UIKit.screen_margin()
+		add_child(_frame)
+	# Compared against _frame, not self: screens are mounted one level down now, so a
+	# `get_parent() == self` check would never match and every screen would be left
+	# stacked on top of the last.
+	if _screen != null and _screen.get_parent() == _frame:
+		_frame.remove_child(_screen)
 		_screen.queue_free()
 	_screen = screen
 	_screen_name = name
-	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(screen)
+	# No anchor preset: _frame is a Container, and a Container sets its children's rects
+	# itself. The screen fills the gutter because Control's default size flags are FILL.
+	_frame.add_child(screen)
 
 
 func _show_menu() -> void:
@@ -91,7 +104,7 @@ func _show_bestiary() -> void:
 
 func enter_course(course: CourseData) -> void:
 	_course = course
-	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng)
+	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng, run.hp)
 	DeckManager.deck = battle.player_deck
 	var screen := BattleScreen.new()
 	screen.battle_finished.connect(func(_b): _on_battle_finished())
@@ -112,7 +125,10 @@ func finish_battle_headless(_won: bool) -> void:
 			"turns_taken": battle.turns,
 			"par_turns": _course.par_turns,
 			"hp_end": battle.player.hp,
-			"hp_start": run.max_hp,
+			# What the player walked in on, not their maximum: hit points carry
+			# between battles, so grading against max_hp would let damage taken
+			# three courses ago permanently cap every later Survival score.
+			"hp_start": battle.player_starting_hp,
 			"xp_banked": battle.xp_banked,
 			"xp_par": _course.xp_par,
 			"weakness_known": run.bestiary.knows_weakness(_course.examiner.enemy_name),

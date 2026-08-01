@@ -1,16 +1,17 @@
 [gd_resource type="Resource" script_class="EnemyData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_idcsh"]
-[ext_resource type="Resource" path="res://resources/cards/ink_blot.tres" id="2_ao60s"]
-[ext_resource type="Resource" path="res://resources/cards/cite_source.tres" id="3_itrna"]
-[ext_resource type="Resource" path="res://resources/cards/marginalia.tres" id="4_nrttl"]
-[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="5_6sw3n"]
-[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_5nnpr"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_ao60s"]
+[ext_resource type="Resource" path="res://resources/cards/ink_blot.tres" id="2_itrna"]
+[ext_resource type="Resource" path="res://resources/cards/cite_source.tres" id="3_nrttl"]
+[ext_resource type="Resource" path="res://resources/cards/marginalia.tres" id="4_6sw3n"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="5_5nnpr"]
+[ext_resource type="Resource" path="res://resources/cards/scorch_notes.tres" id="6_sensl"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_t8tn2"]
 
 [resource]
-script = ExtResource("6_5nnpr")
+script = ExtResource("7_t8tn2")
 enemy_name = "Glass Tutor"
-max_hp = 34
-deck = Array[ExtResource("1_idcsh")]([ExtResource("2_ao60s"), ExtResource("3_itrna"), ExtResource("4_nrttl"), ExtResource("5_6sw3n"), ExtResource("2_ao60s")])
+max_hp = 36
+deck = Array[ExtResource("1_ao60s")]([ExtResource("2_itrna"), ExtResource("3_nrttl"), ExtResource("4_6sw3n"), ExtResource("5_5nnpr"), ExtResource("6_sensl")])
 warded_school = 2
 art_id = "entities/glass_tutor"

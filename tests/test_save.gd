@@ -60,7 +60,11 @@ func run() -> void:
 	if back == null:
 		return
 
-	eq(back.hp, 42, "hp restored")
+	# 42 survived plus the A's recovery against this run's non-default 75 max. Derived
+	# rather than hardcoded: this suite is about the save round-tripping the value,
+	# not about what the value should be.
+	var expected_hp := 42 + int(roundf(Grading.recovery_fraction(Grading.Grade.A) * 75.0))
+	eq(back.hp, expected_hp, "hp restored")
 	eq(back.max_hp, 75, "max_hp restored at a non-default value")
 	eq(back.strikes, 1, "strikes restored at a non-default value")
 	eq(back.courses_passed, 1, "courses_passed restored at a non-default value")

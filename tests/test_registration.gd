@@ -41,7 +41,7 @@ func _test_report_card() -> void:
 	var course := CourseData.new()
 	course.course_name = "Basic Arcana 101"
 	var scored := Grading.score({
-		"won": true, "turns_taken": 5, "par_turns": 5, "hp_end": 60, "hp_start": 60,
+		"won": true, "turns_taken": 4, "par_turns": 5, "hp_end": 60, "hp_start": 60,
 		"xp_banked": 15, "xp_par": 15, "weakness_known": true, "distinct_schools": 5,
 	})
 	eq(scored["grade"], Grading.Grade.S, "this fixture scores an S")

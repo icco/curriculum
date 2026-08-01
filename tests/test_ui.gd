@@ -114,6 +114,17 @@ func run() -> void:
 	var box := UIKit.transparent(VBoxContainer.new())
 	eq(box.mouse_filter, Control.MOUSE_FILTER_IGNORE, "UIKit containers ignore the mouse")
 
+	# The screen frame wraps EVERY screen in the game, so it is the one container whose
+	# filter is worth asserting on its own: if it ever stopped the mouse, every tap in
+	# the game would die on the way down and the whole thing would go unresponsive.
+	var frame := UIKit.screen_margin()
+	eq(frame.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the screen frame ignores the mouse")
+	eq(
+		frame.get_theme_constant("margin_left"),
+		UIKit.SCREEN_MARGIN,
+		"the frame insets content by the screen margin"
+	)
+
 	var tap := UIKit.button("Tap")
 	eq(tap.mouse_filter, Control.MOUSE_FILTER_STOP, "buttons stop it")
 	# 48dp thumb targets at 1080 wide.
@@ -122,4 +133,5 @@ func run() -> void:
 	view.free()
 	fan.free()
 	box.free()
+	frame.free()
 	tap.free()
