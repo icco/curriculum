@@ -168,7 +168,7 @@ func end_turn() -> Array:
 	var burn := player.statuses.tick_start_of_turn()
 	if burn > 0:
 		player.take_damage(burn)
-		events.append({"type": "damage", "target": "player", "amount": burn, "text": "Burn"})
+		events.append({"type": "damage", "target": "player", "amount": burn, "text": "%d from Burn" % burn})
 	for card in player_deck.draw(Deck.HAND_SIZE):
 		events.append({"type": "draw", "card": card, "text": ""})
 	events.append_array(_check_end())
@@ -184,7 +184,7 @@ func _examiner_turn() -> Array:
 	if burn > 0:
 		examiner.take_damage(burn)
 		events.append(
-			{"type": "damage", "target": "examiner", "amount": burn, "text": "Burn"}
+			{"type": "damage", "target": "examiner", "amount": burn, "text": "%d from Burn" % burn}
 		)
 	if examiner.is_down():
 		return events
@@ -203,11 +203,14 @@ func _examiner_turn() -> Array:
 			examiner_deck.discard_pile.append(card)
 		_refill_examiner_hand()
 
-	# Spend the whole turn's mana, greedy highest-cost-affordable-first,
-	# resolved live: pick the best card the CURRENT remaining mana affords,
-	# play it, and repeat. Bounded by hand size (a handful of cards, since we
-	# never redraw mid-turn) and belt-and-braces by MAX_CASTS_PER_TURN, so this
-	# cannot spin even on a hand of zero-cost cards.
+	# Spend the whole turn's mana, greedy highest-cost-affordable-first, resolved
+	# live: pick the best card the CURRENT remaining mana affords, play it, repeat.
+	#
+	# Hand size is NOT a bound here. A DRAW effect refills the examiner's hand
+	# mid-loop via _apply, and several examiner decks hold draw cards (Glass Tutor
+	# runs Cite Source and Marginalia), so the hand can grow while we iterate.
+	# MAX_CASTS_PER_TURN is therefore the only thing preventing a spin on a hand of
+	# zero-cost or self-replacing cards, not a belt-and-braces second line.
 	var casts := 0
 	while casts < MAX_CASTS_PER_TURN:
 		var card := _best_affordable_in_hand(examiner.mana)
