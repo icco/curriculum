@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/perfect_recall.tres" id="1_x53ty"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_yadvd"]
+
+[resource]
+script = ExtResource("2_yadvd")
+card_name = "Sleepless Vigil"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "mana_next"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_x53ty")
+art_id = "cards/sleepless_vigil"

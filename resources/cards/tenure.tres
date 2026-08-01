@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_npm4l"]
+
+[resource]
+script = ExtResource("1_npm4l")
+card_name = "Tenure"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 25,
+"kind": "heal"
+}])
+art_id = "cards/tenure"

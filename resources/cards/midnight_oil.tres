@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/sleepless_vigil.tres" id="1_bf3rx"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_0ufh7"]
+
+[resource]
+script = ExtResource("2_0ufh7")
+card_name = "Midnight Oil"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "mana_next"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_bf3rx")
+art_id = "cards/midnight_oil"

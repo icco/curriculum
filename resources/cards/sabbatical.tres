@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Resource" path="res://resources/cards/full_recovery.tres" id="1_d3kgb"]
+[ext_resource type="Resource" path="res://resources/cards/tenure.tres" id="1_d3kgb"]
 [ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ktmm2"]
 
 [resource]
