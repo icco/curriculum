@@ -113,6 +113,11 @@ func run() -> void:
 	)
 	check(screen.log_label.text.contains("You: 4 damage, fabricated"), "damage to the player says You")
 
+	# Some damage events (start-of-turn Burn) carry an amount but text with no
+	# number in it at all -- the log must still say how much, not just who.
+	screen.replay([{"type": "damage", "target": "player", "amount": 5, "text": "Burn"}])
+	check(screen.log_label.text.contains("You: Burn 5"), "a numberless damage event still shows its amount")
+
 	# Affordability dims a card — checked both ways, so this cannot pass because a
 	# CardView is always dimmed (or never dimmed) regardless of mana.
 	fight.player.mana = 3

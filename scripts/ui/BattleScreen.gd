@@ -187,6 +187,11 @@ func replay(events: Array) -> void:
 		if text == "":
 			continue
 		var kind: String = str(event.get("type", ""))
+		# Start-of-turn Burn carries an "amount" but its text is just "Burn" -- clear
+		# on who has Burn, silent on how much it just cost them, even though Battle
+		# already computed the number.
+		if kind == "damage" and event.has("amount") and not text.contains(str(event["amount"])):
+			text = "%s %d" % [text, int(event["amount"])]
 		if kind == "damage" or kind == "status":
 			var who := _actor_label(str(event.get("target", "")))
 			if who != "" and not text.begins_with(who):
@@ -194,8 +199,8 @@ func replay(events: Array) -> void:
 				# the kind is already on the event (from the effect that made it), so
 				# name it rather than leaving the player to guess.
 				if event.has("status"):
-					var status_name := _status_kind_name(event["status"])
-					if status_name != "" and not text.contains(status_name):
+					var status_name := UIKit.status_name(event["status"])
+					if not text.contains(status_name):
 						text = "%s %s" % [text, status_name]
 				text = "%s: %s" % [who, text]
 		_log_lines.append(text)
@@ -213,25 +218,12 @@ func _actor_label(target: String) -> String:
 	return ""
 
 
-func _status_kind_name(kind) -> String:
-	match int(kind):
-		Statuses.Kind.BURN:
-			return "Burn"
-		Statuses.Kind.CHILL:
-			return "Chill"
-		Statuses.Kind.BLOT:
-			return "Blot"
-		Statuses.Kind.DECAY:
-			return "Decay"
-	return ""
-
-
 func _status_summary(statuses: Statuses) -> String:
 	var parts: Array[String] = []
 	for kind in [Statuses.Kind.BURN, Statuses.Kind.CHILL, Statuses.Kind.BLOT, Statuses.Kind.DECAY]:
 		var n := statuses.amount(kind)
 		if n > 0:
-			parts.append("%s %d" % [_status_kind_name(kind), n])
+			parts.append("%s %d" % [UIKit.status_name(kind), n])
 	return ", ".join(parts)
 
 
