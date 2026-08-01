@@ -78,14 +78,24 @@ func run() -> void:
 	# Different seeds must actually produce different worlds, or "generative" is a
 	# label rather than a behaviour. Checked across many seeds rather than two,
 	# since any single pair can legitimately collide.
+	# The signature covers the DECK as well as the schools. Fingerprinting the ward alone
+	# would let a generator that substituted the very same slots for the very same cards in
+	# every world pass this, the determinism check and the substitution-rate check all at
+	# once -- "it substitutes" and "it substitutes differently per seed" are two claims.
+	# Decks are fingerprinted too, over in _check_generated_rosters where the card pool is
+	# the real one -- this roster's library holds only the two cards it plays, so there is
+	# nothing for a slot to be substituted WITH and every deck legitimately comes out the
+	# same. The claim matters wherever it is testable: "it substitutes" and "it substitutes
+	# differently per seed" are two claims, and the substitution-rate check only makes the
+	# first.
 	var seen := {}
 	for seed_value in range(1, 40):
 		var faculty := Faculty.new(_library(_roster()), seed_value)
 		var signature := ""
 		for enemy in faculty.all():
-			signature += "%d," % enemy.warded_school
+			signature += "%d/%d," % [enemy.weak_school, enemy.warded_school]
 		seen[signature] = true
-	check(seen.size() > 1, "different seeds produce different faculties")
+	check(seen.size() > 1, "different seeds produce different schools")
 
 	# The shared roster resources must come back untouched. Writing the roll onto the
 	# library's own EnemyData would leak it into every later run in the session --
@@ -179,10 +189,16 @@ func _check_generated_rosters() -> void:
 	var substituted := 0
 	var total_slots := 0
 	var seeds := 25
+	var deck_signatures := {}
 	for seed_value in range(1, seeds):
 		var faculty := Faculty.new(library, seed_value)
 		substituted += faculty.slots_substituted
 		total_slots += faculty.slots_filled
+		var signature := ""
+		for enemy in faculty.all():
+			for card in enemy.deck:
+				signature += "%s," % card.card_name
+		deck_signatures[signature] = true
 		for enemy in faculty.all():
 			var base: EnemyData = authored[enemy.enemy_name]
 			var where := "seed %d, %s" % [seed_value, enemy.enemy_name]
@@ -290,3 +306,11 @@ func _check_generated_rosters() -> void:
 	# room without letting it fall to zero unnoticed.
 	var rate := 100.0 * float(substituted) / maxf(1.0, float(total_slots))
 	check(rate > 20.0, "the generator actually substitutes (%.0f%% of slots)" % rate)
+	# And substitutes DIFFERENTLY per seed. A generator that swapped the same 40% of slots
+	# for the same cards in every world would satisfy the rate check, the determinism check
+	# and every rule above, while producing one world wearing a different seed each time.
+	check(
+		deck_signatures.size() > seeds / 2,
+		"different seeds produce different decks (%d distinct rosters in %d seeds)"
+		% [deck_signatures.size(), seeds - 1]
+	)

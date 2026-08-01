@@ -5,9 +5,30 @@ extends SceneTree
 ## hard is the game?", this answers "does playing well matter?" — if a policy that
 ## throws away a real resource scores the same as the greedy one, that resource is
 ## not a decision. Balance work only; the gate is check.sh.
-##   godot --headless --path . --script tools/policy_probe.gd -- 30
+##   godot --headless --path . --script tools/policy_probe.gd -- <runs> <rolls>
+##   godot --headless --path . --script tools/policy_probe.gd -- 60
+##
+## `rolls` pins the content generator exactly as it does in tools/simulate.gd, and is here
+## for the same reason: a greedy-vs-nodefence gap measured on generated content says nothing
+## about whether the GENERATOR moved it until the same measurement has been run with the
+## content pinned to the authored roster. Run `-- 60 none` as the control before reading
+## anything into a change in the gap.
+##
+## Note that the comparison between policies is paired — every policy plays the same 60
+## content seeds — so the gap between two policies is meaningful even though each policy's
+## own level is an average over 60 different worlds. "Never trust an aggregate over
+## generated content" applies to the level, not to the difference.
 
 var _policy := "greedy"
+var _rolls := Faculty.Rolls.GENERATIVE
+
+const ROLL_MODES := {
+	"generative": Faculty.Rolls.GENERATIVE,
+	"none": Faculty.Rolls.NONE,
+	"wards": Faculty.Rolls.WARDS,
+	"schools": Faculty.Rolls.SCHOOLS,
+	"decks": Faculty.Rolls.DECKS,
+}
 
 ## The hp at or below which the throwlow policy stops fighting and takes the F.
 ## Must sit ABOVE the hp the player typically enters a course with, or the policy
@@ -103,7 +124,7 @@ func run_policy(count: int) -> Dictionary:
 	for i in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library, 500 + i)
+		var game := Run.new(library.new_starting_deck(), library, 500 + i, _rolls)
 		var catalog := library.catalog()
 		var guard := 0
 		while not game.is_over() and guard < 30:
@@ -192,6 +213,11 @@ func _process(_delta: float) -> bool:
 	var count := 30
 	if args.size() > 0 and args[0].is_valid_int():
 		count = args[0].to_int()
+	var roll_name := "generative"
+	if args.size() > 1 and ROLL_MODES.has(args[1]):
+		roll_name = args[1]
+	_rolls = ROLL_MODES[roll_name]
+	print("policies over %d runs each, rolling %s" % [count, roll_name])
 
 	for policy in ["greedy", "onecard", "nodefence", "onlydefence", "throwlow"]:
 		_policy = policy
