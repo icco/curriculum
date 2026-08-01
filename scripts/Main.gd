@@ -78,7 +78,7 @@ func start_new_run() -> void:
 
 
 func _continue_run() -> void:
-	run = SaveGame.load_run()
+	run = SaveGame.load_run(library.enemies)
 	if run == null:
 		start_new_run()
 		return
@@ -97,14 +97,18 @@ func _show_bestiary() -> void:
 	var screen := BestiaryScreen.new()
 	screen.closed.connect(_show_menu if run == null else _show_catalog)
 	_swap(screen, "bestiary")
+	# This run's examiners, not the roster's: the screen reads weak_school straight off
+	# what it is handed, so passing library.enemies would print the authored schools
+	# and flatly contradict what the player discovered in a fight.
 	screen.show_bestiary(
-		run.bestiary if run != null else Bestiary.new(), library.enemies
+		run.bestiary if run != null else Bestiary.new(),
+		run.faculty.all() if run != null and not run.faculty.is_empty() else library.enemies
 	)
 
 
 func enter_course(course: CourseData) -> void:
 	_course = course
-	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng, run.hp)
+	battle = Battle.new(run.deck, run.examiner_for(course.examiner), run.bestiary, _rng, run.hp)
 	DeckManager.deck = battle.player_deck
 	var screen := BattleScreen.new()
 	screen.battle_finished.connect(func(_b): _on_battle_finished())
@@ -157,8 +161,14 @@ func _show_registration(scored: Dictionary) -> void:
 		SaveGame.save(run)
 		_show_catalog()
 		return
+	# The examiner the player actually fought, not the roster entry. Drafting off
+	# _course.examiner.deck would offer cards from a deck this run's examiner never
+	# played once decks become generative too.
 	var draft := Draft.new(
-		run.deck, _course.examiner.deck, _course.guaranteed_card_drop, scored["grade"]
+		run.deck,
+		run.examiner_for(_course.examiner).deck,
+		_course.guaranteed_card_drop,
+		scored["grade"]
 	)
 	draft.cap = run.deck_cap()
 	var screen := RegistrationScreen.new()
