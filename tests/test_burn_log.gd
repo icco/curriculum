@@ -27,3 +27,6 @@ func run() -> void:
 	check(burn_text != "", "a burn tick was logged")
 	# The number is the point: the event carries `amount`, and the log must not drop it.
 	check(burn_text.contains("4"), "burn log names its damage, got '%s'" % burn_text)
+	# Battle puts the number in the text and BattleScreen has a fallback that appends
+	# one to any damage event missing it. Both firing would render "4 from Burn 4".
+	eq(burn_text.count("4"), 1, "the damage figure appears once, not doubled")
