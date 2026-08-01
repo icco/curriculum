@@ -45,6 +45,48 @@ func run() -> void:
 			check(t["position"].x >= 0.0, "card %d/%d is on screen" % [i, count])
 			check(t["position"].x <= 1080.0, "card %d/%d is on screen" % [i, count])
 
+	# A card's effects must render as short, plain-English text — without this, a
+	# player can only tell cards apart by memorising all 48 of them.
+	eq(
+		CardView.effect_summary([{"kind": CardData.DAMAGE, "amount": 6}] as Array[Dictionary]),
+		"6 damage",
+		"plain damage reads as N damage"
+	)
+	eq(
+		CardView.effect_summary([{"kind": CardData.BLOCK, "amount": 6}] as Array[Dictionary]),
+		"+6 block",
+		"block reads as +N block"
+	)
+	eq(
+		CardView.effect_summary(
+			[{"kind": CardData.STATUS, "status": Statuses.Kind.BURN, "amount": 3}] as Array[Dictionary]
+		),
+		"3 Burn",
+		"a status effect names the status"
+	)
+	eq(
+		CardView.effect_summary([{"kind": CardData.DRAW, "amount": 2}] as Array[Dictionary]),
+		"Draw 2",
+		"draw reads as Draw N"
+	)
+	eq(
+		CardView.effect_summary(
+			[
+				{"kind": CardData.DAMAGE, "amount": 12},
+				{"kind": CardData.SELF_DAMAGE, "amount": 3},
+			] as Array[Dictionary]
+		),
+		"12 damage, lose 3 hp",
+		"multiple effects join into one line, in card order"
+	)
+	eq(
+		CardView.effect_summary(
+			[{"kind": CardData.BONUS_IF_CHILLED, "amount": 4}] as Array[Dictionary]
+		),
+		"+4 if chilled",
+		"a conditional bonus says its condition"
+	)
+
 	# A CardView reports the card it was given and its XP progress.
 	var view := CardView.new()
 	var card := _card("Spark")

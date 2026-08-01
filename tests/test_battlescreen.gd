@@ -1,13 +1,13 @@
 extends TestCase
 
 ## BattleScreen wires a Battle to the shared UI widgets and replays the event arrays
-## Battle returns. It must never recompute a rule or mutate the battle, and — per the
-## "no untelegraphed damage" guarantee — the intent label must never go blank, whether
-## or not the examiner actually has an intent queued.
+## Battle returns. It must never recompute a rule or mutate the battle. There is no
+## telegraph of the examiner's next move, so the log has to say who an event affected
+## rather than leaving the player to guess.
 ##
 ## Every assertion here is checked in both directions where the property can flip
-## (dimmed/not-dimmed, intent present/absent), so a check that always passes trivially
-## cannot hide behind one that happens to be true right now.
+## (dimmed/not-dimmed), so a check that always passes trivially cannot hide behind one
+## that happens to be true right now.
 
 
 func suite_name() -> String:
@@ -84,16 +84,11 @@ func run() -> void:
 	# No container anywhere in the tree eats a tap; only the button and the cards do.
 	_assert_filters(screen)
 
-	# The examiner's intent must always read as something — including when there is
-	# genuinely no intent queued, which the brief calls out explicitly as a case the
-	# screen must not render blank for.
-	check(screen.intent_label.text.length() > 0, "telegraphed the examiner's intent")
-	fight.examiner_intent = null
-	screen.refresh()
-	check(
-		screen.intent_label.text.length() > 0,
-		"still says something when the examiner has no intent at all"
-	)
+	# There is no telegraph of the examiner's next move — the fight is a genuine
+	# unknown, so the player's only information is the log and their own state.
+	# The examiner's own hit points and any statuses it carries must be visible.
+	check(screen.examiner_hp_label.text.length() > 0, "the examiner's hp is shown")
+	check(screen.player_hp_label.text.length() > 0, "the player's hp is shown")
 
 	# Replaying events writes them to the log rather than touching core state — proven
 	# in both directions: the log actually changes, and the battle actually does not.
@@ -105,6 +100,18 @@ func run() -> void:
 	eq(fight.examiner.hp, before_hp, "replaying a fabricated event does not mutate the battle")
 	neq(screen.log_label.text, before_log, "the log actually changed")
 	check(screen.log_label.text.contains("3 damage, fabricated"), "logged the event text")
+	check(
+		screen.log_label.text.contains(fight.examiner.display_name),
+		"a damage event names who it happened to"
+	)
+
+	# The same damage event aimed at the player instead must say "You", not the
+	# examiner's name — proven in both directions so this cannot pass because every
+	# event is always labelled the same way regardless of its target.
+	screen.replay(
+		[{"type": "damage", "target": "player", "amount": 4, "text": "4 damage, fabricated"}]
+	)
+	check(screen.log_label.text.contains("You: 4 damage, fabricated"), "damage to the player says You")
 
 	# Affordability dims a card — checked both ways, so this cannot pass because a
 	# CardView is always dimmed (or never dimmed) regardless of mana.
