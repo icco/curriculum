@@ -10,7 +10,15 @@ extends SceneTree
 var _policy := "greedy"
 
 ## The hp at or below which the throwlow policy stops fighting and takes the F.
-const _THROW_BELOW := 25
+## Must sit ABOVE the hp the player typically enters a course with, or the policy
+## simply never engages and measures greedy under another name. The per-course
+## "hp in" column from tools/simulate.gd is the number to check it against.
+const _THROW_BELOW := 40
+
+## How many battles throwlow actually diverged on. Without this the policy can report
+## a near-greedy score simply by never having fired, which reads as "the exploit does
+## not pay" when nothing was tested at all.
+var _thrown := 0
 
 
 ## Any card that spends itself on staying alive: Block, healing, or retain. Not a
@@ -63,7 +71,7 @@ func _take_actions(battle: Battle) -> bool:
 			# and the first of two strikes is survivable -- so at low hp, throwing a
 			# fight may beat winning it. If this policy outscores greedy, that
 			# exploit is real rather than theoretical.
-			if battle.player.hp > _THROW_BELOW or battle.player_starting_hp > _THROW_BELOW:
+			if battle.player_starting_hp > _THROW_BELOW:
 				for card in battle.player_deck.hand.duplicate():
 					if battle.can_play(card):
 						battle.play_card(card)
@@ -132,6 +140,8 @@ func run_policy(count: int) -> Dictionary:
 			)
 			var letter := Grading.letter(scored["grade"])
 			grade_counts[letter] = int(grade_counts.get(letter, 0)) + 1
+			if _policy == "throwlow" and battle.player_starting_hp <= _THROW_BELOW:
+				_thrown += 1
 			total_score += float(scored["total"])
 			scored_battles += 1
 			for t in terms:
@@ -180,11 +190,17 @@ func _process(_delta: float) -> bool:
 
 	for policy in ["greedy", "onecard", "nodefence", "onlydefence", "throwlow"]:
 		_policy = policy
+		_thrown = 0
 		var r := run_policy(count)
 		print(
 			"%-9s wins %2d/%d  courses/run %5.1f  mean score %5.1f  grades %s"
 			% [policy, r["wins"], count, r["courses"], r["mean_score"], r["grades"]]
 		)
+		if policy == "throwlow":
+			print(
+				"          diverged from greedy on %d of %d battles (threshold %d hp)"
+				% [_thrown, int(r["battles"]), _THROW_BELOW]
+			)
 		var n := maxf(1.0, float(r["battles"]))
 		var t: Dictionary = r["terms"]
 		print(
