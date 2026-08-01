@@ -34,7 +34,7 @@ func _process(_delta: float) -> bool:
 			if open.is_empty():
 				break
 			var course = open[0]
-			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng)
+			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng, game.hp)
 			battle.start()
 			var turn_guard := 0
 			while not battle.finished and turn_guard < 200:
@@ -56,7 +56,7 @@ func _process(_delta: float) -> bool:
 					"turns_taken": battle.turns,
 					"par_turns": course.par_turns,
 					"hp_end": battle.player.hp,
-					"hp_start": Run.STARTING_HP,
+					"hp_start": battle.player_starting_hp,
 					"xp_banked": battle.xp_banked,
 					"xp_par": course.xp_par,
 					"weakness_known": game.bestiary.knows_weakness(course.examiner.enemy_name),

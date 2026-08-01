@@ -104,7 +104,7 @@ func _show_bestiary() -> void:
 
 func enter_course(course: CourseData) -> void:
 	_course = course
-	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng)
+	battle = Battle.new(run.deck, course.examiner, run.bestiary, _rng, run.hp)
 	DeckManager.deck = battle.player_deck
 	var screen := BattleScreen.new()
 	screen.battle_finished.connect(func(_b): _on_battle_finished())
@@ -125,7 +125,10 @@ func finish_battle_headless(_won: bool) -> void:
 			"turns_taken": battle.turns,
 			"par_turns": _course.par_turns,
 			"hp_end": battle.player.hp,
-			"hp_start": run.max_hp,
+			# What the player walked in on, not their maximum: hit points carry
+			# between battles, so grading against max_hp would let damage taken
+			# three courses ago permanently cap every later Survival score.
+			"hp_start": battle.player_starting_hp,
 			"xp_banked": battle.xp_banked,
 			"xp_par": _course.xp_par,
 			"weakness_known": run.bestiary.knows_weakness(_course.examiner.enemy_name),
