@@ -77,7 +77,7 @@ func _build() -> void:
 
 	var name_box := UIKit.label(card.data.card_name, 22)
 	name_box.position = Vector2(10, CARD_SIZE.y - 50)
-	name_box.size = Vector2(CARD_SIZE.x - 20, 30)
+	name_box.size = Vector2(CARD_SIZE.x - 20, 26)
 	name_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_paint_card_text(name_box, text_colour)
 	add_child(name_box)
@@ -93,17 +93,18 @@ func _build() -> void:
 	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sigil)
 
-	# XP ticks along the bottom edge.
+	# Evolution progress. A row of one-tick-per-XP does not generalise: at a
+	# threshold of 24 (higher-tier cards on the five-level evolution track) that is
+	# 24 ticks at the old fixed spacing, landing hundreds of pixels off a ~200px
+	# card. Text scales to any threshold, and CardInstance.progress() also carries
+	# which level the card is on ("L2 3/9"), which discrete ticks never showed.
 	if card.can_evolve():
-		for i in card.data.xp_to_evolve:
-			var tick := Panel.new()
-			var style := StyleBoxFlat.new()
-			style.bg_color = ArtLibrary.INK if i < card.xp else ArtLibrary.SLATE
-			tick.add_theme_stylebox_override("panel", style)
-			tick.size = Vector2(16, 6)
-			tick.position = Vector2(10 + i * 20, CARD_SIZE.y - 14)
-			tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			add_child(tick)
+		var progress_box := UIKit.label(card.progress(), 16)
+		progress_box.position = Vector2(10, CARD_SIZE.y - 20)
+		progress_box.size = Vector2(CARD_SIZE.x - 20, 16)
+		progress_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_paint_card_text(progress_box, text_colour)
+		add_child(progress_box)
 
 
 ## Turns a card's effects into short, plain-English text — "6 damage", "+6 block",
