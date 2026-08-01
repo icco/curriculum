@@ -78,6 +78,10 @@ func _build() -> void:
 	var name_box := UIKit.label(card.data.card_name, 22)
 	name_box.position = Vector2(10, CARD_SIZE.y - 50)
 	name_box.size = Vector2(CARD_SIZE.x - 20, 26)
+	# Centred, not left: left-aligned text starting flush at the label's own edge
+	# lost its leading glyph once rotated ("Ink Blot" rendered as "nk Blot") even
+	# though the card itself had room to spare. Centring moves the first character
+	# away from that edge.
 	name_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_paint_card_text(name_box, text_colour)
 	add_child(name_box)
@@ -152,11 +156,9 @@ static func _status_name(kind) -> String:
 	return "?"
 
 
-## Colours a card label AND gives it a matching thin outline. Rotated text on a
-## grainy card background can turn a single-stroke glyph (a capital I is nothing but
-## one thin vertical bar) into a scattering of sub-pixel fragments once the whole
-## card is tilted and the frame is downsampled — the outline thickens every glyph
-## just enough that this can't happen, without changing the colour the eye reads.
+## Colours a card label and gives it a same-colour outline, which thickens every
+## glyph a little without changing the colour the eye reads — cheap insurance for
+## thin strokes against the card's grainy painted background.
 func _paint_card_text(label: Label, colour: Color) -> void:
 	label.add_theme_color_override("font_color", colour)
 	label.add_theme_color_override("font_outline_color", colour)
