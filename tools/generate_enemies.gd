@@ -28,12 +28,20 @@ func roster() -> Array:
 			["rot_seed", "necrology_note", "rot_seed", "bitter_recall", "guard"]],
 		["Battle Chanter", 44, 2, FROST, CINDER, "battle_chanter", false,
 			["cinder_burst", "spark", "scorch_notes", "kindle", "guard"]],
-		["Proctor", 60, 3, CINDER, WARD, "proctor", true,
-			["bulwark", "aegis_ward", "rime_lance", "still_the_hall", "restorative_study"]],
-		["Vice-Chancellor", 80, 3, FROST, INK, "vice_chancellor", true,
-			["spilled_ledger", "blightseed", "necrology_thesis", "cite_chapter_and_verse", "bulwark"]],
-		["Rector", 120, 3, ROT, WARD, "rector", false,
-			["valedictory_blaze", "long_winter", "defended_thesis", "bitter_mastery",
+		# HP is ordered deliberately: each gate clearly out-stats that tier's
+		# regulars (tier 1 tops out at 38, tier 2 at 46), and the final
+		# (Rector) clearly out-stats both gates. Full mana spending made three
+		# of these decks degenerate — Proctor could combo block with itself
+		# every turn into a stalemate, Vice-Chancellor's two Decay sources
+		# stacked into an unbounded snowball, Rector's Immolate Notes +
+		# Bitter Mastery was a one-combo kill — so each deck below was fixed
+		# for that specific problem rather than compensated for with lower HP.
+		["Proctor", 40, 3, CINDER, WARD, "proctor", true,
+			["bulwark", "guard", "rime_lance", "glass_shard", "still_the_hall"]],
+		["Vice-Chancellor", 48, 3, FROST, INK, "vice_chancellor", true,
+			["spilled_ledger", "frost_lance", "cite_chapter_and_verse", "scorch_notes", "bulwark"]],
+		["Rector", 80, 3, ROT, WARD, "rector", false,
+			["valedictory_blaze", "long_winter", "defended_thesis", "spark",
 			 "valedictory_sigil", "immolate_notes"]],
 	]
 

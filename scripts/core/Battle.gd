@@ -4,17 +4,22 @@ extends RefCounted
 ## One battle. Pure logic: every method returns an array of event dictionaries for
 ## the presentation layer to replay, and nothing here touches the scene tree.
 ##
-## The examiner plays exactly one card per turn, telegraphed as `examiner_intent` at
-## the end of the player's turn, so the player is never hit by untelegraphed damage.
+## The examiner spends its FULL mana each turn, playing every card it can afford in a
+## greedy highest-cost-first sequence (mirroring the player's own economy: 3 mana,
+## mostly 1-cost cards) — resolved live, on the examiner's own turn. There is
+## deliberately no telegraph: the player does not know what is coming, the same way
+## the examiner does not know the player's hand. (An earlier version of this class
+## pre-committed and exposed a single-card `examiner_intent` for the UI to preview;
+## that guarantee has been dropped by design so the fight is a real one.)
 
 const CHILL_REDUCTION := 0.3  # per stack, applied to damage
 const BLOT_REDUCTION := 0.4  # per stack, applied to every number on the card
+const MAX_CASTS_PER_TURN := 8  # safety bound; a refilled hand is only ~3 cards
 
 var player: Combatant
 var examiner: Combatant
 var player_deck: Deck
 var examiner_deck: Deck
-var examiner_intent: CardInstance = null
 var turns := 0
 var xp_banked := 0
 var finished := false
@@ -63,7 +68,6 @@ func start() -> Array:
 	var events: Array = [{"type": "turn_start", "turn": turns, "text": "Turn 1"}]
 	for card in player_deck.draw(Deck.HAND_SIZE):
 		events.append({"type": "draw", "card": card, "text": "Drew %s" % card.data.card_name})
-	events.append_array(_choose_intent())
 	return events
 
 
@@ -164,7 +168,7 @@ func end_turn() -> Array:
 	var burn := player.statuses.tick_start_of_turn()
 	if burn > 0:
 		player.take_damage(burn)
-		events.append({"type": "damage", "target": "player", "amount": burn, "text": "Burn"})
+		events.append({"type": "damage", "target": "player", "amount": burn, "text": "%d from Burn" % burn})
 	for card in player_deck.draw(Deck.HAND_SIZE):
 		events.append({"type": "draw", "card": card, "text": ""})
 	events.append_array(_check_end())
@@ -180,13 +184,39 @@ func _examiner_turn() -> Array:
 	if burn > 0:
 		examiner.take_damage(burn)
 		events.append(
-			{"type": "damage", "target": "examiner", "amount": burn, "text": "Burn"}
+			{"type": "damage", "target": "examiner", "amount": burn, "text": "%d from Burn" % burn}
 		)
 	if examiner.is_down():
 		return events
 
-	if examiner_intent != null:
-		var card: CardInstance = examiner_intent
+	_refill_examiner_hand()
+	if _best_affordable_in_hand(examiner.mana_per_turn) == null and not examiner_deck.hand.is_empty():
+		# Nothing currently in hand is affordable at all this turn. Rather than
+		# hold the same unaffordable hand forever (hand.size() stays >= 3, so it
+		# would never be topped up again and the examiner would hesitate every
+		# turn for the rest of the battle), cycle the whole hand into the
+		# discard and try once more with a fresh draw. This does not guarantee
+		# an affordable card exists anywhere in the deck, but it stops a merely
+		# unlucky draw from making a battle un-loseable.
+		for card in examiner_deck.hand.duplicate():
+			examiner_deck.hand.erase(card)
+			examiner_deck.discard_pile.append(card)
+		_refill_examiner_hand()
+
+	# Spend the whole turn's mana, greedy highest-cost-affordable-first, resolved
+	# live: pick the best card the CURRENT remaining mana affords, play it, repeat.
+	#
+	# Hand size is NOT a bound here. A DRAW effect refills the examiner's hand
+	# mid-loop via _apply, and several examiner decks hold draw cards (Glass Tutor
+	# runs Cite Source and Marginalia), so the hand can grow while we iterate.
+	# MAX_CASTS_PER_TURN is therefore the only thing preventing a spin on a hand of
+	# zero-cost or self-replacing cards, not a belt-and-braces second line.
+	var casts := 0
+	while casts < MAX_CASTS_PER_TURN:
+		var card := _best_affordable_in_hand(examiner.mana)
+		if card == null:
+			break
+		casts += 1
 		examiner.spend_mana(card.data.cost)
 		events.append(
 			{
@@ -208,49 +238,22 @@ func _examiner_turn() -> Array:
 		for effect in card.data.effects:
 			events.append_array(_apply(effect, scale, chill_scale, examiner, player))
 		examiner_deck.play(card)
-		examiner_intent = null
 
-		# The intent may have just killed the player. Do not tick the examiner's
-		# own Decay or pick a new intent on top of a battle that is already
-		# over — that is how a dead player was getting credited with the win:
-		# the examiner's own Decay tick would then kill the examiner too, and
-		# _check_end (before its fix below) asked "is the examiner down?" first.
+		# The card just played may have just killed the player. Do not tick the
+		# examiner's own Decay or keep casting on top of a battle that is
+		# already over — that is how a dead player was getting credited with
+		# the win: the examiner's own Decay tick would then kill the examiner
+		# too, and _check_end (before its fix below) asked "is the examiner
+		# down?" first.
 		if player.is_down():
 			return events
+		# A self-costing card (Rot-flavoured) can kill the examiner mid-turn.
+		# Stop casting; a dead examiner does not keep acting.
+		if examiner.is_down():
+			break
 
 	events.append_array(_tick_decay(examiner, _enemy_data.enemy_name))
-	if not examiner.is_down():
-		events.append_array(_choose_intent())
 	return events
-
-
-## Picks the most expensive card the examiner can afford, and telegraphs it.
-func _choose_intent() -> Array:
-	_refill_examiner_hand()
-	var best := _best_affordable_in_hand()
-	if best == null and not examiner_deck.hand.is_empty():
-		# Nothing currently in hand is affordable. Rather than hold the same
-		# unaffordable hand forever (hand.size() stays >= 3, so it would never
-		# be topped up again and the examiner would hesitate every turn for the
-		# rest of the battle), cycle the whole hand into the discard and try
-		# once more with a fresh draw. This does not guarantee an affordable
-		# card exists anywhere in the deck, but it stops a merely unlucky draw
-		# from making a battle un-loseable.
-		for card in examiner_deck.hand.duplicate():
-			examiner_deck.hand.erase(card)
-			examiner_deck.discard_pile.append(card)
-		_refill_examiner_hand()
-		best = _best_affordable_in_hand()
-	examiner_intent = best
-	if best == null:
-		return [{"type": "intent", "card": null, "text": "%s hesitates." % _enemy_data.enemy_name}]
-	return [
-		{
-			"type": "intent",
-			"card": best,
-			"text": "%s will cast %s" % [_enemy_data.enemy_name, best.data.card_name],
-		}
-	]
 
 
 func _refill_examiner_hand() -> void:
@@ -258,10 +261,10 @@ func _refill_examiner_hand() -> void:
 		examiner_deck.draw(3 - examiner_deck.hand.size())
 
 
-func _best_affordable_in_hand() -> CardInstance:
+func _best_affordable_in_hand(budget: int) -> CardInstance:
 	var best: CardInstance = null
 	for card in examiner_deck.hand:
-		if card.data.cost > examiner.mana_per_turn:
+		if card.data.cost > budget:
 			continue
 		if best == null or card.data.cost > best.data.cost:
 			best = card

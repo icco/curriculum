@@ -25,3 +25,6 @@ export_credentials.cfg
 /assets/source/**/v[0-9]*.jpeg
 /assets/source/**/v[0-9]*.webp
 /assets/source/.spend.log
+# Agent worktrees. Live git repos, not project content -- a bare `git add -A` from the
+# repo root otherwise commits them as gitlinks.
+.claude/worktrees/

@@ -187,9 +187,11 @@ func replay(events: Array) -> void:
 		if text == "":
 			continue
 		var kind: String = str(event.get("type", ""))
-		# Start-of-turn Burn carries an "amount" but its text is just "Burn" -- clear
-		# on who has Burn, silent on how much it just cost them, even though Battle
-		# already computed the number.
+		# Fallback for any damage event whose text omits its own amount. Battle now
+		# phrases them all with the number in place ("6 damage", "4 from Burn"), so
+		# this should not fire -- it is here so a future event that forgets cannot
+		# silently render a hit with no figure attached. Guarded on `contains` so a
+		# text that already has the number is not given a second one.
 		if kind == "damage" and event.has("amount") and not text.contains(str(event["amount"])):
 			text = "%s %d" % [text, int(event["amount"])]
 		if kind == "damage" or kind == "status":
