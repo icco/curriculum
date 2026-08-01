@@ -170,6 +170,11 @@ func _check_generated_rosters() -> void:
 	var authored := {}
 	for enemy in library.enemies:
 		authored[enemy.enemy_name] = enemy
+	var course_count := {}
+	for course in library.courses:
+		if course.examiner != null:
+			var key: String = course.examiner.enemy_name
+			course_count[key] = int(course_count.get(key, 0)) + 1
 
 	var substituted := 0
 	var total_slots := 0
@@ -268,6 +273,14 @@ func _check_generated_rosters() -> void:
 				check(
 					teaches.has(enemy.weak_school),
 					"%s: weak to a school it teaches" % where
+				)
+			# An examiner met only once -- the two gates and the final -- gets no rematch to
+			# spend Bestiary knowledge on, and two failed courses end the run, so a bad ward
+			# there costs the whole run rather than one course.
+			if int(course_count.get(enemy.enemy_name, 2)) <= 1:
+				check(
+					not opening.has(enemy.warded_school),
+					"%s: a once-fought examiner is not warded against an opening school" % where
 				)
 
 	# The anti-no-op assertion. Every rule above is satisfied perfectly by a generator that

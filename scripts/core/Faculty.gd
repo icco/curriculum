@@ -57,12 +57,25 @@ extends RefCounted
 ## tutorial — the opening courses are weak to schools the starting deck holds and warded
 ## against ones it does not — and the whole roster was tuned assuming those matchups.
 ##
-## The tutorial half is now a rule rather than a table (see _weak_allowed and _ward_allowed):
-## an examiner met in a tier-1 course is weak to a school the player opens with, and is
-## never warded against the one school they open with DAMAGE in. At tier 1 the player's
-## deck is fixed and tiny — four Spark, four Guard, two Ink Blot — so halving their only
-## damage school is not a hard fight, it is an unwinnable one. That is the same argument
-## the defensive-ward rule already makes, applied to the opening.
+## The tutorial half is now a rule rather than a table. See _weak_candidates and
+## _ward_allowed for the reasoning behind each, but in short:
+##
+## - A weakness is drawn from what the examiner TEACHES — the schools in the deck it plays
+##   and in its courses' syllabus cards — because a weakness is only worth anything if the
+##   player has that school, and what they have comes almost entirely from drafting the
+##   examiners they beat.
+## - It is never a school nothing can deal damage in. Ward is the whole of that set.
+## - At tier 1 the tutorial outranks both: the weakness is something the OPENING deck can
+##   hit with, taught or not, because the player has drafted nothing yet.
+## - No tier-1 examiner is warded against the one school the player opens with damage in.
+##   Their deck is fixed and tiny — four Spark, four Guard, two Ink Blot — so halving their
+##   only damage school is not a hard fight, it is an unwinnable one. Same argument as the
+##   defensive-ward rule, applied to the opening.
+##
+## Every one of those came from a measurement rather than from taste, and the numbers are
+## on the rules themselves. What they have in common is worth stating once: a constraint
+## that leaves one legal answer is not a constraint, it is a hardcoded value with extra
+## steps, and two of these started life that way.
 ##
 ## The tuning half is answered by the deck roll keeping every fight's shape, above.
 
@@ -119,6 +132,7 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 	var pool: CardPool = null
 	var tier_of := {}
 	var syllabus_of := {}
+	var course_counts := {}
 	if content != null:
 		for base in content.enemies:
 			if base != null:
@@ -127,6 +141,7 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 		pool = CardPool.new(content.cards)
 		tier_of = _earliest_tiers(content.courses)
 		syllabus_of = _syllabus_schools(content.courses)
+		course_counts = _course_counts(content.courses)
 	var opening_offence := _damage_schools(content.starting_deck if content != null else [])
 	# Every school the LIBRARY has a damage card in, which is every school but Ward.
 	var offensive_schools := _damage_schools(content.cards if content != null else [])
@@ -146,7 +161,10 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 		# ACTUALLY holds. Reading "is this examiner defensive?" off the authored deck would
 		# constrain the ward for a deck it never plays.
 		var deck := _roll_deck(base, pool, rng, rolls)
-		var defensive := _is_defensive(deck)
+		# "Fragile" in the sense that a bad ward costs more than one course: either the
+		# examiner wins by outlasting, or it is met only once so there is no rematch.
+		var one_off: bool = int(course_counts.get(base.enemy_name, 2)) <= 1
+		var fragile := _is_defensive(deck) or one_off
 		var tier := int(tier_of.get(base.enemy_name, 99))
 
 		# Both schools resolve as ONE constrained pick each, not as sequential patches.
@@ -168,7 +186,7 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 			ward = _resolve_ward(
 				dealt_wards[i],
 				weak,
-				defensive,
+				fragile,
 				tier,
 				starting_schools,
 				opening_offence,
@@ -400,10 +418,22 @@ static func _teaches(deck: Array[CardData], syllabus: Array) -> Array[int]:
 ## are preferences, and the relaxation order below is what stops them deadlocking a roll.
 ##
 ## A. Never weak and warded to the same school.
-## B. A defensive examiner is never warded against a school the player opens with. Halving
-##    the player's damage against a deck that is mostly Block does not make a hard fight,
-##    it makes an unbreakable one — unconstrained, Proctor's Inspection measured a 43% loss
-##    over 11.1 turns, the stalemate its own roster entry warns about.
+## B. A defensive examiner, or one fought only ONCE, is never warded against a school the
+##    player opens with.
+##
+##    Defensive because halving the player's damage against a deck that is mostly Block does
+##    not make a hard fight, it makes an unbreakable one — unconstrained, Proctor's
+##    Inspection measured a 43% loss over 11.1 turns, the stalemate its own roster entry
+##    warns about.
+##
+##    Fought once because there is no second attempt to spend knowledge on. Six of the nine
+##    examiners are met twice (spec 8.1), so a bad matchup against one of those costs a
+##    course and teaches the Bestiary something that pays off later. The two gates and the
+##    final are met once each, and two failed courses end the run outright, so the same bad
+##    matchup there costs the whole run. Midterm Review is the single worst node in the game
+##    on authored content and stays that way rolled; this is what stops a roll compounding
+##    it. Derived from the catalog — an examiner used by exactly one course — rather than
+##    from is_gate, so the final counts too without depending on content also flagging it.
 ## C. An examiner met in a tier-1 course is never warded against a school the player opens
 ##    with DAMAGE in. At tier 1 that is Cinder alone, and the deck is still four Spark, four
 ##    Guard and two Ink Blot: there is no second damage school to fall back on and no draft
@@ -423,7 +453,7 @@ static func _teaches(deck: Array[CardData], syllabus: Array) -> Array[int]:
 static func _ward_allowed(
 	school: int,
 	weak: int,
-	defensive: bool,
+	fragile: bool,
 	tier: int,
 	starting_schools: Array,
 	opening_offence: Array,
@@ -431,7 +461,7 @@ static func _ward_allowed(
 ) -> bool:
 	if school == weak:
 		return false
-	if defensive and starting_schools.has(school):
+	if fragile and starting_schools.has(school):
 		return false
 	if tier <= 1 and opening_offence.has(school):
 		return false
@@ -443,14 +473,14 @@ static func _ward_allowed(
 static func _resolve_ward(
 	dealt: int,
 	weak: int,
-	defensive: bool,
+	fragile: bool,
 	tier: int,
 	starting_schools: Array,
 	opening_offence: Array,
 	syllabus: Array,
 	rng: RandomNumberGenerator
 ) -> int:
-	if _ward_allowed(dealt, weak, defensive, tier, starting_schools, opening_offence, syllabus):
+	if _ward_allowed(dealt, weak, fragile, tier, starting_schools, opening_offence, syllabus):
 		return dealt
 	# Relaxed one preference at a time, rule A last and never: it is the spec's, where the
 	# rest are difficulty guards that a narrow school set may make unsatisfiable together.
@@ -460,12 +490,12 @@ static func _resolve_ward(
 		var allowed: Array[int] = []
 		for school in Schools.ALL:
 			var soft_syllabus: Array = syllabus if relax < 1 else []
-			var soft_defensive: bool = defensive and relax < 2
+			var soft_fragile: bool = fragile and relax < 2
 			var soft_tier: int = 99 if relax >= 3 else tier
 			if _ward_allowed(
 				school,
 				weak,
-				soft_defensive,
+				soft_fragile,
 				soft_tier,
 				starting_schools,
 				opening_offence,
@@ -512,6 +542,19 @@ static func _earliest_tiers(courses: Array) -> Dictionary:
 			continue
 		var name: String = course.examiner.enemy_name
 		out[name] = mini(int(out.get(name, 99)), int(course.tier))
+	return out
+
+
+## examiner name -> how many courses it examines. One means there is no rematch to spend
+## Bestiary knowledge on: the two gates and the final, which Catalog.validate() exempts from
+## its "every examiner appears in at least two courses" rule for the same reason.
+static func _course_counts(courses: Array) -> Dictionary:
+	var out := {}
+	for course in courses:
+		if course == null or course.examiner == null:
+			continue
+		var name: String = course.examiner.enemy_name
+		out[name] = int(out.get(name, 0)) + 1
 	return out
 
 
