@@ -19,7 +19,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a slender flame spear, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a slender flame spear, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/ember_lance",
@@ -31,7 +31,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a slender flame spear with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a slender flame spear with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/blaze_lance",
@@ -43,7 +43,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a slender flame spear radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a slender flame spear radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/inferno_lance",
@@ -55,7 +55,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a slender flame spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a slender flame spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/empyrean_lance",
@@ -67,7 +67,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a slender flame spear, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a slender flame spear, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cinder_burst",
@@ -79,7 +79,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a bursting ember starburst, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a bursting ember starburst, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/pyre_burst",
@@ -91,7 +91,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a bursting ember starburst with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a bursting ember starburst with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bonfire_burst",
@@ -103,7 +103,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a bursting ember starburst radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a bursting ember starburst radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/wildblaze_burst",
@@ -115,7 +115,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a bursting ember starburst, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a bursting ember starburst, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/starfire_burst",
@@ -127,7 +127,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a bursting ember starburst, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a bursting ember starburst, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/kindle",
@@ -139,7 +139,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a rising tongue of kindling flame, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a rising tongue of kindling flame, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/conflagration",
@@ -151,7 +151,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a rising tongue of kindling flame with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a rising tongue of kindling flame with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/wildfire",
@@ -163,7 +163,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a rising tongue of kindling flame radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a rising tongue of kindling flame radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/firestorm",
@@ -175,7 +175,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a rising tongue of kindling flame, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a rising tongue of kindling flame, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/everburning",
@@ -187,7 +187,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a rising tongue of kindling flame, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a rising tongue of kindling flame, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/scorch_notes",
@@ -199,7 +199,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a curling scorched page, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of a curling scorched page, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/immolate_notes",
@@ -211,7 +211,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a curling scorched page with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of a curling scorched page with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cremate_notes",
@@ -223,7 +223,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a curling scorched page radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of a curling scorched page radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/incinerate_notes",
@@ -235,7 +235,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a curling scorched page, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a curling scorched page, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/annihilate_notes",
@@ -247,7 +247,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a curling scorched page, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of a curling scorched page, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/final_recitation",
@@ -259,7 +259,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of an upright blazing torch, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show exactly one small instance of an upright blazing torch, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_blaze",
@@ -271,7 +271,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of an upright blazing torch with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one larger instance of an upright blazing torch with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/commencement_pyre",
@@ -283,7 +283,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of an upright blazing torch radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show three instances of an upright blazing torch radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/convocation_inferno",
@@ -295,7 +295,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of an upright blazing torch, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of an upright blazing torch, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/doctoral_immolation",
@@ -307,7 +307,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of an upright blazing torch, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show one colossal instance of an upright blazing torch, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/frost_lance",
@@ -319,7 +319,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a slender ice spear, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a slender ice spear, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/rime_lance",
@@ -331,7 +331,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a slender ice spear with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a slender ice spear with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/glacier_lance",
@@ -343,7 +343,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a slender ice spear radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a slender ice spear radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/permafrost_lance",
@@ -355,7 +355,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a slender ice spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a slender ice spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/everfrost_lance",
@@ -367,7 +367,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a slender ice spear, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a slender ice spear, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/hoarfrost",
@@ -379,7 +379,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a branching frost crystal, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a branching frost crystal, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/deep_hoarfrost",
@@ -391,7 +391,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a branching frost crystal with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a branching frost crystal with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/killing_frost",
@@ -403,7 +403,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a branching frost crystal radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a branching frost crystal radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/black_ice",
@@ -415,7 +415,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a branching frost crystal, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a branching frost crystal, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/eternal_winter",
@@ -427,7 +427,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a branching frost crystal, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a branching frost crystal, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/glass_shard",
@@ -439,7 +439,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of an angular glass shard, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of an angular glass shard, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/mirror_shard",
@@ -451,7 +451,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of an angular glass shard with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of an angular glass shard with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/prism_shard",
@@ -463,7 +463,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of an angular glass shard radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of an angular glass shard radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/crystal_shard",
@@ -475,7 +475,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of an angular glass shard, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of an angular glass shard, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/diamond_shard",
@@ -487,7 +487,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of an angular glass shard, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of an angular glass shard, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/numb_the_hall",
@@ -499,7 +499,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a frozen archway, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a frozen archway, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/still_the_hall",
@@ -511,7 +511,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a frozen archway with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a frozen archway with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/freeze_the_hall",
@@ -523,7 +523,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a frozen archway radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a frozen archway radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/silence_the_hall",
@@ -535,7 +535,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a frozen archway, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a frozen archway, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/entomb_the_hall",
@@ -547,7 +547,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a frozen archway, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a frozen archway, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/winter_term",
@@ -559,7 +559,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a snow-laden bough, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show exactly one small instance of a snow-laden bough, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/long_winter",
@@ -571,7 +571,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a snow-laden bough with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one larger instance of a snow-laden bough with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/endless_winter",
@@ -583,7 +583,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a snow-laden bough radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show three instances of a snow-laden bough radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/dead_of_winter",
@@ -595,7 +595,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a snow-laden bough, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a snow-laden bough, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/winter_eternal",
@@ -607,7 +607,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a snow-laden bough, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show one colossal instance of a snow-laden bough, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cite_source",
@@ -619,7 +619,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of an open book, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of an open book, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cite_chapter_and_verse",
@@ -631,7 +631,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of an open book with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of an open book with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cross_reference",
@@ -643,7 +643,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of an open book radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of an open book radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/annotated_bibliography",
@@ -655,7 +655,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of an open book, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of an open book, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/complete_works",
@@ -667,7 +667,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of an open book, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of an open book, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/cram",
@@ -679,7 +679,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a stack of leaning books, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a stack of leaning books, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/all_nighter",
@@ -691,7 +691,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a stack of leaning books with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a stack of leaning books with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/midnight_oil",
@@ -703,7 +703,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a stack of leaning books radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a stack of leaning books radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/sleepless_vigil",
@@ -715,7 +715,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a stack of leaning books, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a stack of leaning books, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/perfect_recall",
@@ -727,7 +727,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a stack of leaning books, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a stack of leaning books, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/ink_blot",
@@ -739,7 +739,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a spreading ink blot, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a spreading ink blot, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/spilled_ledger",
@@ -751,7 +751,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a spreading ink blot with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a spreading ink blot with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/smeared_archive",
@@ -763,7 +763,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a spreading ink blot radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a spreading ink blot radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/redacted_record",
@@ -775,7 +775,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a spreading ink blot, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a spreading ink blot, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/purged_transcript",
@@ -787,7 +787,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a spreading ink blot, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a spreading ink blot, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/marginalia",
@@ -799,7 +799,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a quill beside a scrawled note, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a quill beside a scrawled note, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/copious_marginalia",
@@ -811,7 +811,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a quill beside a scrawled note with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a quill beside a scrawled note with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/exhaustive_marginalia",
@@ -823,7 +823,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a quill beside a scrawled note radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a quill beside a scrawled note radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/annotated_codex",
@@ -835,7 +835,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a quill beside a scrawled note, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a quill beside a scrawled note, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/complete_concordance",
@@ -847,7 +847,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a quill beside a scrawled note, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a quill beside a scrawled note, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/thesis_statement",
@@ -859,7 +859,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a bound thesis volume, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show exactly one small instance of a bound thesis volume, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/defended_thesis",
@@ -871,7 +871,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a bound thesis volume with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one larger instance of a bound thesis volume with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/published_thesis",
@@ -883,7 +883,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a bound thesis volume radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show three instances of a bound thesis volume radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/peer_reviewed_thesis",
@@ -895,7 +895,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a bound thesis volume, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a bound thesis volume, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/landmark_thesis",
@@ -907,7 +907,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a bound thesis volume, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show one colossal instance of a bound thesis volume, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bitter_recall",
@@ -919,7 +919,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a wilting vine, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a wilting vine, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bitter_mastery",
@@ -931,7 +931,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a wilting vine with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a wilting vine with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bitter_reckoning",
@@ -943,7 +943,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a wilting vine radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a wilting vine radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bitter_judgment",
@@ -955,7 +955,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a wilting vine, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a wilting vine, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bitter_finality",
@@ -967,7 +967,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a wilting vine, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a wilting vine, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/feed_the_curriculum",
@@ -979,7 +979,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of an open ledger shaped like a hungry mouth, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of an open ledger shaped like a hungry mouth, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/feed_the_faculty",
@@ -991,7 +991,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of an open ledger shaped like a hungry mouth with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of an open ledger shaped like a hungry mouth with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/feed_the_department",
@@ -1003,7 +1003,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of an open ledger shaped like a hungry mouth radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of an open ledger shaped like a hungry mouth radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/feed_the_institution",
@@ -1015,7 +1015,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of an open ledger shaped like a hungry mouth, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of an open ledger shaped like a hungry mouth, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/feed_the_endowment",
@@ -1027,7 +1027,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of an open ledger shaped like a hungry mouth, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of an open ledger shaped like a hungry mouth, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/necrology_note",
@@ -1039,7 +1039,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a folded note marked with a small skull glyph, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a folded note marked with a small skull glyph, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/necrology_thesis",
@@ -1051,7 +1051,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a folded note marked with a small skull glyph with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a folded note marked with a small skull glyph with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/necrology_monograph",
@@ -1063,7 +1063,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a folded note marked with a small skull glyph radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a folded note marked with a small skull glyph radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/necrology_codex",
@@ -1075,7 +1075,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a folded note marked with a small skull glyph, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a folded note marked with a small skull glyph, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/necrology_canon",
@@ -1087,7 +1087,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a folded note marked with a small skull glyph, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a folded note marked with a small skull glyph, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/rot_seed",
@@ -1099,7 +1099,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a blighted seed pod, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show exactly one small instance of a blighted seed pod, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/blightseed",
@@ -1111,7 +1111,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a blighted seed pod with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one larger instance of a blighted seed pod with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/blightroot",
@@ -1123,7 +1123,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a blighted seed pod radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show three instances of a blighted seed pod radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/blightvine",
@@ -1135,7 +1135,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a blighted seed pod, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a blighted seed pod, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/blightbloom",
@@ -1147,7 +1147,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a blighted seed pod, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show one colossal instance of a blighted seed pod, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/guard",
@@ -1159,7 +1159,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a round shield, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a round shield, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bulwark",
@@ -1171,7 +1171,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a round shield with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a round shield with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/rampart",
@@ -1183,7 +1183,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a round shield radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a round shield radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bastion",
@@ -1195,7 +1195,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a round shield, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a round shield, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/citadel",
@@ -1207,7 +1207,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a round shield, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a round shield, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/honours_sigil",
@@ -1219,7 +1219,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a sigil medallion, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a sigil medallion, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_sigil",
@@ -1231,7 +1231,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a sigil medallion with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a sigil medallion with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/magisterial_sigil",
@@ -1243,7 +1243,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a sigil medallion radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a sigil medallion radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/doctoral_sigil",
@@ -1255,7 +1255,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a sigil medallion, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a sigil medallion, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/grand_chancellor_sigil",
@@ -1267,7 +1267,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a sigil medallion, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a sigil medallion, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/rimeward",
@@ -1279,7 +1279,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a warding rune, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a warding rune, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/aegis_ward",
@@ -1291,7 +1291,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a warding rune with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a warding rune with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/sanctum_ward",
@@ -1303,7 +1303,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a warding rune radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a warding rune radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/bastion_ward",
@@ -1315,7 +1315,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a warding rune, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a warding rune, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/absolute_ward",
@@ -1327,7 +1327,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a warding rune, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a warding rune, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/study_break",
@@ -1339,7 +1339,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a steaming teacup, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a steaming teacup, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/restorative_study",
@@ -1351,7 +1351,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a steaming teacup with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a steaming teacup with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/restful_recess",
@@ -1363,7 +1363,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a steaming teacup radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a steaming teacup radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/sabbatical",
@@ -1375,7 +1375,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a steaming teacup, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a steaming teacup, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/tenure",
@@ -1387,7 +1387,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a steaming teacup, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a steaming teacup, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/warded_bracers",
@@ -1399,7 +1399,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a banded bracer, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show exactly one small instance of a banded bracer, modest and off-center, claiming a small part of the plate. A card illustration, stage 1 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/sigil_bracers",
@@ -1411,7 +1411,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a banded bracer with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one larger instance of a banded bracer with a second, smaller echo of the same shape beside it, together claiming more of the plate. A card illustration, stage 2 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/rune_bracers",
@@ -1423,7 +1423,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a banded bracer radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show three instances of a banded bracer radiating outward from the center, claiming roughly half the plate. A card illustration, stage 3 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/glyph_bracers",
@@ -1435,7 +1435,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a banded bracer, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a banded bracer, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/ward_gauntlets",
@@ -1447,7 +1447,7 @@
       "known": true,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a banded bracer, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line \u2014 read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show one colossal instance of a banded bracer, scaled up so it claims almost the entire plate, the largest and most dominant version of this shape in the set. A card illustration, stage 5 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "entities/novice",
@@ -1456,7 +1456,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a young examiner in a short, narrow robe, hands folded, an unremarkable first-year student proctor. The robe is one flat ink shape in a colour from the palette (#A3B0AC), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a young examiner in a short, narrow robe, hands folded, an unremarkable first-year student proctor. The robe is one flat ink shape in a colour from the palette (#A3B0AC), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/drillmaster",
@@ -1465,7 +1465,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a stern examiner in a stiff, close-fitted robe with squared shoulders, standing at rigid attention. The robe is one flat ink shape in a colour from the palette (#D45C3C), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a stern examiner in a stiff, close-fitted robe with squared shoulders, standing at rigid attention. The robe is one flat ink shape in a colour from the palette (#D45C3C), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/battle_chanter",
@@ -1474,7 +1474,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, an examiner in a swirling, wide-sleeved robe caught mid-gesture, one arm raised as if chanting. The robe is one flat ink shape in a colour from the palette (#6E7B3F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, an examiner in a swirling, wide-sleeved robe caught mid-gesture, one arm raised as if chanting. The robe is one flat ink shape in a colour from the palette (#6E7B3F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/hall_monitor",
@@ -1483,7 +1483,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a watchful examiner in a long, straight robe holding a small lantern shape at chest height. The robe is one flat ink shape in a colour from the palette (#498BAD), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a watchful examiner in a long, straight robe holding a small lantern shape at chest height. The robe is one flat ink shape in a colour from the palette (#498BAD), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/glass_tutor",
@@ -1492,7 +1492,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a slight examiner in an angular, faceted robe that reads like cut glass, perfectly symmetrical. The robe is one flat ink shape in a colour from the palette (#A3B0AC), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a slight examiner in an angular, faceted robe that reads like cut glass, perfectly symmetrical. The robe is one flat ink shape in a colour from the palette (#A3B0AC), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/alchemy_master",
@@ -1501,7 +1501,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a broad examiner in a heavy robe with a round vessel shape held in both hands at the waist. The robe is one flat ink shape in a colour from the palette (#6E7B3F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a broad examiner in a heavy robe with a round vessel shape held in both hands at the waist. The robe is one flat ink shape in a colour from the palette (#6E7B3F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/proctor",
@@ -1510,7 +1510,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a tall, imposing examiner in a floor-length ceremonial robe with a wide, rigid collar. The robe is one flat ink shape in a colour from the palette (#E0A51F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a tall, imposing examiner in a floor-length ceremonial robe with a wide, rigid collar. The robe is one flat ink shape in a colour from the palette (#E0A51F), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/rector",
@@ -1519,7 +1519,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, an elder examiner in an austere black robe with a single ornamental sigil disc at the chest. The robe is one flat ink shape in a colour from the palette (#000000), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, an elder examiner in an austere black robe with a single ornamental sigil disc at the chest. The robe is one flat ink shape in a colour from the palette (#000000), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "entities/vice_chancellor",
@@ -1528,7 +1528,7 @@
       "known": true,
       "size": "portrait",
       "n": 4,
-      "prompt": "A single standing figure, a commanding examiner in a voluminous formal robe with a tall, narrow ceremonial headpiece. The robe is one flat ink shape in a colour from the palette (#D45C3C), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading \u2014 the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
+      "prompt": "A single standing figure, a commanding examiner in a voluminous formal robe with a tall, narrow ceremonial headpiece. The robe is one flat ink shape in a colour from the palette (#D45C3C), the head a flat black (#000000) circle, on the warm cream ground (#F7EADD). Full-body portrait silhouette, no face, no hands detail, no folds or shading — the robe's outline alone carries the character. Reads clearly as a small figure at a distance."
     },
     {
       "id": "schools/cinder_sigil",
@@ -1608,7 +1608,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "A card-back pattern: a single small flat five-pointed star ink shape (#000000), centered inside a plain flat ink ring in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Perfectly symmetrical, no school colour, no text, no numerals, no lettering of any kind \u2014 reads identically face-down for every card."
+      "prompt": "A card-back pattern: a single small flat five-pointed star ink shape (#000000), centered inside a plain flat ink ring in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Perfectly symmetrical, no school colour, no text, no numerals, no lettering of any kind — reads identically face-down for every card."
     },
     {
       "id": "ornaments/paper_grain",
@@ -1616,7 +1616,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "An abstract riso-print grain plate: an even field of warm cream (#F7EADD) covered edge to edge in fine stippled halftone grain in pale slate (#A3B0AC) and grain grey (#999189), with a scatter of tiny stippled celestial glyphs \u2014 a circle, a crescent, a five-pointed star \u2014 barely visible in the grain. No shapes, no figures, no subject: pure printed-paper texture, tileable at the edges."
+      "prompt": "An abstract riso-print grain plate: an even field of warm cream (#F7EADD) covered edge to edge in fine stippled halftone grain in pale slate (#A3B0AC) and grain grey (#999189), with a scatter of tiny stippled celestial glyphs — a circle, a crescent, a five-pointed star — barely visible in the grain. No shapes, no figures, no subject: pure printed-paper texture, tileable at the edges."
     },
     {
       "id": "ornaments/tier_medallion_1",
@@ -1625,7 +1625,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A small round medallion: a flat ink ring (#498BAD) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 1 of 3. Geometric, symmetrical, no lettering, no numerals \u2014 reads clearly as a small badge."
+      "prompt": "A small round medallion: a flat ink ring (#498BAD) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 1 of 3. Geometric, symmetrical, no lettering, no numerals — reads clearly as a small badge."
     },
     {
       "id": "ornaments/tier_medallion_2",
@@ -1634,7 +1634,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A small round medallion: a flat ink ring (#E0A51F) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 2 of 3. Geometric, symmetrical, no lettering, no numerals \u2014 reads clearly as a small badge."
+      "prompt": "A small round medallion: a flat ink ring (#E0A51F) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 2 of 3. Geometric, symmetrical, no lettering, no numerals — reads clearly as a small badge."
     },
     {
       "id": "ornaments/tier_medallion_3",
@@ -1643,7 +1643,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A small round medallion: a flat ink ring (#D45C3C) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 3 of 3. Geometric, symmetrical, no lettering, no numerals \u2014 reads clearly as a small badge."
+      "prompt": "A small round medallion: a flat ink ring (#D45C3C) with a plain cream (#F7EADD) center, a single stippled celestial glyph at the middle sized for tier 3 of 3. Geometric, symmetrical, no lettering, no numerals — reads clearly as a small badge."
     }
   ]
 }
