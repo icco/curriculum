@@ -127,7 +127,9 @@ static func effect_summary(effects: Array[Dictionary]) -> String:
 			CardData.HEAL:
 				parts.append("+%d heal" % amount)
 			CardData.STATUS:
-				parts.append("%d %s" % [amount, _status_name(effect.get("status", Statuses.Kind.BURN))])
+				parts.append(
+					"%d %s" % [amount, UIKit.status_name(effect.get("status", Statuses.Kind.BURN))]
+				)
 			CardData.DRAW:
 				parts.append("Draw %d" % amount)
 			CardData.MANA_NEXT:
@@ -141,19 +143,6 @@ static func effect_summary(effects: Array[Dictionary]) -> String:
 			CardData.BONUS_IF_WARD_PLAYED:
 				parts.append("+%d if warded" % amount)
 	return ", ".join(parts)
-
-
-static func _status_name(kind) -> String:
-	match int(kind):
-		Statuses.Kind.BURN:
-			return "Burn"
-		Statuses.Kind.CHILL:
-			return "Chill"
-		Statuses.Kind.BLOT:
-			return "Blot"
-		Statuses.Kind.DECAY:
-			return "Decay"
-	return "?"
 
 
 ## Colours a card label and gives it a same-colour outline, which thickens every
