@@ -1,3 +1,20 @@
+## Known cross-branch conflict: two cards held back
+
+`tests/test_card_school_colour.gd` (owned by another branch, not this one) samples
+the exact painted pixel of `cards/spark` and `cards/frost_lance` and asserts it
+equals `ArtFactory.card_face()`'s procedural output -- true only while those two
+cards have no real sprite. Real art for either breaks that test.
+
+Every other card the test touches (`Ink Blot`, `Guard`) only checks label text
+colour, not the illustration, so real art for those is fine -- verified by
+generating both and running `./tools/check.sh`.
+
+Until that test is updated (it hardcodes two arbitrary probe cards; any other pair
+would do), `cards/spark` and `cards/frost_lance` are generated -- variants exist
+under `assets/source/cards/{spark,frost_lance}/` -- but deliberately not `--accept`ed,
+so `assets/sprites/` has no file for them and they keep rendering procedurally.
+Accepting is one command once the conflict is resolved.
+
 # Art direction
 
 Mid-century modern screenprint, in the lineage of Alexander Girard and Charley

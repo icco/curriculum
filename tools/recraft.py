@@ -159,7 +159,7 @@ def call_recraft(prompt: str, model: str, size: str, n: int, response_format: st
 
 def download(url: str) -> bytes:
     # The CDN rejects urllib's default User-Agent with a 403.
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (curriculum-art-pipeline)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "curriculum-assets"})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read()
 

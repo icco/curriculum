@@ -19,6 +19,15 @@ const MANIFEST_PATH := "res://assets/prompts/manifest.json"
 const SOURCE_DIR := "res://assets/source"
 const SPRITE_DIR := "res://assets/sprites"
 
+# CardView's TextureRect has no aspect-preserving stretch mode (BattleScreen's
+# figure one does), so a sprite whose aspect doesn't already match CARD_SIZE (2:3)
+# gets non-uniformly stretched -- circles become ellipses. Recraft has no 2:3
+# size option (see assets/prompts/manifest.json's "sizes" comment), so card art is
+# generated square and padded here with cream margin top and bottom to exactly 2:3
+# before it ever reaches CardView. The padding also reads as the intended "printed
+# plate" margin from the art direction, not just a technical workaround.
+const CARD_ASPECT := 1.5  # height / width, matching CardView.CARD_SIZE's 200x300
+
 
 func _load_image_bytes(bytes: PackedByteArray, ext: String) -> Image:
 	var image := Image.new()
@@ -54,6 +63,28 @@ func _sniff_ext(bytes: PackedByteArray) -> String:
 	return ""
 
 
+## Pads a square card illustration to CARD_ASPECT with solid cream margin, top and
+## bottom, so it matches CardView.CARD_SIZE's aspect exactly and its untouched,
+## default-stretch TextureRect can't distort it.
+func _pad_to_card_aspect(image: Image) -> Image:
+	var w := image.get_width()
+	var target_h := int(round(float(w) * CARD_ASPECT))
+	if target_h <= image.get_height():
+		return image
+	# blit_rect requires the two images to share a format -- Recraft's output
+	# decodes as RGB8 (no alpha), not this canvas's RGBA8, without this.
+	image.convert(Image.FORMAT_RGBA8)
+	var padded := Image.create(w, target_h, false, Image.FORMAT_RGBA8)
+	# Recraft's own cream drifts a few values off the nominal #F7EADD (warmer,
+	# slightly pinker) -- padding with the literal hex left a visible seam where
+	# the margin met the generated ground. Sampling the corner instead always
+	# matches whatever cream this particular image actually came back with.
+	padded.fill(image.get_pixel(2, 2))
+	var y_offset := (target_h - image.get_height()) / 2
+	padded.blit_rect(image, Rect2i(Vector2i.ZERO, image.get_size()), Vector2i(0, y_offset))
+	return padded
+
+
 func _find_accepted(subject_id: String) -> String:
 	var dir_path := "%s/%s" % [SOURCE_DIR, subject_id]
 	var dir := DirAccess.open(dir_path)
@@ -62,7 +93,10 @@ func _find_accepted(subject_id: String) -> String:
 	dir.list_dir_begin()
 	var name := dir.get_next()
 	while name != "":
-		if name.begins_with("accepted."):
+		# assets/source lives inside the project, so Godot's own importer leaves an
+		# accepted.png.import sidecar right next to accepted.png; without excluding
+		# it, "begins_with" also matches that sidecar as if it were image data.
+		if name.begins_with("accepted.") and not name.ends_with(".import"):
 			return "%s/%s" % [dir_path, name]
 		name = dir.get_next()
 	return ""
@@ -105,6 +139,9 @@ func _process(_delta: float) -> bool:
 		if image == null:
 			failed.append("%s: failed to decode %s" % [subject_id, accepted_path])
 			continue
+
+		if subject.get("category") == "card":
+			image = _pad_to_card_aspect(image)
 
 		var sprite_path := "%s/%s.png" % [SPRITE_DIR, subject_id]
 		var sprite_dir := sprite_path.get_base_dir()

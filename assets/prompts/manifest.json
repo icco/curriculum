@@ -1,11 +1,11 @@
 {
   "_comment": "Single source of truth for every generated illustration prompt. tools/recraft.py reads this file; no prompt text exists anywhere else. See assets/prompts/README.md for how to run the pipeline and assets/prompts/recraft.md for the art-direction rationale behind `style`.",
-  "model": "recraftv4",
+  "model": "recraftv4_1",
   "response_format": "url",
   "style": "Mid-century modern screenprint illustration in the lineage of Alexander Girard and Charley Harper. Completely flat shapes with no outlines, no shading, no gradients, and no rendering -- form is carried entirely by silhouette. Visible risograph halftone grain sits inside each flat ink shape and along its edges. The composition sits on a large organic field shape rather than bleeding to the edges, leaving a warm cream margin like a printed plate. Small stippled celestial glyphs -- a circle, a crescent, and a five-pointed star -- float as fine grain texture against the flat ink shapes. Clean and minimal: three or four large shapes at most, no fine detail, no invented alphabet or constructed script, no readable or pseudo-readable lettering of any kind.",
   "sizes": {
-    "card": "1024x1536",
-    "portrait": "1024x1536",
+    "card": "1024x1024",
+    "portrait": "768x1536",
     "square": "1024x1024"
   },
   "subjects": [
