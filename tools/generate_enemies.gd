@@ -28,12 +28,12 @@ func roster() -> Array:
 			["rot_seed", "necrology_note", "rot_seed", "bitter_recall", "guard"]],
 		["Battle Chanter", 44, 2, FROST, CINDER, "battle_chanter", false,
 			["cinder_burst", "spark", "scorch_notes", "kindle", "guard"]],
-		["Proctor", 60, 3, CINDER, WARD, "proctor", true,
-			["bulwark", "aegis_ward", "rime_lance", "still_the_hall", "restorative_study"]],
-		["Vice-Chancellor", 80, 3, FROST, INK, "vice_chancellor", true,
-			["spilled_ledger", "blightseed", "necrology_thesis", "cite_chapter_and_verse", "bulwark"]],
-		["Rector", 120, 3, ROT, WARD, "rector", false,
-			["valedictory_blaze", "long_winter", "defended_thesis", "bitter_mastery",
+		["Proctor", 22, 3, CINDER, WARD, "proctor", true,
+			["bulwark", "rime_lance", "rime_lance", "glass_shard", "mirror_shard"]],
+		["Vice-Chancellor", 45, 3, FROST, INK, "vice_chancellor", true,
+			["spilled_ledger", "blightseed", "immolate_notes", "cite_chapter_and_verse", "bulwark"]],
+		["Rector", 55, 3, ROT, WARD, "rector", false,
+			["valedictory_blaze", "long_winter", "defended_thesis", "spark",
 			 "valedictory_sigil", "immolate_notes"]],
 	]
 

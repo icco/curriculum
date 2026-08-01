@@ -20,11 +20,11 @@ func _card(name: String, school, cost: int, effects: Array) -> CardData:
 	return d
 
 
-func _enemy(hp: int, weak, warded, deck: Array) -> EnemyData:
+func _enemy(hp: int, weak, warded, deck: Array, mana: int = 2) -> EnemyData:
 	var e := EnemyData.new()
 	e.enemy_name = "Dummy"
 	e.max_hp = hp
-	e.mana_per_turn = 2
+	e.mana_per_turn = mana
 	var typed: Array[CardData] = []
 	for c in deck:
 		typed.append(c)
@@ -176,7 +176,6 @@ func run() -> void:
 	var turn := _battle([strike, strike, strike, strike, strike, strike, strike], _enemy(100, S.ROT, S.FROST, [_card("Jab", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 4}])]))
 	turn.start()
 	eq(turn.turns, 1, "first turn")
-	check(turn.examiner_intent != null, "intent telegraphed before the player acts")
 	turn.end_turn()
 	eq(turn.player.hp, 56, "examiner hit for four")
 	eq(turn.turns, 2, "second turn")
@@ -252,14 +251,42 @@ func run() -> void:
 	eq(chill_guard.player.statuses.amount(Statuses.Kind.CHILL), 1, "Chill is untouched by a card with no damage effect")
 
 	# The examiner plays the highest-cost card it can AFFORD with its
-	# mana_per_turn (2 here), not the highest-cost card in its deck.
+	# mana_per_turn (2 here), not the highest-cost card in its deck. There is no
+	# telegraph any more: this is only observable once the examiner's turn
+	# actually resolves.
 	var nip := _card("Nip", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 1}])
 	var bite := _card("Bite", S.CINDER, 2, [{"kind": CardData.DAMAGE, "amount": 2}])
 	var devour := _card("Devour", S.CINDER, 3, [{"kind": CardData.DAMAGE, "amount": 3}])
 	var pricing := _battle([strike], _enemy(100, S.ROT, S.FROST, [nip, bite, devour]))
 	pricing.start()
-	check(pricing.examiner_intent != null, "examiner has an intent")
-	eq(pricing.examiner_intent.data.cost, 2, "picked the highest AFFORDABLE card, not the priciest one")
+	var pricing_events := pricing.end_turn()
+	eq(pricing.player.hp, 58, "picked the highest AFFORDABLE card (Bite, 2 mana), not the priciest (Devour, 3 mana)")
+	var cast_bite := false
+	for e in pricing_events:
+		if e.get("by", "") == "examiner" and e.get("card") != null and e["card"].data.card_name == "Bite":
+			cast_bite = true
+	eq(cast_bite, true, "confirmed by the card_played event: the examiner actually cast Bite")
+
+	# NEW pinned economy test: an examiner with 3 mana and three 1-cost cards
+	# must play ALL THREE in the same turn, not stop after one. Distinct damage
+	# values make the total unambiguous — it cannot be hit by playing the same
+	# card three times, and it proves the full mana was spent.
+	var jab_one := _card("Jab One", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 1}])
+	var jab_two := _card("Jab Two", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 2}])
+	var jab_three := _card("Jab Three", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 4}])
+	var economy := _battle([strike], _enemy(100, S.ROT, S.FROST, [jab_one, jab_two, jab_three], 3))
+	economy.start()
+	var economy_events := economy.end_turn()
+	eq(
+		economy.player.hp,
+		53,
+		"3 mana and three 1-cost cards: the examiner played all three (1+2+4=7 damage), not just one"
+	)
+	var cast_names := {}
+	for e in economy_events:
+		if e.get("by", "") == "examiner" and e.get("card") != null:
+			cast_names[e["card"].data.card_name] = true
+	eq(cast_names.size(), 3, "all three distinct cards were cast in the one turn, not the same one repeatedly")
 
 	# Player Decay ticks at the END of the player's own turn, BEFORE the examiner
 	# gets to act at all. If Decay kills the player right there, the examiner's
@@ -278,9 +305,9 @@ func run() -> void:
 			examiner_acted = true
 	eq(examiner_acted, false, "the examiner's turn did not run after the player's decay ended the battle")
 
-	# Examiner Burn ticks at the START of the examiner's turn, BEFORE its
-	# telegraphed intent resolves. If Burn alone is lethal, the intent must never
-	# be played — the player must take no damage from it.
+	# Examiner Burn ticks at the START of the examiner's turn, BEFORE it gets a
+	# chance to play anything. If Burn alone is lethal, it must never get to
+	# cast — the player must take no damage from it.
 	var scorch := _card("Scorch", S.CINDER, 1, [{"kind": CardData.STATUS, "status": Statuses.Kind.BURN, "amount": 5}])
 	var massive := _card("Massive", S.CINDER, 1, [{"kind": CardData.DAMAGE, "amount": 50}])
 	var burn_kill := _battle([scorch, strike, strike, strike, strike], _enemy(2, S.ROT, S.FROST, [massive]))
@@ -289,15 +316,15 @@ func run() -> void:
 	var burn_kill_events := burn_kill.end_turn()
 	eq(burn_kill.finished, true, "burn alone killed the examiner")
 	eq(burn_kill.player_won, true, "burn kill counts as a win")
-	eq(burn_kill.player.hp, 60, "the examiner's lethal-avoided intent never got to resolve")
+	eq(burn_kill.player.hp, 60, "the examiner never got to cast anything")
 	var examiner_played := false
 	for e in burn_kill_events:
 		if e.get("by", "") == "examiner":
 			examiner_played = true
-	eq(examiner_played, false, "burn resolved before the intent could be played")
+	eq(examiner_played, false, "burn killed the examiner before it could play anything")
 
-	# CRITICAL: simultaneous death must be scored as a loss, not a win. The
-	# examiner's own intent can carry a self-cost (a Rot-flavoured spell) that
+	# CRITICAL: simultaneous death must be scored as a loss, not a win. A card
+	# the examiner plays can carry a self-cost (a Rot-flavoured spell) that
 	# kills the examiner in the very same effects pass that its damage effect
 	# kills the player. _check_end must ask "is the player down?" before "is
 	# the examiner down?", or a dead player gets credited with passing.
@@ -360,13 +387,17 @@ func run() -> void:
 	stuck.examiner_deck.hand = forced_hand
 	stuck.examiner_deck.draw_pile = forced_draw
 	stuck.start()
-	check(stuck.examiner_intent != null, "the examiner found something to play instead of hesitating forever")
-	if stuck.examiner_intent != null:
-		eq(
-			stuck.examiner_intent.data.card_name,
-			"Cheap Hit",
-			"cycled the unaffordable hand to find the one card it could afford"
-		)
+	var stuck_events := stuck.end_turn()
+	eq(
+		stuck.player.hp,
+		55,
+		"cycled the unaffordable hand, found Cheap Hit, and cast it instead of hesitating forever"
+	)
+	var cast_cheap_hit := false
+	for e in stuck_events:
+		if e.get("by", "") == "examiner" and e.get("card") != null and e["card"].data.card_name == "Cheap Hit":
+			cast_cheap_hit = true
+	eq(cast_cheap_hit, true, "confirmed by the card_played event: Cheap Hit was actually cast")
 
 	# The UI needs read access to the enemy's art id and data without reaching
 	# into a private field.
