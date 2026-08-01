@@ -262,8 +262,17 @@ func _test_mouse_filters() -> void:
 	eq(registration.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the screen itself ignores the mouse")
 	for box in registration.find_children("*", "VBoxContainer", true, false):
 		eq(box.mouse_filter, Control.MOUSE_FILTER_IGNORE, "layout containers ignore the mouse")
+	for margin in registration.find_children("*", "MarginContainer", true, false):
+		eq(margin.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the outer margin ignores the mouse")
 	for grid in registration.find_children("*", "GridContainer", true, false):
 		eq(grid.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the card grid ignores the mouse")
+	# The "NEW" ownership badge sits on top of an offered card's tap target as a child
+	# Control, not beside it -- if it (or its label) ever took the mouse, it would
+	# silently eat the tap instead of letting it fall through to the button beneath.
+	for badge in registration.find_children("*", "PanelContainer", true, false):
+		eq(badge.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the NEW badge ignores the mouse")
+	for label in registration.find_children("*", "Label", true, false):
+		eq(label.mouse_filter, Control.MOUSE_FILTER_IGNORE, "labels never eat taps")
 	for button in registration.find_children("*", "Button", true, false):
 		eq(button.mouse_filter, Control.MOUSE_FILTER_STOP, "buttons take taps")
 		check(button.custom_minimum_size.y >= UIKit.TAP_MIN, "buttons are thumb-sized")
