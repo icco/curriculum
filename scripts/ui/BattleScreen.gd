@@ -125,8 +125,11 @@ func _build() -> void:
 
 	# --- Hand: anchored at the very bottom, above the End Turn button. ---
 	hand_fan = HandFan.new()
-	hand_fan.custom_minimum_size = Vector2(1080, 330)
-	hand_fan.size = Vector2(1080, 330)
+	# Height only: a hard 1080 minimum width would refuse to shrink into the screen's
+	# edge gutter, so the fan alone would hang past the margin every other section
+	# respects. It fills whatever width the gutter leaves and re-fans itself on resize.
+	hand_fan.custom_minimum_size = Vector2(0, 330)
+	hand_fan.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hand_fan.card_play_requested.connect(_on_card_played)
 	root.add_child(hand_fan)
 

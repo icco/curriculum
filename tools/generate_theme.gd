@@ -7,6 +7,10 @@ extends SceneTree
 
 const OUT := "res://resources/ui_theme.tres"
 const MIN_TAP := 96  # 48dp at a 2x portrait scale
+## Default gap between stacked/adjacent children. Godot's own default is 4, which packs
+## rows tight enough that a list reads as one dense block; the paper look wants air
+## between things. A screen that has tuned its own spacing overrides this locally.
+const SEPARATION := 16
 
 
 func _flat(colour: Color, border: Color, width := 2) -> StyleBoxFlat:
@@ -30,6 +34,10 @@ func _process(_delta: float) -> bool:
 	theme.set_color("font_color", "Button", ArtLibrary.INK)
 	theme.set_color("font_disabled_color", "Button", ArtLibrary.GRAIN_B)
 	theme.set_constant("h_separation", "Button", 12)
+	# Set on both concrete classes rather than on BoxContainer, so the value is visible
+	# in the saved .tres under the type a screen actually instantiates.
+	theme.set_constant("separation", "VBoxContainer", SEPARATION)
+	theme.set_constant("separation", "HBoxContainer", SEPARATION)
 	theme.set_color("font_color", "Label", ArtLibrary.INK)
 	theme.set_stylebox("panel", "PanelContainer", _flat(ArtLibrary.PAPER, ArtLibrary.INK))
 	theme.set_stylebox("background", "ProgressBar", _flat(ArtLibrary.SLATE, ArtLibrary.INK, 2))

@@ -5,6 +5,13 @@ extends RefCounted
 ## the mouse-filter rule is applied.
 
 const TAP_MIN := 96.0  # 48dp at portrait 2x
+## The gutter every screen keeps between its content and the edge of the display, so
+## nothing reads as pressed up against the bezel. 24dp at portrait 2x, following the dp
+## convention TAP_MIN uses -- wider than a standard 16dp gutter, because the paper look
+## wants the content to sit lightly on the page rather than fill it. Applied once, by
+## Main, to whatever screen is up: a screen never sets its own edge margin, or they
+## drift apart from one another.
+const SCREEN_MARGIN := 48
 
 
 static func label(text: String, size := 32) -> Label:
@@ -27,6 +34,19 @@ static func button(text: String) -> Button:
 static func transparent(container: Control) -> Control:
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return container
+
+
+## The screen-edge gutter, as a container to put a screen inside. Full-rect so it
+## fills the viewport, and transparent so it cannot swallow a tap on its way down.
+static func screen_margin() -> MarginContainer:
+	var node := MarginContainer.new()
+	node.set_anchors_preset(Control.PRESET_FULL_RECT)
+	node.add_theme_constant_override("margin_left", SCREEN_MARGIN)
+	node.add_theme_constant_override("margin_right", SCREEN_MARGIN)
+	node.add_theme_constant_override("margin_top", SCREEN_MARGIN)
+	node.add_theme_constant_override("margin_bottom", SCREEN_MARGIN)
+	transparent(node)
+	return node
 
 
 static func spacer() -> Control:
