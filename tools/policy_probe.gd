@@ -10,6 +10,17 @@ extends SceneTree
 var _policy := "greedy"
 
 
+## Any card that spends itself on staying alive: Block, healing, or retain. Not a
+## school test -- see the nodefence policy.
+func _is_defensive(data: CardData) -> bool:
+	if data.retain:
+		return true
+	for effect in data.effects:
+		if effect.get("kind", "") in [CardData.BLOCK, CardData.HEAL, CardData.BONUS_IF_WARD_PLAYED]:
+			return true
+	return false
+
+
 ## Returns true if it played something.
 func _take_actions(battle: Battle) -> bool:
 	var played := false
@@ -29,20 +40,24 @@ func _take_actions(battle: Battle) -> bool:
 					battle.play_card(card)
 					played = true
 					break
-		"noward":
-			# Deliberately bad: never defend or heal; all-in on offence.
+		"nodefence":
+			# Deliberately bad: all-in on offence, never spending a card on staying
+			# alive. Filtered on what the card DOES, not on its school: Block is not
+			# exclusive to Ward (the Numb the Hall line is Frost and grants 6-10
+			# Block), so filtering on Schools.School.WARD would measure "never plays a
+			# Ward card" while quietly leaving the policy still defending.
 			for card in battle.player_deck.hand.duplicate():
-				if card.data.school == Schools.School.WARD:
+				if _is_defensive(card.data):
 					continue
 				if battle.can_play(card):
 					battle.play_card(card)
 					played = true
 					if battle.finished:
 						break
-		"onlyward":
+		"onlydefence":
 			# Deliberately bad: turtle forever.
 			for card in battle.player_deck.hand.duplicate():
-				if card.data.school != Schools.School.WARD:
+				if not _is_defensive(card.data):
 					continue
 				if battle.can_play(card):
 					battle.play_card(card)
@@ -73,7 +88,7 @@ func run_policy(count: int) -> Dictionary:
 			if open.is_empty():
 				break
 			var course = open[0]
-			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng)
+			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng, game.hp)
 			battle.start()
 			var turn_guard := 0
 			while not battle.finished and turn_guard < 200:
@@ -92,7 +107,7 @@ func run_policy(count: int) -> Dictionary:
 					"turns_taken": battle.turns,
 					"par_turns": course.par_turns,
 					"hp_end": battle.player.hp,
-					"hp_start": Run.STARTING_HP,
+					"hp_start": battle.player_starting_hp,
 					"xp_banked": battle.xp_banked,
 					"xp_par": course.xp_par,
 					"weakness_known": game.bestiary.knows_weakness(course.examiner.enemy_name),
@@ -147,7 +162,7 @@ func _process(_delta: float) -> bool:
 	if args.size() > 0 and args[0].is_valid_int():
 		count = args[0].to_int()
 
-	for policy in ["greedy", "onecard", "noward", "onlyward"]:
+	for policy in ["greedy", "onecard", "nodefence", "onlydefence"]:
 		_policy = policy
 		var r := run_policy(count)
 		print(

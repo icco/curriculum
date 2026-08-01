@@ -36,7 +36,7 @@ failed assertions — Godot will happily exit 0 while printing `SCRIPT ERROR` ev
 frame, so the exit code alone proves nothing.
 
 ```sh
-./tools/check.sh                      # 24 suites, ~3400 checks
+./tools/check.sh                      # 25 suites, ~3450 checks
 ```
 
 The suite is a small hand-rolled harness (`tests/TestCase.gd`, `tests/run_tests.gd`)

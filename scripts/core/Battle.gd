@@ -24,6 +24,10 @@ var turns := 0
 var xp_banked := 0
 var finished := false
 var player_won := false
+## What the player walked in on. The Survival term must be scored against THIS, not
+## against max_hp: once hit points carry between battles, grading a battle against
+## the maximum would let damage taken three courses ago cap every later grade.
+var player_starting_hp := 0
 
 ## Untyped: Bestiary and Battle referring to each other by type would be cyclic.
 var _bestiary
@@ -33,12 +37,23 @@ var _mana_bonus_next := 0
 var _ward_played_this_turn := false
 
 
+## `starting_hp` is what the run has left; 0 means "walk in at full", which is what a
+## caller with no run behind it (most tests) wants. Hit points are a RUN resource, not
+## a per-battle buffer that refills — Run.hp is written by record_result and
+## round-tripped by SaveGame, and reading it back here is what makes it mean anything.
 func _init(
-	player_cards: Array, enemy: EnemyData, bestiary, rng: RandomNumberGenerator = null
+	player_cards: Array,
+	enemy: EnemyData,
+	bestiary,
+	rng: RandomNumberGenerator = null,
+	starting_hp: int = 0
 ) -> void:
 	_enemy_data = enemy
 	_bestiary = bestiary
-	player = Combatant.new("Student", 60, 3)
+	player = Combatant.new("Student", Run.STARTING_HP, 3)
+	if starting_hp > 0:
+		player.hp = mini(starting_hp, player.max_hp)
+	player_starting_hp = player.hp
 	examiner = enemy.to_combatant()
 	player_deck = Deck.new(player_cards, rng)
 	var examiner_instances := []
