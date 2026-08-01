@@ -9,6 +9,9 @@ extends SceneTree
 
 var _policy := "greedy"
 
+## The hp at or below which the throwlow policy stops fighting and takes the F.
+const _THROW_BELOW := 25
+
 
 ## Any card that spends itself on staying alive: Block, healing, or retain. Not a
 ## school test -- see the nodefence policy.
@@ -54,6 +57,19 @@ func _take_actions(battle: Battle) -> bool:
 					played = true
 					if battle.finished:
 						break
+		"throwlow":
+			# Is deliberately failing an exam a free full heal? A pass restores a
+			# fraction of max scaled by grade, but an F restores ALL of it (spec 6.1)
+			# and the first of two strikes is survivable -- so at low hp, throwing a
+			# fight may beat winning it. If this policy outscores greedy, that
+			# exploit is real rather than theoretical.
+			if battle.player.hp > _THROW_BELOW or battle.player_starting_hp > _THROW_BELOW:
+				for card in battle.player_deck.hand.duplicate():
+					if battle.can_play(card):
+						battle.play_card(card)
+						played = true
+						if battle.finished:
+							break
 		"onlydefence":
 			# Deliberately bad: turtle forever.
 			for card in battle.player_deck.hand.duplicate():
@@ -162,7 +178,7 @@ func _process(_delta: float) -> bool:
 	if args.size() > 0 and args[0].is_valid_int():
 		count = args[0].to_int()
 
-	for policy in ["greedy", "onecard", "nodefence", "onlydefence"]:
+	for policy in ["greedy", "onecard", "nodefence", "onlydefence", "throwlow"]:
 		_policy = policy
 		var r := run_policy(count)
 		print(

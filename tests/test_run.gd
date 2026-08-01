@@ -33,7 +33,9 @@ func run() -> void:
 	eq(r.grades["Basic Arcana 101"], Grading.Grade.B, "grade recorded")
 	eq(r.courses_passed, 1, "one course passed")
 	eq(r.deck_cap(), 11, "cap grew")
-	eq(r.hp, 45, "hp carried over from the battle")
+	# 45 survived, plus the 20% of max that a B restores. Passing is the only recovery
+	# in the game, and it scales with the grade earned.
+	eq(r.hp, 57, "hp carried over from the battle, plus the B's recovery")
 	eq(r.strikes, 0, "a pass is not a strike")
 	# Passing a non-final course must not win the run — only is_final does that. An
 	# implementation that sets `won` on any pass would pass every other assertion here
@@ -82,12 +84,14 @@ func run() -> void:
 	eq(long_run.deck_cap(), 16, "cap saturates")
 
 	# A win must never leave the player at 0 hit points: a photo-finish victory
-	# (hp_end == 0) still floors to 1, since 0 hp is reserved for meaning "you failed
-	# the exam", never "you won." Plain assignment (hp = hp_end) would leave hp at 0
-	# here and pass every other assertion in this file identically.
+	# (hp_end == 0) still floors to 1 BEFORE the grade's recovery is added, since 0 hp
+	# is reserved for meaning "you failed the exam", never "you won." Plain assignment
+	# (hp = hp_end) would leave hp at 0 here and pass every other assertion in this
+	# file identically. A B restores 20% of 60, so 1 + 12.
 	var floor_run := Run.new(_deck(10))
 	floor_run.record_result(_course("Basic Arcana 101"), Grading.Grade.B, 0)
-	eq(floor_run.hp, 1, "a win floors hp to at least one")
+	eq(floor_run.hp, 13, "a photo-finish win floors to 1, then the grade heals on top")
+	check(floor_run.hp >= 1, "a win never leaves the player at zero")
 
 	# hp_end can exceed max_hp is not something Battle should ever report, but the
 	# clamp guards both directions, so the ceiling needs its own case: maxi(hp_end, 1)
@@ -95,6 +99,22 @@ func run() -> void:
 	var ceiling_run := Run.new(_deck(10))
 	ceiling_run.record_result(_course("Basic Arcana 101"), Grading.Grade.B, 999)
 	eq(ceiling_run.hp, ceiling_run.max_hp, "a win clamps hp to at most max_hp")
+
+	# Recovery scales with the grade, and it is the only healing between courses.
+	# Checked across every grade because a table lookup that silently defaulted to
+	# zero would still pass a single-grade case.
+	for row in [[Grading.Grade.S, 24], [Grading.Grade.A, 18], [Grading.Grade.B, 12],
+			[Grading.Grade.C, 6]]:
+		var heal_run := Run.new(_deck(10))
+		var out: Dictionary = heal_run.record_result(_course("Recovery"), row[0], 20)
+		eq(heal_run.hp, 20 + int(row[1]),
+			"a %s restores %d of 60" % [Grading.letter(row[0]), int(row[1])])
+		eq(int(out["healed"]), int(row[1]), "the result reports what it healed")
+
+	# Recovery cannot push past the maximum, and it never exceeds it silently.
+	var topped := Run.new(_deck(10))
+	topped.record_result(_course("Recovery"), Grading.Grade.S, 55)
+	eq(topped.hp, topped.max_hp, "recovery clamps at max_hp")
 
 	# The bestiary belongs to the run and survives between battles: a fact learned
 	# before one record_result call is still known after a later one, rather than

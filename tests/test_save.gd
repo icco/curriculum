@@ -60,7 +60,8 @@ func run() -> void:
 	if back == null:
 		return
 
-	eq(back.hp, 42, "hp restored")
+	# 42 survived plus the A's recovery, 30% of this run's non-default 75 max.
+	eq(back.hp, 65, "hp restored")
 	eq(back.max_hp, 75, "max_hp restored at a non-default value")
 	eq(back.strikes, 1, "strikes restored at a non-default value")
 	eq(back.courses_passed, 1, "courses_passed restored at a non-default value")
