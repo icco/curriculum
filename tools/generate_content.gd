@@ -30,11 +30,16 @@ const XP_THRESHOLDS := [5, 9, 15, 24, 5]
 
 ## Levels 3-5 don't get hand-authored stat lines. Each is the previous level's
 ## amount plus a shrinking share (80%, 60%, 40%) of the raw level1->level2 delta,
-## cumulative. Repeating the level1->level2 delta outright would let a card that
-## merely doubled once (Spark's damage, say) double three further times by level
-## 5 and trivialise the back half of the game; tapering keeps every line
-## climbing without exploding. See five-levels-report.md for the worked numbers.
+## cumulative — repeating that delta outright would let a card that merely
+## doubled once double three further times by level 5. See scale_line_effects().
 const GROWTH_MULT := [0.8, 0.6, 0.4]
+
+## A maxed deck's whole turn (3 mana) should land in the neighbourhood of
+## 45-50 direct damage, or a properly-statted boss dies in one turn instead of
+## surviving a fight. This is the per-CARD half of that budget: nothing may
+## deal more than this from repeated copies of itself alone in one turn. See
+## turn_ceiling() and enforce_turn_cap().
+const TURN_DAMAGE_CAP := 50
 
 
 static func dmg(n: int) -> Dictionary:
@@ -207,13 +212,13 @@ static func scale_line_effects(level1: Array, level2: Array) -> Array:
 			var level1_amount := lookup_amount(level1, key)
 			cur[key] = level2_amount
 			var d: int = level2_amount - level1_amount
-			# Self-damage is the card's drawback, not its payoff. Bitter Recall's
-			# self-damage falls 3 -> 2 from level1 to level2; tapering that drop
-			# toward zero would hand back the drawback entirely by level 5 just as
-			# the damage climbs highest — the one outlier the growth rule must not
-			# produce. Hold it flat at the level2 value instead.
-			if kind_of[key] == CardData.SELF_DAMAGE:
-				d = 0
+			# Self-damage is the drawback, not the payoff, so a shrinking delta
+			# (Bitter Recall's pay 3 -> 2) is backwards: it would keep shrinking
+			# right as the payoff peaks, making the card strictly better in every
+			# dimension by level 5. Flip the sign so the risk grows alongside the
+			# reward instead; a delta that's already growing (or flat) is left as-is.
+			if kind_of[key] == CardData.SELF_DAMAGE and d < 0:
+				d = -d
 			delta[key] = d
 		else:
 			has_amount[key] = false
@@ -245,6 +250,71 @@ static func scale_line_effects(level1: Array, level2: Array) -> Array:
 			effects.append(built)
 		levels.append(effects)
 	return levels
+
+
+## How many times one copy of a card can be cast in a single 3-mana turn.
+static func casts_per_turn(cost: int, exhaust: bool) -> int:
+	if exhaust or cost <= 0:
+		return 1
+	return maxi(1, int(floor(3.0 / cost)))
+
+
+## Direct, same-turn damage only (DAMAGE, and BONUS_IF_CHILLED since it lands
+## in the same hit). Burn and Decay are excluded: they pay out over several
+## turns, which is a different balance question from a single turn's burst.
+static func direct_damage_total(effects: Array) -> int:
+	var total := 0
+	for e in effects:
+		var kind: String = e.get("kind", "")
+		if kind == CardData.DAMAGE or kind == CardData.BONUS_IF_CHILLED:
+			total += int(e.get("amount", 0))
+	return total
+
+
+static func turn_ceiling(effects: Array, cost: int, exhaust: bool) -> int:
+	return direct_damage_total(effects) * casts_per_turn(cost, exhaust)
+
+
+## Blunt safety net for every level of every line: trims the single largest
+## direct-damage effect until turn_ceiling() fits TURN_DAMAGE_CAP. Not a
+## substitute for picking the right cost/exhaust on a line that's breaching by
+## a lot (see the Bitter Recall override in _process()) — this only catches
+## the case where an otherwise-fine line's growth overshoots by a little.
+static func enforce_turn_cap(effects: Array, cost: int, exhaust: bool) -> Array:
+	var casts := casts_per_turn(cost, exhaust)
+	var ceiling := turn_ceiling(effects, cost, exhaust)
+	if ceiling <= TURN_DAMAGE_CAP:
+		return effects
+	var best_idx := -1
+	var best_amt := -1
+	for i in effects.size():
+		var e = effects[i]
+		var kind: String = e.get("kind", "")
+		if kind == CardData.DAMAGE or kind == CardData.BONUS_IF_CHILLED:
+			var amt := int(e.get("amount", 0))
+			if amt > best_amt:
+				best_amt = amt
+				best_idx = i
+	if best_idx == -1:
+		return effects
+	var reduction := int(ceil(float(ceiling - TURN_DAMAGE_CAP) / casts))
+	var out := effects.duplicate(true)
+	var trimmed: Dictionary = out[best_idx].duplicate()
+	trimmed["amount"] = maxi(1, best_amt - reduction)
+	out[best_idx] = trimmed
+	return out
+
+
+static func _with_self_damage(effects: Array, amount: int) -> Array:
+	var out: Array = []
+	for e in effects:
+		if e.get("kind", "") == CardData.SELF_DAMAGE:
+			var ne: Dictionary = e.duplicate()
+			ne["amount"] = amount
+			out.append(ne)
+		else:
+			out.append(e)
+	return out
 
 
 func make_card(
@@ -306,6 +376,22 @@ func _process(_delta: float) -> bool:
 		# cheaper from level1 to level2 (Marginalia 1 -> 0, Cram 2 -> 1, Thesis
 		# Statement 3 -> 2) keeps that identity rather than continuing to drop.
 		var costs := [cost1, cost2, cost2, cost2, cost2]
+
+		# Bitter Recall was already the best damage-per-mana card in the game
+		# pre-levelling (12 damage for 1 mana vs. Spark's 6); the generic growth
+		# rule compounded that into 3 casts x 29 damage = 87 in one turn. No amount
+		# of trimming the damage number fixes a cost-1 card that can be cast 3
+		# times, so this line alone rises in cost as it masters (1/2/2/3/3) —
+		# every other line's cost is meant to stay flat, which is why this can't
+		# be a generic rule.
+		if names[0] == "Bitter Recall":
+			costs = [1, 2, 2, 3, 3]
+			var self_damage_by_level := [3, 4, 5, 6, 7]
+			for lvl in range(5):
+				effects_by_level[lvl] = _with_self_damage(effects_by_level[lvl], self_damage_by_level[lvl])
+
+		for lvl in range(5):
+			effects_by_level[lvl] = enforce_turn_cap(effects_by_level[lvl], costs[lvl], exhaust)
 
 		# Every level gets its own art_id, derived from its own name the same way
 		# its filename is: "cards/<slug(name)>". Levels used to share the line's

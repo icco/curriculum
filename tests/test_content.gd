@@ -4,12 +4,35 @@ extends TestCase
 ## add a card by adding a .tres.
 
 
+## A maxed deck's whole turn (3 mana) should land around 45-50 direct damage,
+## not one-shot a properly-statted boss. This is the per-card half of that
+## budget, checked independently of tools/generate_content.gd's own
+## enforcement — Bitter Recall's level5 form once reached 3 casts x 29 damage
+## = 87 from a single 1-cost card before that generator-side fix landed.
+const TURN_DAMAGE_CAP := 50
+
+
 func suite_name() -> String:
 	return "content"
 
 
 func _library() -> ContentLibrary:
 	return load("res://resources/content_library.tres")
+
+
+## Same-turn direct damage only (Burn/Decay pay out over several turns, a
+## different balance question from one turn's burst) x however many times one
+## copy can be cast on 3 mana (1, if exhaust or free).
+func _turn_ceiling(card: CardData) -> int:
+	var per_cast := 0
+	for effect in card.effects:
+		var kind: String = effect.get("kind", "")
+		if kind == CardData.DAMAGE or kind == CardData.BONUS_IF_CHILLED:
+			per_cast += int(effect.get("amount", 0))
+	if per_cast == 0:
+		return 0
+	var casts := 1 if (card.exhaust or card.cost <= 0) else maxi(1, int(floor(3.0 / card.cost)))
+	return per_cast * casts
 
 
 func run() -> void:
@@ -96,6 +119,17 @@ func run() -> void:
 		eq(node.school, school, "%s's level 5 stays in the line's school" % root.card_name)
 		check(node.is_fully_evolved(), "%s line terminates at level 5" % root.card_name)
 		eq(seen.size(), 5, "%s line is exactly five levels long" % root.card_name)
+
+	# Per-card turn-damage ceiling: pinned separately from generate_content.gd's own
+	# enforcement so a future change to the growth rule or a hand-edited .tres can't
+	# silently reintroduce a one-card alpha strike. library.cards.size() == 120 is
+	# already pinned above, so this can't pass vacuously on an empty list.
+	for card in library.cards:
+		var ceiling := _turn_ceiling(card)
+		check(
+			ceiling <= TURN_DAMAGE_CAP,
+			"%s could deal %d damage in one 3-mana turn, over the %d cap" % [card.card_name, ceiling, TURN_DAMAGE_CAP]
+		)
 
 	# Every .tres under resources/ must load, including any the library does not index.
 	# `--import` scans assets but does not eagerly load an unreferenced .tres, so a

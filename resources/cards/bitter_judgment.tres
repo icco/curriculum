@@ -7,8 +7,9 @@
 script = ExtResource("2_af78q")
 card_name = "Bitter Judgment"
 school = 3
+cost = 3
 effects = Array[Dictionary]([{
-"amount": 2,
+"amount": 6,
 "kind": "self_damage"
 }, {
 "amount": 27,

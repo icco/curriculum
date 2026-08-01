@@ -6,7 +6,7 @@
 script = ExtResource("1_k7uet")
 card_name = "Supernova Lance"
 effects = Array[Dictionary]([{
-"amount": 17,
+"amount": 16,
 "kind": "damage"
 }])
 art_id = "cards/supernova_lance"

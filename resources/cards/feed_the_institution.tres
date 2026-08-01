@@ -9,7 +9,7 @@ card_name = "Feed the Institution"
 school = 3
 cost = 2
 effects = Array[Dictionary]([{
-"amount": 3,
+"amount": 6,
 "kind": "self_damage"
 }, {
 "kind": "double_decay"
