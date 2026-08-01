@@ -98,7 +98,14 @@ func _test_edges_behind_and_mouse_filters() -> void:
 	map.show_catalog(cat, {"Basic Arcana 101": Grading.Grade.S})
 
 	check(map.get_child_count() > 0, "the map built children")
-	check(map.get_child(0) is Node2D, "the edges container is the first child, behind the buttons")
+	# The edges and the node buttons now share one scrollable content control (so an
+	# arbitrarily tall syllabus can scroll as a single unit) rather than being direct
+	# children of the map itself -- find that shared parent via a button, and confirm
+	# the edges are its first child, drawn behind every node it also parents.
+	check(map.node_buttons.size() > 0, "sanity: the map has at least one node button")
+	var content: Node = (map.node_buttons.values()[0] as Node).get_parent()
+	check(content.get_child(0) is Node2D, "the edges container is the first child, behind the buttons")
+	check(content.get_child(0) == map.find_children("*", "Node2D", true, false)[0], "that Node2D is the map's edges container")
 	eq(map.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the map itself ignores the mouse")
 	for course_name in map.node_buttons:
 		eq(
