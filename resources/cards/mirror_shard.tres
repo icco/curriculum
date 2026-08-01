@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_fuip2"]
+[ext_resource type="Resource" path="res://resources/cards/prism_shard.tres" id="1_beu8c"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_1v6hv"]
 
 [resource]
-script = ExtResource("1_fuip2")
+script = ExtResource("2_1v6hv")
 card_name = "Mirror Shard"
 school = 1
 cost = 2
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "amount": 6,
 "kind": "bonus_if_chilled"
 }])
-art_id = "cards/glass_shard"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_beu8c")
+art_id = "cards/mirror_shard"

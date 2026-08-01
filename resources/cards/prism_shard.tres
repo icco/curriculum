@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/crystal_shard.tres" id="1_bjnp7"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_rygvx"]
+
+[resource]
+script = ExtResource("2_rygvx")
+card_name = "Prism Shard"
+school = 1
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 16,
+"kind": "damage"
+}, {
+"amount": 8,
+"kind": "bonus_if_chilled"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_bjnp7")
+art_id = "cards/prism_shard"

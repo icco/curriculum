@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/bastion.tres" id="1_rr2pu"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_tdsre"]
+
+[resource]
+script = ExtResource("2_tdsre")
+card_name = "Rampart"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 13,
+"kind": "block"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_rr2pu")
+art_id = "cards/rampart"

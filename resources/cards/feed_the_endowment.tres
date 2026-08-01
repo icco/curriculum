@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_jsihh"]
+
+[resource]
+script = ExtResource("1_jsihh")
+card_name = "Feed the Endowment"
+school = 3
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 7,
+"kind": "self_damage"
+}, {
+"kind": "double_decay"
+}, {
+"amount": 2,
+"kind": "draw"
+}])
+art_id = "cards/feed_the_endowment"

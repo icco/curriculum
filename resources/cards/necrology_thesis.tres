@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_deo7o"]
+[ext_resource type="Resource" path="res://resources/cards/necrology_monograph.tres" id="1_kluc3"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_l0mna"]
 
 [resource]
-script = ExtResource("1_deo7o")
+script = ExtResource("2_l0mna")
 card_name = "Necrology Thesis"
 school = 3
 cost = 2
@@ -15,4 +16,6 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 3
 }])
-art_id = "cards/necrology_note"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_kluc3")
+art_id = "cards/necrology_thesis"

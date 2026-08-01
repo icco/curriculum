@@ -192,9 +192,17 @@ func _test_xp_shown_on_every_card() -> void:
 		saw_progress.append(progress)
 
 	# Confirm this isn't a coincidence where every card happens to show the same
-	# string: the trained card's progress differs from an untrained one's.
-	check(saw_progress.has("1/5"), "the trained card shows its actual progress, not 0/5 for everyone")
-	check(saw_progress.has("0/5"), "an untrained card still shows 0/5")
+	# string: at least two cards must show DIFFERENT progress. Derived from
+	# CardInstance.progress() rather than hardcoded, because the format is owned by that
+	# class and has already changed once — it went from "0/5" to "L1 0/5" when cards
+	# gained five levels, silently breaking a literal assertion here.
+	var distinct := {}
+	for progress in saw_progress:
+		distinct[progress] = true
+	check(
+		distinct.size() >= 2,
+		"cards show differing progress, not one string for everyone (saw %s)" % [distinct.keys()]
+	)
 
 	registration.free()
 

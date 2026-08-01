@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/complete_concordance.tres" id="1_hjjrw"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_8ltg0"]
+
+[resource]
+script = ExtResource("2_8ltg0")
+card_name = "Annotated Codex"
+school = 2
+cost = 0
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "draw"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_hjjrw")
+art_id = "cards/annotated_codex"

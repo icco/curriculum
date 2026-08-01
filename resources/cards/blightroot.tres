@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/blightvine.tres" id="1_jffyh"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_j4krg"]
+
+[resource]
+script = ExtResource("2_j4krg")
+card_name = "Blightroot"
+school = 3
+effects = Array[Dictionary]([{
+"amount": 8,
+"kind": "status",
+"status": 3
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_jffyh")
+art_id = "cards/blightroot"

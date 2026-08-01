@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_4k4ac"]
+[ext_resource type="Resource" path="res://resources/cards/cross_reference.tres" id="1_blpsx"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_5wqeu"]
 
 [resource]
-script = ExtResource("1_4k4ac")
+script = ExtResource("2_5wqeu")
 card_name = "Cite Chapter & Verse"
 school = 2
 effects = Array[Dictionary]([{
@@ -13,4 +14,6 @@ effects = Array[Dictionary]([{
 "amount": 2,
 "kind": "draw"
 }])
-art_id = "cards/cite_source"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_blpsx")
+art_id = "cards/cite_chapter_and_verse"

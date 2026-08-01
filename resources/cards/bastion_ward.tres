@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/absolute_ward.tres" id="1_t6lux"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_vu664"]
+
+[resource]
+script = ExtResource("2_vu664")
+card_name = "Bastion Ward"
+school = 4
+effects = Array[Dictionary]([{
+"amount": 12,
+"kind": "block"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_t6lux")
+art_id = "cards/bastion_ward"
+retain = true

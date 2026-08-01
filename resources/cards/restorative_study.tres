@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_36nlo"]
+[ext_resource type="Resource" path="res://resources/cards/restful_recess.tres" id="1_u5xv8"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_rwkbe"]
 
 [resource]
-script = ExtResource("1_36nlo")
+script = ExtResource("2_rwkbe")
 card_name = "Restorative Study"
 school = 4
 cost = 2
@@ -11,4 +12,6 @@ effects = Array[Dictionary]([{
 "amount": 14,
 "kind": "heal"
 }])
-art_id = "cards/study_break"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_u5xv8")
+art_id = "cards/restorative_study"

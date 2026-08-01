@@ -1,14 +1,17 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_6lhnp"]
+[ext_resource type="Resource" path="res://resources/cards/sanctum_ward.tres" id="1_vuawg"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ns8mb"]
 
 [resource]
-script = ExtResource("1_6lhnp")
+script = ExtResource("2_ns8mb")
 card_name = "Aegis Ward"
 school = 4
 effects = Array[Dictionary]([{
 "amount": 8,
 "kind": "block"
 }])
-art_id = "cards/rimeward"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_vuawg")
+art_id = "cards/aegis_ward"
 retain = true

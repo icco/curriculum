@@ -1,14 +1,17 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_7jxnv"]
+[ext_resource type="Resource" path="res://resources/cards/commencement_pyre.tres" id="1_k0c65"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_55ywo"]
 
 [resource]
-script = ExtResource("1_7jxnv")
+script = ExtResource("2_55ywo")
 card_name = "Valedictory Blaze"
 cost = 3
 effects = Array[Dictionary]([{
 "amount": 30,
 "kind": "damage"
 }])
-art_id = "cards/final_recitation"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_k0c65")
+art_id = "cards/valedictory_blaze"
 exhaust = true

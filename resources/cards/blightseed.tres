@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_mlex5"]
+[ext_resource type="Resource" path="res://resources/cards/blightroot.tres" id="1_ippq3"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_p5b4h"]
 
 [resource]
-script = ExtResource("1_mlex5")
+script = ExtResource("2_p5b4h")
 card_name = "Blightseed"
 school = 3
 effects = Array[Dictionary]([{
@@ -11,4 +12,6 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 3
 }])
-art_id = "cards/rot_seed"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_ippq3")
+art_id = "cards/blightseed"

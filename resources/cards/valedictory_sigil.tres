@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_mk7us"]
+[ext_resource type="Resource" path="res://resources/cards/magisterial_sigil.tres" id="1_tbbru"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_xbtsi"]
 
 [resource]
-script = ExtResource("1_mk7us")
+script = ExtResource("2_xbtsi")
 card_name = "Valedictory Sigil"
 school = 4
 cost = 3
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "amount": 10,
 "kind": "heal"
 }])
-art_id = "cards/honours_sigil"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_tbbru")
+art_id = "cards/valedictory_sigil"
