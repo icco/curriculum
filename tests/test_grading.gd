@@ -92,17 +92,34 @@ func run() -> void:
 	almost(mid["total"], 64.0, "mid-tier total")
 	eq(mid["grade"], Grading.Grade.B, "a 64 total grades B through score()")
 
+	# Recovery is a grade's other payout besides the draft, so it is pinned here
+	# alongside draft_allowance rather than only in test_run: the two together are
+	# what make a grade worth chasing.
+	check(
+		(
+			Grading.recovery_fraction(Grading.Grade.S)
+			> Grading.recovery_fraction(Grading.Grade.A)
+			and Grading.recovery_fraction(Grading.Grade.A)
+			> Grading.recovery_fraction(Grading.Grade.B)
+			and Grading.recovery_fraction(Grading.Grade.B)
+			> Grading.recovery_fraction(Grading.Grade.C)
+			and Grading.recovery_fraction(Grading.Grade.C) > 0.0
+		),
+		"recovery strictly increases with the grade earned"
+	)
+	almost(Grading.recovery_fraction(Grading.Grade.F), 0.0, "an F recovers nothing HERE")
+
 	# Thresholds — pin each of the four cutoffs exactly at its value AND just below,
 	# so a `>=` weakened to `>` (which would kick the exact-cutoff value down a tier)
 	# and a cutoff placed too low (which would let the just-below value pass) both fail.
 	eq(Grading.grade_for(90.0), Grading.Grade.S, "90 is S")
 	eq(Grading.grade_for(89.9), Grading.Grade.A, "just under 90 is A")
-	eq(Grading.grade_for(75.0), Grading.Grade.A, "75 is A")
-	eq(Grading.grade_for(74.9), Grading.Grade.B, "just under 75 is B")
-	eq(Grading.grade_for(60.0), Grading.Grade.B, "60 is B")
-	eq(Grading.grade_for(59.9), Grading.Grade.C, "just under 60 is C")
-	eq(Grading.grade_for(40.0), Grading.Grade.C, "40 is C")
-	eq(Grading.grade_for(39.9), Grading.Grade.F, "under 40 is F")
+	eq(Grading.grade_for(78.0), Grading.Grade.A, "78 is A")
+	eq(Grading.grade_for(77.9), Grading.Grade.B, "just under 78 is B")
+	eq(Grading.grade_for(64.0), Grading.Grade.B, "64 is B")
+	eq(Grading.grade_for(63.9), Grading.Grade.C, "just under 64 is C")
+	eq(Grading.grade_for(44.0), Grading.Grade.C, "44 is C")
+	eq(Grading.grade_for(43.9), Grading.Grade.F, "under 44 is F")
 	eq(Grading.grade_for(0.0), Grading.Grade.F, "zero is F")
 
 	# Losing is an F however well it otherwise went — use the SAME params as the

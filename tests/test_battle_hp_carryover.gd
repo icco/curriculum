@@ -81,12 +81,18 @@ func run() -> void:
 	var game := Run.new(_deck(6))
 	var course := CourseData.new()
 	course.course_name = "Attrition 101"
-	# 31 survived, plus the 12 a B restores (20% of 60) — passing is the only recovery
-	# between courses, so the number that carries is post-recovery.
+	# 31 survived, plus whatever a B restores — passing is the only recovery between
+	# courses, so the number that carries is post-recovery. Derived from Grading
+	# rather than hardcoded, since the recovery scale is a tuning dial; test_run and
+	# test_grading pin its shape and arithmetic. What matters HERE is only that the
+	# number Run banked is the number the next battle starts on.
+	var expected := 31 + int(roundf(
+		Grading.recovery_fraction(Grading.Grade.B) * float(game.max_hp)
+	))
 	game.record_result(course, Grading.Grade.B, 31)
-	eq(game.hp, 43, "the run banked the battle's ending hp plus the grade's recovery")
+	eq(game.hp, expected, "the run banked the battle's ending hp plus the grade's recovery")
 	var next_battle := Battle.new(game.deck, _enemy(40), Bestiary.new(), rng, game.hp)
-	eq(next_battle.player.hp, 43, "the next battle starts on the run's hp")
+	eq(next_battle.player.hp, expected, "the next battle starts on the run's hp")
 
 	# Survival is scored against the walked-in hp. A wounded player who takes no
 	# damage has survived the battle perfectly and must score full marks — scoring

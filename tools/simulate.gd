@@ -20,6 +20,12 @@ func _process(_delta: float) -> bool:
 	var ended_final_loss := 0  ## reached the final course and lost it
 	var ended_stuck := 0  ## is_over() never became true (ran out of open courses)
 	var course_loss_counts := {}  ## course_name -> number of runs that lost there
+	## course_name -> {attempts, hp_in, hp_out, turns}. Hit points carry between
+	## courses now, so WHERE a run dies is much less informative than what it walked
+	## in with: a course with a 60% loss rate that is only ever entered at 20 hp is
+	## a symptom of the two courses before it, not a mis-tuned examiner.
+	var course_stats := {}
+	var course_order: Array = []
 
 	for i in count:
 		var rng := RandomNumberGenerator.new()
@@ -34,6 +40,10 @@ func _process(_delta: float) -> bool:
 			if open.is_empty():
 				break
 			var course = open[0]
+			if not course_stats.has(course.course_name):
+				course_stats[course.course_name] = {"a": 0, "hp_in": 0, "hp_out": 0, "turns": 0}
+				course_order.append(course.course_name)
+			var hp_in: int = game.hp
 			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng, game.hp)
 			battle.start()
 			var turn_guard := 0
@@ -65,6 +75,11 @@ func _process(_delta: float) -> bool:
 			)
 			var letter := Grading.letter(scored["grade"])
 			grade_counts[letter] = int(grade_counts.get(letter, 0)) + 1
+			var cs: Dictionary = course_stats[course.course_name]
+			cs["a"] = int(cs["a"]) + 1
+			cs["hp_in"] = int(cs["hp_in"]) + hp_in
+			cs["hp_out"] = int(cs["hp_out"]) + maxi(0, battle.player.hp)
+			cs["turns"] = int(cs["turns"]) + battle.turns
 			if not battle.player_won:
 				last_course_lost = course.course_name
 				course_loss_counts[course.course_name] = int(course_loss_counts.get(course.course_name, 0)) + 1
@@ -105,5 +120,21 @@ func _process(_delta: float) -> bool:
 	)
 	print("courses passed distribution: %s" % courses_passed_counts)
 	print("losses by course: %s" % course_loss_counts)
+	print("")
+	print("%-24s %5s %6s %7s %7s %6s" % ["course", "att", "loss%", "hp in", "hp out", "turns"])
+	for name in course_order:
+		var cs: Dictionary = course_stats[name]
+		var attempts := maxf(1.0, float(cs["a"]))
+		print(
+			"%-24s %5d %5.0f%% %7.1f %7.1f %6.1f"
+			% [
+				name,
+				int(cs["a"]),
+				100.0 * float(course_loss_counts.get(name, 0)) / attempts,
+				float(cs["hp_in"]) / attempts,
+				float(cs["hp_out"]) / attempts,
+				float(cs["turns"]) / attempts,
+			]
+		)
 	quit(0)
 	return true

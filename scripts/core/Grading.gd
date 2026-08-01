@@ -32,9 +32,18 @@ const _ALLOWANCE := {Grade.S: -1, Grade.A: 5, Grade.B: 3, Grade.C: 1, Grade.F: 0
 ## win is by learning") reaches the scarcest resource directly rather than through
 ## the draft alone.
 ##
+## The shape is 4:3:2:1 across S/A/B/C; the scale is the game's single global
+## difficulty dial and was set by measurement, not taste. At 0.09 per step the greedy
+## bot in tools/simulate.gd graduates ~20% of runs — a weak policy should mostly fail
+## a roguelike, so the band aimed at was 10-20%. One step up (0.10) took it to 28%.
+## Retune THIS before retuning any examiner: it moves every course at once, where a
+## stat change moves one or two. It is also coupled to the tier cutoffs below —
+## tightening those lowers grades, which lowers healing, which is a difficulty change
+## wearing a scoring change's clothes. Re-measure both together.
+##
 ## F is absent deliberately — a failed course restores in full under spec section
 ## 6.1, and that rule belongs to Run.record_result, not here.
-const _RECOVERY := {Grade.S: 0.4, Grade.A: 0.3, Grade.B: 0.2, Grade.C: 0.1, Grade.F: 0.0}
+const _RECOVERY := {Grade.S: 0.36, Grade.A: 0.27, Grade.B: 0.18, Grade.C: 0.09, Grade.F: 0.0}
 
 
 static func letter(grade: Grade) -> String:
@@ -53,11 +62,11 @@ static func recovery_fraction(grade: Grade) -> float:
 static func grade_for(total: float) -> Grade:
 	if total >= 90.0:
 		return Grade.S
-	if total >= 75.0:
+	if total >= 78.0:
 		return Grade.A
-	if total >= 60.0:
+	if total >= 64.0:
 		return Grade.B
-	if total >= 40.0:
+	if total >= 44.0:
 		return Grade.C
 	return Grade.F
 
