@@ -7,9 +7,13 @@ extends Control
 signal card_play_requested(card)
 signal card_inspect_requested(card)
 
-const MAX_SPREAD := 420.0
-const MAX_TILT := 0.22  # radians at the outermost card
-const ARC_DROP := 46.0  # how far the outer cards hang below the middle
+## Tuned so five cards in a hand never overlap enough to clip each other's name —
+## the fanned/tilted bounding box of each card, not just its flat width, has to clear
+## its neighbour (see the half-extent maths below). At the old 200x300 / 0.22 rad,
+## adjacent outer cards overlapped by ~40px and their names read as fragments.
+const MAX_SPREAD := 440.0
+const MAX_TILT := 0.14  # radians at the outermost card
+const ARC_DROP := 40.0  # how far the outer cards hang below the middle
 
 
 ## Where card `index` of `count` sits across a screen `width` wide.
@@ -56,13 +60,27 @@ func set_hand(cards: Array) -> void:
 	layout()
 
 
+## fan_transform's y is 0 at the middle card and grows toward the edges (see
+## ARC_DROP), so the middle card's centre sits at the very top of local (0,0) — its
+## top edge is CARD_SIZE.y / 2 ABOVE that origin. Left uncorrected, the middle of the
+## hand renders outside HandFan's own rect and bleeds into whatever is laid out above
+## it (this is what made the block/mana row look corrupted once the dead gap above
+## the hand was closed up). Shifting every card down by half the card height, plus a
+## little for the rotated corners of the outer cards, keeps the whole fan inside the
+## control it belongs to.
+func _vertical_offset() -> float:
+	return CardView.CARD_SIZE.y * 0.5 + 12.0
+
+
 func layout() -> void:
 	var width := size.x if size.x > 0.0 else 1080.0
 	var views := get_children()
+	var y_offset := _vertical_offset()
 	for i in views.size():
 		var view: CardView = views[i]
 		var t := fan_transform(i, views.size(), width)
-		view.position = t["position"] - CardView.CARD_SIZE * 0.5
+		var centre: Vector2 = t["position"] + Vector2(0, y_offset)
+		view.position = centre - CardView.CARD_SIZE * 0.5
 		view.rotation = t["rotation"]
 		view.remember_home()
 
