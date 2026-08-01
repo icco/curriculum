@@ -55,7 +55,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a slender flame spear, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a slender flame spear as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a slender flame spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_blaze_ii",
@@ -115,7 +115,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a bursting ember starburst, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a bursting ember starburst as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a bursting ember starburst, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/commencement_pyre",
@@ -175,7 +175,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a rising tongue of kindling flame, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a rising tongue of kindling flame as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a rising tongue of kindling flame, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/summa_cum_ignis",
@@ -235,7 +235,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a curling scorched page, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a curling scorched page as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of a curling scorched page, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/magna_cum_cinders",
@@ -295,7 +295,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of an upright blazing torch, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render an upright blazing torch as a single flat ink shape in Cinder (#D45C3C), on the warm cream ground (#F7EADD). Show a dense cluster of an upright blazing torch, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/emeritus_recitation",
@@ -355,7 +355,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a slender ice spear, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a slender ice spear as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a slender ice spear, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_glacier",
@@ -415,7 +415,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a branching frost crystal, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a branching frost crystal as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a branching frost crystal, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_permafrost",
@@ -475,7 +475,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of an angular glass shard, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render an angular glass shard as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of an angular glass shard, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_prism",
@@ -535,7 +535,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a frozen archway, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a frozen archway as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a frozen archway, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_winter_court",
@@ -595,7 +595,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a snow-laden bough, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a snow-laden bough as a single flat ink shape in Frost (#498BAD), on the warm cream ground (#F7EADD). Show a dense cluster of a snow-laden bough, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_frost_age",
@@ -655,7 +655,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of an open book, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render an open book as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of an open book, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_bibliography",
@@ -715,7 +715,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a stack of leaning books, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a stack of leaning books as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a stack of leaning books, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_finals",
@@ -775,7 +775,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a spreading ink blot, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a spreading ink blot as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a spreading ink blot, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_deluge",
@@ -835,7 +835,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a quill beside a scrawled note, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a quill beside a scrawled note as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a quill beside a scrawled note, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_annotations",
@@ -895,7 +895,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a bound thesis volume, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a bound thesis volume as a single flat ink shape in Ink (#000000), with small flat accents in pale slate (#A3B0AC), on the warm cream ground (#F7EADD). Show a dense cluster of a bound thesis volume, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_dissertation",
@@ -955,7 +955,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a wilting vine, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a wilting vine as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a wilting vine, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_malediction",
@@ -1015,7 +1015,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of an open ledger shaped like a hungry mouth, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render an open ledger shaped like a hungry mouth as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of an open ledger shaped like a hungry mouth, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_banquet",
@@ -1075,7 +1075,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a folded note marked with a small skull glyph, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a folded note marked with a small skull glyph as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a folded note marked with a small skull glyph, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_obituary",
@@ -1135,7 +1135,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a blighted seed pod, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a blighted seed pod as a single flat ink shape in Rot (#6E7B3F), on the warm cream ground (#F7EADD). Show a dense cluster of a blighted seed pod, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_blightwood",
@@ -1195,7 +1195,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a round shield, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a round shield as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a round shield, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_citadel",
@@ -1255,7 +1255,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a sigil medallion, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a sigil medallion as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a sigil medallion, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/emeritus_sigil",
@@ -1315,7 +1315,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a warding rune, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a warding rune as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a warding rune, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_bastion",
@@ -1375,7 +1375,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a steaming teacup, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a steaming teacup as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a steaming teacup, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_retreat",
@@ -1435,7 +1435,7 @@
       "known": false,
       "size": "card",
       "n": 2,
-      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a banded bracer, repeated many times, filling most of the plate. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
+      "prompt": "Render a banded bracer as a single flat ink shape in Ward (#E0A51F), on the warm cream ground (#F7EADD). Show a dense cluster of a banded bracer, repeated many times, filling most of the plate, but still stopping short of the frame edge, with a visible cream margin all around like every other card in the set. A card illustration, stage 4 of 5 in an evolving spell line — read clearly at small size."
     },
     {
       "id": "cards/valedictory_vambraces",
