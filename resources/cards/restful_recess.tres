@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/sabbatical.tres" id="1_iig1s"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_nhsgd"]
+
+[resource]
+script = ExtResource("2_nhsgd")
+card_name = "Restful Recess"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 19,
+"kind": "heal"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_iig1s")
+art_id = "cards/restful_recess"

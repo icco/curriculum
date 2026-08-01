@@ -1,13 +1,16 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_e3jg5"]
+[ext_resource type="Resource" path="res://resources/cards/wildfire.tres" id="1_2csgn"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_dqt7x"]
 
 [resource]
-script = ExtResource("1_e3jg5")
+script = ExtResource("2_dqt7x")
 card_name = "Conflagration"
 effects = Array[Dictionary]([{
 "amount": 6,
 "kind": "status",
 "status": 0
 }])
-art_id = "cards/kindle"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_2csgn")
+art_id = "cards/conflagration"

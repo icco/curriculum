@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/full_recovery.tres" id="1_d3kgb"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ktmm2"]
+
+[resource]
+script = ExtResource("2_ktmm2")
+card_name = "Sabbatical"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 23,
+"kind": "heal"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_d3kgb")
+art_id = "cards/sabbatical"

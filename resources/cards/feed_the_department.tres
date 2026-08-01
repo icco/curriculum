@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/feed_the_institution.tres" id="1_oia1b"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_tjaw1"]
+
+[resource]
+script = ExtResource("2_tjaw1")
+card_name = "Feed the Department"
+school = 3
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 5,
+"kind": "self_damage"
+}, {
+"kind": "double_decay"
+}, {
+"amount": 2,
+"kind": "draw"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_oia1b")
+art_id = "cards/feed_the_department"

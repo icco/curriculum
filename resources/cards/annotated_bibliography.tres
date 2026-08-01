@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/complete_works.tres" id="1_6onx3"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_iucj6"]
+
+[resource]
+script = ExtResource("2_iucj6")
+card_name = "Annotated Bibliography"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 9,
+"kind": "damage"
+}, {
+"amount": 3,
+"kind": "draw"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_6onx3")
+art_id = "cards/annotated_bibliography"

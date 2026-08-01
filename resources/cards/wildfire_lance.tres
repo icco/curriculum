@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/supernova_lance.tres" id="1_75250"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_ww53n"]
+
+[resource]
+script = ExtResource("2_ww53n")
+card_name = "Wildfire Lance"
+effects = Array[Dictionary]([{
+"amount": 15,
+"kind": "damage"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_75250")
+art_id = "cards/wildfire_lance"

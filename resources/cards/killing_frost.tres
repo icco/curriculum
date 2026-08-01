@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/black_ice.tres" id="1_lo6jw"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_k5gq4"]
+
+[resource]
+script = ExtResource("2_k5gq4")
+card_name = "Killing Frost"
+school = 1
+effects = Array[Dictionary]([{
+"amount": 4,
+"kind": "status",
+"status": 1
+}, {
+"amount": 5,
+"kind": "damage"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_lo6jw")
+art_id = "cards/killing_frost"

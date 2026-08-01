@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_hvvw4"]
+[ext_resource type="Resource" path="res://resources/cards/freeze_the_hall.tres" id="1_i1ajl"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_r5378"]
 
 [resource]
-script = ExtResource("1_hvvw4")
+script = ExtResource("2_r5378")
 card_name = "Still the Hall"
 school = 1
 cost = 2
@@ -15,4 +16,6 @@ effects = Array[Dictionary]([{
 "amount": 10,
 "kind": "block"
 }])
-art_id = "cards/numb_the_hall"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_i1ajl")
+art_id = "cards/still_the_hall"

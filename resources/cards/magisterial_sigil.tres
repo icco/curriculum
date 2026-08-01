@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/doctoral_sigil.tres" id="1_dtxqp"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_cihjp"]
+
+[resource]
+script = ExtResource("2_cihjp")
+card_name = "Magisterial Sigil"
+school = 4
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 29,
+"kind": "block"
+}, {
+"amount": 13,
+"kind": "heal"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_dtxqp")
+art_id = "cards/magisterial_sigil"

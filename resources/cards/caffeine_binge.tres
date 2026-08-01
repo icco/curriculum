@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/sleepless_marathon.tres" id="1_adxhq"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_4jh0o"]
+
+[resource]
+script = ExtResource("2_4jh0o")
+card_name = "Caffeine Binge"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "mana_next"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_adxhq")
+art_id = "cards/caffeine_binge"
