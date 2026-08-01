@@ -15,10 +15,41 @@ var deck: Array = []  ## Array[CardInstance]
 var bestiary: Bestiary = Bestiary.new()
 var expelled := false
 var won := false
+## Seeds this run's examiner variants. Saved and reloaded so a continued run faces the
+## same faculty it started against — rolling fresh on load would hand the player a new
+## set of weaknesses and quietly invalidate everything in their Bestiary.
+var content_seed := 0
+var faculty: Faculty = null
 
 
-func _init(starting_deck: Array) -> void:
+## `enemies` is the content library's roster; passing none leaves the faculty empty and
+## every examiner on its authored schools, which is what suites constructing a bare Run
+## want. `seed_value` of 0 means "roll one", so only a load passes it explicitly.
+func _init(starting_deck: Array, enemies: Array = [], seed_value: int = 0) -> void:
 	deck = starting_deck.duplicate()
+	content_seed = seed_value if seed_value != 0 else _fresh_seed()
+	# The starting deck's schools shape the roll: the faculty has to stay learnable by
+	# the deck the player actually opens with. See Faculty's constraints.
+	var schools := {}
+	for card in deck:
+		if card != null and card.data != null:
+			schools[card.data.school] = true
+	faculty = Faculty.new(enemies, content_seed, schools.keys())
+
+
+static func _fresh_seed() -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	# Never 0: that is the "roll me one" sentinel, so a run that happened to draw it
+	# would re-roll its faculty on every load instead of restoring the saved one.
+	return maxi(1, absi(rng.randi()))
+
+
+## This run's version of a course's examiner — its schools, not the roster's.
+func examiner_for(base: EnemyData) -> EnemyData:
+	if faculty == null:
+		return base
+	return faculty.examiner(base)
 
 
 func deck_cap() -> int:

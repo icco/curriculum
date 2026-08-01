@@ -10,6 +10,14 @@ func _process(_delta: float) -> bool:
 	var count := 10
 	if args.size() > 0 and args[0].is_valid_int():
 		count = args[0].to_int()
+	# How many distinct GENERATED WORLDS the runs are spread over. Examiner weaknesses
+	# are rolled per run now, so an aggregate across N runs is an average over N
+	# different games — and a generator producing half-trivial and half-impossible
+	# worlds averages to a perfectly respectable number while being useless. Runs are
+	# grouped onto a few worlds so the spread BETWEEN them is visible.
+	var worlds := 10
+	if args.size() > 1 and args[1].is_valid_int():
+		worlds = maxi(1, args[1].to_int())
 
 	var library: ContentLibrary = load("res://resources/content_library.tres")
 	var wins := 0
@@ -26,11 +34,17 @@ func _process(_delta: float) -> bool:
 	## a symptom of the two courses before it, not a mis-tuned examiner.
 	var course_stats := {}
 	var course_order: Array = []
+	var world_runs := {}  ## world index -> runs played
+	var world_wins := {}  ## world index -> runs graduated
 
 	for i in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck())
+		# Content seed and shuffle seed vary independently: several runs share a world
+		# and differ only in their draws.
+		var world := i % worlds
+		rng.seed = 1000 + i
+		var game := Run.new(library.new_starting_deck(), library.enemies, 500 + world)
 		var catalog := library.catalog()
 		var guard := 0
 		var last_course_lost: String = ""
@@ -44,7 +58,9 @@ func _process(_delta: float) -> bool:
 				course_stats[course.course_name] = {"a": 0, "hp_in": 0, "hp_out": 0, "turns": 0}
 				course_order.append(course.course_name)
 			var hp_in: int = game.hp
-			var battle := Battle.new(game.deck, course.examiner, game.bestiary, rng, game.hp)
+			var battle := Battle.new(
+				game.deck, game.examiner_for(course.examiner), game.bestiary, rng, game.hp
+			)
 			battle.start()
 			var turn_guard := 0
 			while not battle.finished and turn_guard < 200:
@@ -85,7 +101,12 @@ func _process(_delta: float) -> bool:
 				course_loss_counts[course.course_name] = int(course_loss_counts.get(course.course_name, 0)) + 1
 			game.record_result(course, scored["grade"], battle.player.hp)
 			if battle.player_won and not game.is_over():
-				var draft := Draft.new(game.deck, course.examiner.deck, course.guaranteed_card_drop, scored["grade"])
+				var draft := Draft.new(
+					game.deck,
+					game.examiner_for(course.examiner).deck,
+					course.guaranteed_card_drop,
+					scored["grade"]
+				)
 				draft.cap = game.deck_cap()
 				var selection: Array = []
 				for card in draft.offered:
@@ -97,8 +118,10 @@ func _process(_delta: float) -> bool:
 				var kept := draft.keep(selection)
 				if kept.size() == draft.cap:
 					game.deck = kept
+		world_runs[world] = int(world_runs.get(world, 0)) + 1
 		if game.won:
 			wins += 1
+			world_wins[world] = int(world_wins.get(world, 0)) + 1
 		elif game.expelled:
 			ended_expelled += 1
 			if last_course_lost != "":
@@ -120,6 +143,27 @@ func _process(_delta: float) -> bool:
 	)
 	print("courses passed distribution: %s" % courses_passed_counts)
 	print("losses by course: %s" % course_loss_counts)
+
+	# Per-world graduation, so a generator that makes some worlds unplayable cannot
+	# hide behind a healthy average.
+	var rates: Array[float] = []
+	for world in world_runs:
+		rates.append(100.0 * float(world_wins.get(world, 0)) / float(world_runs[world]))
+	rates.sort()
+	if rates.size() > 1:
+		var spread := ""
+		for r in rates:
+			spread += "%.0f%% " % r
+		print(
+			"graduation by world (%d worlds, %d runs each): %s-- lowest %.0f%%, highest %.0f%%"
+			% [
+				rates.size(),
+				int(world_runs[world_runs.keys()[0]]),
+				spread,
+				rates[0],
+				rates[rates.size() - 1],
+			]
+		)
 	print("")
 	print("%-24s %5s %6s %7s %7s %6s" % ["course", "att", "loss%", "hp in", "hp out", "turns"])
 	for name in course_order:
