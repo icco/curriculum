@@ -82,7 +82,12 @@ func show_catalog(catalog: Catalog, grades: Dictionary) -> void:
 			rows.append(courses.slice(i, mini(i + cols_per_row, courses.size())))
 			i += cols_per_row
 
-	var total_height := TOP_PADDING + float(rows.size()) * ROW_HEIGHT + NODE_SIZE.y * 0.5 + BOTTOM_PADDING
+	# Row centres sit at TOP_PADDING + row * ROW_HEIGHT with `row` 0-indexed, so the
+	# LAST centre is (rows - 1) rows down, not `rows`. Multiplying by rows.size()
+	# added a whole empty ROW_HEIGHT of overscroll below the map -- 300px of dead
+	# space on a single-row catalog, which is what a fresh run shows.
+	var last_row_centre := TOP_PADDING + float(maxi(rows.size() - 1, 0)) * ROW_HEIGHT
+	var total_height := last_row_centre + NODE_SIZE.y * 0.5 + BOTTOM_PADDING
 
 	var content := UIKit.transparent(Control.new())
 	content.custom_minimum_size = Vector2(width, total_height)
