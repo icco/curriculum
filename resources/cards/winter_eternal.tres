@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_7ydbx"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_tfckr"]
 
 [resource]
-script = ExtResource("1_7ydbx")
-card_name = "Ice Age"
+script = ExtResource("1_tfckr")
+card_name = "Winter Eternal"
 school = 1
 cost = 3
 effects = Array[Dictionary]([{
@@ -15,4 +15,4 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 1
 }])
-art_id = "cards/ice_age"
+art_id = "cards/winter_eternal"

@@ -93,9 +93,9 @@ static func doubling() -> Dictionary:
 func table() -> Array:
 	return [
 		# Cinder
-		["Spark", "Ember Lance", "Blaze Lance", "Wildfire Lance", "Supernova Lance",
+		["Spark", "Ember Lance", "Blaze Lance", "Inferno Lance", "Empyrean Lance",
 			CINDER, 1, [dmg(6)], 1, [dmg(10)], false, false],
-		["Kindle", "Conflagration", "Wildfire", "Firestorm", "Cataclysm",
+		["Kindle", "Conflagration", "Wildfire", "Firestorm", "Everburning",
 			CINDER, 1, [status(BURN, 3)], 1, [status(BURN, 6)], false, false],
 		["Scorch Notes", "Immolate Notes", "Cremate Notes", "Incinerate Notes", "Annihilate Notes",
 			CINDER, 2, [dmg(11)], 2, [dmg(17)], false, false],
@@ -104,7 +104,7 @@ func table() -> Array:
 		["Final Recitation", "Valedictory Blaze", "Commencement Pyre", "Convocation Inferno", "Doctoral Immolation",
 			CINDER, 3, [dmg(20)], 3, [dmg(30)], true, false],
 		# Frost
-		["Frost Lance", "Rime Lance", "Glacier Lance", "Permafrost Lance", "Absolute Zero Lance",
+		["Frost Lance", "Rime Lance", "Glacier Lance", "Permafrost Lance", "Everfrost Lance",
 			FROST, 1, [dmg(5), status(CHILL, 1)], 1, [dmg(8), status(CHILL, 1)], false, false],
 		["Hoarfrost", "Deep Hoarfrost", "Killing Frost", "Black Ice", "Eternal Winter",
 			FROST, 1, [status(CHILL, 2)], 1, [status(CHILL, 3), dmg(3)], false, false],
@@ -112,7 +112,7 @@ func table() -> Array:
 			FROST, 2, [dmg(9), chilled(4)], 2, [dmg(13), chilled(6)], false, false],
 		["Numb the Hall", "Still the Hall", "Freeze the Hall", "Silence the Hall", "Entomb the Hall",
 			FROST, 2, [status(CHILL, 2), blk(6)], 2, [status(CHILL, 3), blk(10)], false, false],
-		["Winter Term", "Long Winter", "Endless Winter", "Nuclear Winter", "Ice Age",
+		["Winter Term", "Long Winter", "Endless Winter", "Dead of Winter", "Winter Eternal",
 			FROST, 3, [dmg(12), status(CHILL, 4)], 3, [dmg(18), status(CHILL, 5)], false, false],
 		# Ink
 		["Ink Blot", "Spilled Ledger", "Smeared Archive", "Redacted Record", "Purged Transcript",
@@ -121,7 +121,7 @@ func table() -> Array:
 			INK, 1, [draw(2)], 0, [draw(2)], false, false],
 		["Cite Source", "Cite Chapter & Verse", "Cross Reference", "Annotated Bibliography", "Complete Works",
 			INK, 1, [dmg(4), draw(1)], 1, [dmg(6), draw(2)], false, false],
-		["Cram", "All-Nighter", "Caffeine Binge", "Sleepless Marathon", "Perfect Recall",
+		["Cram", "All-Nighter", "Midnight Oil", "Sleepless Vigil", "Perfect Recall",
 			INK, 2, [mana(2)], 1, [mana(2)], false, false],
 		["Thesis Statement", "Defended Thesis", "Published Thesis", "Peer Reviewed Thesis", "Landmark Thesis",
 			INK, 3, [dmg(8), draw(3)], 2, [dmg(12), draw(3)], false, false],
@@ -139,7 +139,7 @@ func table() -> Array:
 			WARD, 1, [blk(6)], 1, [blk(10)], false, false],
 		["Rimeward", "Aegis Ward", "Sanctum Ward", "Bastion Ward", "Absolute Ward",
 			WARD, 1, [blk(5)], 1, [blk(8)], false, true],
-		["Study Break", "Restorative Study", "Restful Recess", "Sabbatical", "Full Recovery",
+		["Study Break", "Restorative Study", "Restful Recess", "Sabbatical", "Tenure",
 			WARD, 2, [heal(8)], 2, [heal(14)], false, false],
 		["Warded Bracers", "Sigil Bracers", "Rune Bracers", "Glyph Bracers", "Ward Gauntlets",
 			WARD, 2, [blk(10), warded(4)], 2, [blk(14), warded(6)], false, false],
@@ -354,6 +354,19 @@ func _process(_delta: float) -> bool:
 	# (test_content's directory walk would find it) and inflate the count past
 	# 120, so every run starts from a clean slate for cards this generator owns:
 	# everything, since the whole set is regenerated from the table every time.
+	# The arrays this generator does not own are read straight from their own
+	# directories, never through the existing content_library.tres. The library
+	# references every card by path, and this generator renames cards -- so loading it
+	# fails the moment a card is renamed, and the old "preserve if present" branch then
+	# quietly wrote back EMPTY enemies and courses, wiping the roster and the catalog.
+	# Those two directories are untouched here, so scanning them cannot go stale.
+	var kept_enemies: Array[EnemyData] = []
+	for res in _load_all("res://resources/enemies"):
+		kept_enemies.append(res)
+	var kept_courses: Array[CourseData] = []
+	for res in _load_all("res://resources/courses"):
+		kept_courses.append(res)
+
 	var stale_dir := DirAccess.open(OUT_DIR)
 	if stale_dir == null:
 		printerr("cannot open %s to clear stale cards" % OUT_DIR)
@@ -471,13 +484,38 @@ func _process(_delta: float) -> bool:
 	var library := ContentLibrary.new()
 	library.cards = all
 	library.starting_deck = start
-	# Enemies and courses are filled in by Tasks 17 and 18; preserve them if present.
-	var existing = load("res://resources/content_library.tres")
-	if existing != null:
-		library.enemies = existing.enemies
-		library.courses = existing.courses
+	# Captured before the wipe -- see the note there.
+	library.enemies = kept_enemies
+	library.courses = kept_courses
+	if kept_enemies.is_empty() or kept_courses.is_empty():
+		printerr(
+			"refusing to write a library with %d enemies and %d courses"
+			% [kept_enemies.size(), kept_courses.size()]
+		)
+		quit(1)
+		return true
 	ResourceSaver.save(library, "res://resources/content_library.tres")
 	print("indexed %d cards, %d starting" % [library.cards.size(), library.starting_deck.size()])
 
 	quit(0)
 	return true
+
+
+## Loads every .tres in a directory, sorted by filename so the index is deterministic.
+func _load_all(dir_path: String) -> Array:
+	var out: Array = []
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		printerr("cannot open %s" % dir_path)
+		return out
+	var names := dir.get_files()
+	names.sort()
+	for file in names:
+		if not file.ends_with(".tres"):
+			continue
+		var res = load("%s/%s" % [dir_path, file])
+		if res == null:
+			printerr("failed to load %s/%s" % [dir_path, file])
+			continue
+		out.append(res)
+	return out

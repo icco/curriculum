@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_3e5gs"]
+
+[resource]
+script = ExtResource("1_3e5gs")
+card_name = "Everburning"
+effects = Array[Dictionary]([{
+"amount": 11,
+"kind": "status",
+"status": 0
+}])
+art_id = "cards/everburning"

@@ -30,7 +30,16 @@ func run() -> void:
 	# This is the case that matters now that evolution is no longer a single step —
 	# a bug that stops the chain early (or lets it run past level 5) would pass a
 	# test that only checked one evolution.
-	var expected_names := ["Ember Lance", "Blaze Lance", "Wildfire Lance", "Supernova Lance"]
+	# Names are read off the chain itself rather than hardcoded. Levels 1 and 2 are
+	# pinned by contract elsewhere (examiner decks reference them by path), but 3-5 are
+	# flavour and have already been renamed once for fitting the setting badly; a
+	# literal list here breaks on a rename while testing nothing about evolution.
+	var expected_names: Array[String] = []
+	var walk: CardData = spark.evolved_card
+	while walk != null:
+		expected_names.append(walk.card_name)
+		walk = walk.evolved_card
+	eq(expected_names.size(), 4, "the line has four levels above the base")
 	var thresholds := [9, 15, 24]
 	for i in thresholds.size():
 		var threshold: int = thresholds[i]
@@ -41,7 +50,11 @@ func run() -> void:
 		eq(card.xp, threshold - 1, "%d xp banked just under the threshold" % (threshold - 1))
 		eq(card.gain_xp(), true, "the %dth play evolves" % threshold)
 		eq(card.xp, 0, "xp resets on evolution")
-	eq(card.data.card_name, "Supernova Lance", "walked the whole line to its terminal card")
+	eq(
+		card.data.card_name,
+		expected_names[expected_names.size() - 1],
+		"walked the whole line to its terminal card"
+	)
 	eq(card.level(), 5, "terminal card is level 5")
 
 	# Evolved cards are terminal and stop accruing.

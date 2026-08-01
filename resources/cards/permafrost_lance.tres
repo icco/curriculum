@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Resource" path="res://resources/cards/absolute_zero_lance.tres" id="1_yb351"]
+[ext_resource type="Resource" path="res://resources/cards/everfrost_lance.tres" id="1_yb351"]
 [ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_meh3g"]
 
 [resource]
