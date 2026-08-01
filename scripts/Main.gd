@@ -56,7 +56,8 @@ func _swap(screen: Control, name: String) -> void:
 		_screen.queue_free()
 	_screen = screen
 	_screen_name = name
-	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# No anchor preset: _frame is a Container, and a Container sets its children's rects
+	# itself. The screen fills the gutter because Control's default size flags are FILL.
 	_frame.add_child(screen)
 
 
