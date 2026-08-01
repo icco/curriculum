@@ -1,5 +1,14 @@
 # Brief: make Curriculum's examiner content fully generative
 
+> **Done**, except for the explicitly out-of-scope part. Weak schools and decks are both
+> generative; the code is `scripts/core/Faculty.gd` and `scripts/core/CardPool.gd`, and the
+> measurements are recorded under finding 5 of
+> [`docs/audit-2026-08-01.md`](audit-2026-08-01.md). Per-run course choice remains undone.
+>
+> The brief is kept as written, including the two things it got wrong — see **What this
+> brief got wrong** at the bottom, which is there because the working agreement asks for
+> exactly that.
+
 A self-contained task brief, written to be handed to an agent or a new contributor.
 Everything needed to start is either here or linked from here.
 
@@ -179,3 +188,45 @@ weakness regression was correctly attributed rather than guessed at.
 - If a measurement contradicts a claim in the audit or the spec, **say so and correct
   the document**. Several findings in that audit were wrong and were withdrawn on
   evidence; that is the expected standard, not a failure.
+
+---
+
+## What this brief got wrong
+
+Recorded per the working agreement above: a measurement that contradicts the document
+corrects the document.
+
+**1. "Weaknesses and decks are one job, not two" — right conclusion, wrong reason, and the
+prescribed work was unnecessary.**
+
+The brief says both "require retuning the roster to be *school-agnostic*", and to "expect a
+full roster pass comparable in size to the one in PR #19". Neither happened, and neither
+was needed. `tools/generate_enemies.gd`'s table is untouched.
+
+An examiner's cards resolve at a flat 1.0 scale. `Battle._examiner_turn` never consults the
+weak/ward multiplier, because that multiplier is a property of the examiner *being hit* —
+it applies to the player's cards only. An examiner's card therefore has no school-dependent
+power, and the decks were already school-agnostic. What a fight's difficulty actually rests
+on is the deck's cost curve, its damage density and its status profile, which is why the
+generator preserves those three slot-for-slot and swaps only the card filling the slot.
+
+They *are* one job, but because both depend on the same thing: the player's deck is drafted
+from the examiners, so what the decks contain determines which weaknesses are worth having.
+
+**2. "Constraining the roll is not sufficient on its own" — true of the constraint that was
+tried, not of the problem.**
+
+Forcing every examiner to be weak to a school the player already owns reached 7.5%, as the
+brief records. But "owns" is the wrong predicate. The constraint that works is that an
+examiner is weak to a school it **teaches** — one in the deck it plays or in its courses'
+syllabus cards — because that is where the player's own cards come from. Shipped, that
+measures 14.6% over 240 runs across 12 worlds, against 17.5% for the fully authored roster.
+
+**3. A caveat on the brief's own measurement command.**
+
+`simulate.gd -- 120 12` gives ten runs per world, so a world's rate is quantised to 10% and
+"0%" is consistent with a true rate anywhere under about 15%. Every world that read 0% at
+that resolution graduated between 2.5% and 15% when re-run at 40 runs. Criterion 3 asks for
+a judgement on the per-world spread, and ten runs cannot support one — re-run a suspicious
+world concentrated (`simulate.gd -- 40 1 generative <seed>`) before believing it is dead.
+`simulate.gd` now prints each world's content seed for exactly this reason.
