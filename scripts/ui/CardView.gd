@@ -7,7 +7,10 @@ extends Control
 signal play_requested(card)
 signal inspect_requested(card)
 
-const CARD_SIZE := Vector2(200, 300)
+## Smaller than the original 200x300: at that size, five fanned and tilted cards
+## overlapped enough to clip each other's names. 170x255 keeps the 2:3 portrait and
+## leaves every card in a five-hand fully clear of its neighbours (see HandFan).
+const CARD_SIZE := Vector2(170, 255)
 ## How far up the card must be dragged before it counts as played.
 const PLAY_THRESHOLD := 120.0
 
@@ -59,34 +62,96 @@ func _build() -> void:
 	var ink: Color = Schools.colour(card.data.school)
 	var text_colour: Color = ArtLibrary.PAPER if ink.get_luminance() < 0.4 else ArtLibrary.INK
 
-	var name_box := UIKit.label(card.data.card_name, 24)
-	name_box.position = Vector2(16, CARD_SIZE.y - 96)
-	name_box.size = Vector2(CARD_SIZE.x - 32, 40)
-	name_box.add_theme_color_override("font_color", text_colour)
+	# What the card actually DOES. Without this, a player can only tell cards apart by
+	# name and has to have memorised all 48 — the single biggest readability gap
+	# reported from the playtest.
+	var effects_box := UIKit.label(effect_summary(card.data.effects), 19)
+	effects_box.position = Vector2(10, CARD_SIZE.y - 112)
+	effects_box.size = Vector2(CARD_SIZE.x - 20, 54)
+	effects_box.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	effects_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	effects_box.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	effects_box.clip_text = true
+	_paint_card_text(effects_box, text_colour)
+	add_child(effects_box)
+
+	var name_box := UIKit.label(card.data.card_name, 22)
+	name_box.position = Vector2(10, CARD_SIZE.y - 50)
+	name_box.size = Vector2(CARD_SIZE.x - 20, 26)
+	# Centred, not left: left-aligned text starting flush at the label's own edge
+	# lost its leading glyph once rotated ("Ink Blot" rendered as "nk Blot") even
+	# though the card itself had room to spare. Centring moves the first character
+	# away from that edge.
+	name_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_paint_card_text(name_box, text_colour)
 	add_child(name_box)
 
-	var cost := UIKit.label(str(card.data.cost), 30)
-	cost.position = Vector2(12, 8)
-	cost.add_theme_color_override("font_color", text_colour)
+	var cost := UIKit.label(str(card.data.cost), 26)
+	cost.position = Vector2(10, 6)
+	_paint_card_text(cost, text_colour)
 	add_child(cost)
 
 	var sigil := TextureRect.new()
-	sigil.texture = ArtFactory.sigil(card.data.school, Vector2i(32, 32))
-	sigil.position = Vector2(CARD_SIZE.x - 44, 8)
+	sigil.texture = ArtFactory.sigil(card.data.school, Vector2i(28, 28))
+	sigil.position = Vector2(CARD_SIZE.x - 38, 6)
 	sigil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(sigil)
 
-	# XP ticks along the bottom edge.
+	# Evolution progress. A row of one-tick-per-XP does not generalise: at a
+	# threshold of 24 (higher-tier cards on the five-level evolution track) that is
+	# 24 ticks at the old fixed spacing, landing hundreds of pixels off a ~200px
+	# card. Text scales to any threshold, and CardInstance.progress() also carries
+	# which level the card is on ("L2 3/9"), which discrete ticks never showed.
 	if card.can_evolve():
-		for i in card.data.xp_to_evolve:
-			var tick := Panel.new()
-			var style := StyleBoxFlat.new()
-			style.bg_color = ArtLibrary.INK if i < card.xp else ArtLibrary.SLATE
-			tick.add_theme_stylebox_override("panel", style)
-			tick.size = Vector2(24, 8)
-			tick.position = Vector2(16 + i * 30, CARD_SIZE.y - 24)
-			tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			add_child(tick)
+		var progress_box := UIKit.label(card.progress(), 16)
+		progress_box.position = Vector2(10, CARD_SIZE.y - 20)
+		progress_box.size = Vector2(CARD_SIZE.x - 20, 16)
+		progress_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_paint_card_text(progress_box, text_colour)
+		add_child(progress_box)
+
+
+## Turns a card's effects into short, plain-English text — "6 damage", "+6 block",
+## "3 Burn", "12 damage, lose 3 hp" — so a card can be judged without memorising it.
+## Static and pure so it is trivially testable on its own.
+static func effect_summary(effects: Array[Dictionary]) -> String:
+	var parts: Array[String] = []
+	for effect in effects:
+		var kind: String = str(effect.get("kind", ""))
+		var amount: int = int(effect.get("amount", 0))
+		match kind:
+			CardData.DAMAGE:
+				parts.append("%d damage" % amount)
+			CardData.BLOCK:
+				parts.append("+%d block" % amount)
+			CardData.HEAL:
+				parts.append("+%d heal" % amount)
+			CardData.STATUS:
+				parts.append(
+					"%d %s" % [amount, UIKit.status_name(effect.get("status", Statuses.Kind.BURN))]
+				)
+			CardData.DRAW:
+				parts.append("Draw %d" % amount)
+			CardData.MANA_NEXT:
+				parts.append("+%d mana next turn" % amount)
+			CardData.SELF_DAMAGE:
+				parts.append("lose %d hp" % amount)
+			CardData.DOUBLE_DECAY:
+				parts.append("doubles Decay")
+			CardData.BONUS_IF_CHILLED:
+				parts.append("+%d if chilled" % amount)
+			CardData.BONUS_IF_WARD_PLAYED:
+				parts.append("+%d if warded" % amount)
+	return ", ".join(parts)
+
+
+## Colours a card label and gives it a same-colour outline, which thickens every
+## glyph a little without changing the colour the eye reads — cheap insurance for
+## thin strokes against the card's grainy painted background.
+func _paint_card_text(label: Label, colour: Color) -> void:
+	label.add_theme_color_override("font_color", colour)
+	label.add_theme_color_override("font_outline_color", colour)
+	label.add_theme_constant_override("outline_size", 3)
 
 
 func set_playable(value: bool) -> void:

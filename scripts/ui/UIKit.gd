@@ -35,3 +35,19 @@ static func spacer() -> Control:
 	node.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return node
+
+
+## The single source for a status's display name, so CardView (effect text on a
+## card) and BattleScreen (log lines, status readouts) can't drift into calling the
+## same status by two different names.
+static func status_name(kind) -> String:
+	match int(kind):
+		Statuses.Kind.BURN:
+			return "Burn"
+		Statuses.Kind.CHILL:
+			return "Chill"
+		Statuses.Kind.BLOT:
+			return "Blot"
+		Statuses.Kind.DECAY:
+			return "Decay"
+	return "?"
