@@ -192,9 +192,17 @@ func _test_xp_shown_on_every_card() -> void:
 		saw_progress.append(progress)
 
 	# Confirm this isn't a coincidence where every card happens to show the same
-	# string: the trained card's progress differs from an untrained one's.
-	check(saw_progress.has("1/5"), "the trained card shows its actual progress, not 0/5 for everyone")
-	check(saw_progress.has("0/5"), "an untrained card still shows 0/5")
+	# string: at least two cards must show DIFFERENT progress. Derived from
+	# CardInstance.progress() rather than hardcoded, because the format is owned by that
+	# class and has already changed once — it went from "0/5" to "L1 0/5" when cards
+	# gained five levels, silently breaking a literal assertion here.
+	var distinct := {}
+	for progress in saw_progress:
+		distinct[progress] = true
+	check(
+		distinct.size() >= 2,
+		"cards show differing progress, not one string for everyone (saw %s)" % [distinct.keys()]
+	)
 
 	registration.free()
 
@@ -262,8 +270,17 @@ func _test_mouse_filters() -> void:
 	eq(registration.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the screen itself ignores the mouse")
 	for box in registration.find_children("*", "VBoxContainer", true, false):
 		eq(box.mouse_filter, Control.MOUSE_FILTER_IGNORE, "layout containers ignore the mouse")
+	for margin in registration.find_children("*", "MarginContainer", true, false):
+		eq(margin.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the outer margin ignores the mouse")
 	for grid in registration.find_children("*", "GridContainer", true, false):
 		eq(grid.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the card grid ignores the mouse")
+	# The "NEW" ownership badge sits on top of an offered card's tap target as a child
+	# Control, not beside it -- if it (or its label) ever took the mouse, it would
+	# silently eat the tap instead of letting it fall through to the button beneath.
+	for badge in registration.find_children("*", "PanelContainer", true, false):
+		eq(badge.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the NEW badge ignores the mouse")
+	for label in registration.find_children("*", "Label", true, false):
+		eq(label.mouse_filter, Control.MOUSE_FILTER_IGNORE, "labels never eat taps")
 	for button in registration.find_children("*", "Button", true, false):
 		eq(button.mouse_filter, Control.MOUSE_FILTER_STOP, "buttons take taps")
 		check(button.custom_minimum_size.y >= UIKit.TAP_MIN, "buttons are thumb-sized")

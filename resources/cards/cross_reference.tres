@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/annotated_bibliography.tres" id="1_vby7k"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_td5pw"]
+
+[resource]
+script = ExtResource("2_td5pw")
+card_name = "Cross Reference"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 8,
+"kind": "damage"
+}, {
+"amount": 3,
+"kind": "draw"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_vby7k")
+art_id = "cards/cross_reference"

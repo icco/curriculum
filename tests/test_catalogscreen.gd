@@ -15,6 +15,7 @@ func run() -> void:
 	_test_edges_behind_and_mouse_filters()
 	_test_course_chosen_signal()
 	_test_bestiary_known_and_unknown()
+	_test_scroll_height_has_no_dead_row()
 
 
 func _test_entry_courses_only() -> void:
@@ -98,7 +99,14 @@ func _test_edges_behind_and_mouse_filters() -> void:
 	map.show_catalog(cat, {"Basic Arcana 101": Grading.Grade.S})
 
 	check(map.get_child_count() > 0, "the map built children")
-	check(map.get_child(0) is Node2D, "the edges container is the first child, behind the buttons")
+	# The edges and the node buttons now share one scrollable content control (so an
+	# arbitrarily tall syllabus can scroll as a single unit) rather than being direct
+	# children of the map itself -- find that shared parent via a button, and confirm
+	# the edges are its first child, drawn behind every node it also parents.
+	check(map.node_buttons.size() > 0, "sanity: the map has at least one node button")
+	var content: Node = (map.node_buttons.values()[0] as Node).get_parent()
+	check(content.get_child(0) is Node2D, "the edges container is the first child, behind the buttons")
+	check(content.get_child(0) == map.find_children("*", "Node2D", true, false)[0], "that Node2D is the map's edges container")
 	eq(map.mouse_filter, Control.MOUSE_FILTER_IGNORE, "the map itself ignores the mouse")
 	for course_name in map.node_buttons:
 		eq(
@@ -169,3 +177,41 @@ func _test_bestiary_known_and_unknown() -> void:
 	)
 
 	beast.free()
+
+
+## The scroll content must be tall enough for the last row and no taller. Row centres
+## are 0-indexed, so multiplying by the row COUNT leaves a full empty ROW_HEIGHT of
+## overscroll -- 300px of dead space on the single-row catalog a fresh run shows.
+func _test_scroll_height_has_no_dead_row() -> void:
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var screen := CourseCatalog.new()
+	screen.size = Vector2(1080, 1920)
+	screen.show_catalog(library.catalog(), {})
+
+	var content: Control = null
+	for scroll in screen.find_children("*", "ScrollContainer", true, false):
+		for child in scroll.get_children():
+			if child is Control and child.custom_minimum_size.y > 0.0:
+				content = child
+				break
+	check(content != null, "found the scrolling content node")
+	if content == null:
+		screen.free()
+		return
+
+	# A fresh run reveals only the three prerequisite-free courses: one row.
+	var lowest := 0.0
+	for name in screen.node_buttons:
+		var button: Button = screen.node_buttons[name]
+		lowest = maxf(lowest, button.position.y + button.size.y)
+	check(lowest > 0.0, "at least one node was placed")
+	check(
+		content.custom_minimum_size.y >= lowest,
+		"content reaches the lowest node (%.0f >= %.0f)" % [content.custom_minimum_size.y, lowest]
+	)
+	check(
+		content.custom_minimum_size.y < lowest + CourseCatalog.ROW_HEIGHT,
+		"no empty row below the last one (%.0f, lowest node ends %.0f)"
+			% [content.custom_minimum_size.y, lowest]
+	)
+	screen.free()

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/landmark_thesis.tres" id="1_3gxky"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_14433"]
+
+[resource]
+script = ExtResource("2_14433")
+card_name = "Peer Reviewed Thesis"
+school = 2
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 17,
+"kind": "damage"
+}, {
+"amount": 3,
+"kind": "draw"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_3gxky")
+art_id = "cards/peer_reviewed_thesis"

@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_urf06"]
+[ext_resource type="Resource" path="res://resources/cards/endless_winter.tres" id="1_5q482"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_clv2j"]
 
 [resource]
-script = ExtResource("1_urf06")
+script = ExtResource("2_clv2j")
 card_name = "Long Winter"
 school = 1
 cost = 3
@@ -15,4 +16,6 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 1
 }])
-art_id = "cards/winter_term"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_5q482")
+art_id = "cards/long_winter"

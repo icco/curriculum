@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/grand_chancellor_sigil.tres" id="1_7fn88"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_xj5sj"]
+
+[resource]
+script = ExtResource("2_xj5sj")
+card_name = "Doctoral Sigil"
+school = 4
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 33,
+"kind": "block"
+}, {
+"amount": 15,
+"kind": "heal"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_7fn88")
+art_id = "cards/doctoral_sigil"

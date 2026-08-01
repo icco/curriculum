@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/eternal_winter.tres" id="1_23u75"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_b2hoq"]
+
+[resource]
+script = ExtResource("2_b2hoq")
+card_name = "Black Ice"
+school = 1
+effects = Array[Dictionary]([{
+"amount": 5,
+"kind": "status",
+"status": 1
+}, {
+"amount": 7,
+"kind": "damage"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_23u75")
+art_id = "cards/black_ice"

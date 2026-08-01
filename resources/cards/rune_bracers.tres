@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/glyph_bracers.tres" id="1_pvq4k"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_pbke2"]
+
+[resource]
+script = ExtResource("2_pbke2")
+card_name = "Rune Bracers"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 17,
+"kind": "block"
+}, {
+"amount": 8,
+"kind": "bonus_if_ward_played"
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_pvq4k")
+art_id = "cards/rune_bracers"

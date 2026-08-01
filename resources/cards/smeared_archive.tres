@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/redacted_record.tres" id="1_lxwin"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_g65cg"]
+
+[resource]
+script = ExtResource("2_g65cg")
+card_name = "Smeared Archive"
+school = 2
+effects = Array[Dictionary]([{
+"amount": 3,
+"kind": "status",
+"status": 2
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_lxwin")
+art_id = "cards/smeared_archive"

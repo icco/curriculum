@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_upch1"]
+[ext_resource type="Resource" path="res://resources/cards/killing_frost.tres" id="1_y45s2"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_wjjwk"]
 
 [resource]
-script = ExtResource("1_upch1")
+script = ExtResource("2_wjjwk")
 card_name = "Deep Hoarfrost"
 school = 1
 effects = Array[Dictionary]([{
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "amount": 3,
 "kind": "damage"
 }])
-art_id = "cards/hoarfrost"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_y45s2")
+art_id = "cards/deep_hoarfrost"

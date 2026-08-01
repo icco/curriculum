@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_tyly0"]
+[ext_resource type="Resource" path="res://resources/cards/rune_bracers.tres" id="1_qgo8n"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_kbfmo"]
 
 [resource]
-script = ExtResource("1_tyly0")
+script = ExtResource("2_kbfmo")
 card_name = "Sigil Bracers"
 school = 4
 cost = 2
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "amount": 6,
 "kind": "bonus_if_ward_played"
 }])
-art_id = "cards/warded_bracers"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_qgo8n")
+art_id = "cards/sigil_bracers"

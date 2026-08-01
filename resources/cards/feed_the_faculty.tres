@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_idh52"]
+[ext_resource type="Resource" path="res://resources/cards/feed_the_department.tres" id="1_8686c"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_6vpyf"]
 
 [resource]
-script = ExtResource("1_idh52")
+script = ExtResource("2_6vpyf")
 card_name = "Feed the Faculty"
 school = 3
 cost = 2
@@ -16,4 +17,6 @@ effects = Array[Dictionary]([{
 "amount": 1,
 "kind": "draw"
 }])
-art_id = "cards/feed_the_curriculum"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_8686c")
+art_id = "cards/feed_the_faculty"

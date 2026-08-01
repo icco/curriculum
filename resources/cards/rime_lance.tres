@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_s6f57"]
+[ext_resource type="Resource" path="res://resources/cards/glacier_lance.tres" id="1_ua33n"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_7qwol"]
 
 [resource]
-script = ExtResource("1_s6f57")
+script = ExtResource("2_7qwol")
 card_name = "Rime Lance"
 school = 1
 effects = Array[Dictionary]([{
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 1
 }])
-art_id = "cards/frost_lance"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_ua33n")
+art_id = "cards/rime_lance"

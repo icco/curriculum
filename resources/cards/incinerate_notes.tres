@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/annihilate_notes.tres" id="1_ykigh"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_j3cwr"]
+
+[resource]
+script = ExtResource("2_j3cwr")
+card_name = "Incinerate Notes"
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 26,
+"kind": "damage"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_ykigh")
+art_id = "cards/incinerate_notes"

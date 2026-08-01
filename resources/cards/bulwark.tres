@@ -1,13 +1,16 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_3k7xp"]
+[ext_resource type="Resource" path="res://resources/cards/rampart.tres" id="1_r0gik"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_nvv2e"]
 
 [resource]
-script = ExtResource("1_3k7xp")
+script = ExtResource("2_nvv2e")
 card_name = "Bulwark"
 school = 4
 effects = Array[Dictionary]([{
 "amount": 10,
 "kind": "block"
 }])
-art_id = "cards/guard"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_r0gik")
+art_id = "cards/bulwark"
