@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_fg5pm"]
+
+[resource]
+script = ExtResource("1_fg5pm")
+card_name = "Eternal Winter"
+school = 1
+effects = Array[Dictionary]([{
+"amount": 6,
+"kind": "status",
+"status": 1
+}, {
+"amount": 8,
+"kind": "damage"
+}])
+art_id = "cards/eternal_winter"

@@ -1,12 +1,15 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_866df"]
+[ext_resource type="Resource" path="res://resources/cards/blaze_lance.tres" id="1_p5nbb"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_s7p48"]
 
 [resource]
-script = ExtResource("1_866df")
+script = ExtResource("2_s7p48")
 card_name = "Ember Lance"
 effects = Array[Dictionary]([{
 "amount": 10,
 "kind": "damage"
 }])
-art_id = "cards/spark"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_p5nbb")
+art_id = "cards/ember_lance"

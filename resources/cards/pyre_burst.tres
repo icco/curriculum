@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_aw7o7"]
+[ext_resource type="Resource" path="res://resources/cards/bonfire_burst.tres" id="1_67178"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_37n3h"]
 
 [resource]
-script = ExtResource("1_aw7o7")
+script = ExtResource("2_37n3h")
 card_name = "Pyre Burst"
 cost = 2
 effects = Array[Dictionary]([{
@@ -14,4 +15,6 @@ effects = Array[Dictionary]([{
 "kind": "status",
 "status": 0
 }])
-art_id = "cards/cinder_burst"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_67178")
+art_id = "cards/pyre_burst"

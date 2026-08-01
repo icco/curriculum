@@ -1,9 +1,10 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_ipxwp"]
+[ext_resource type="Resource" path="res://resources/cards/exhaustive_marginalia.tres" id="1_dlro8"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_qjf3c"]
 
 [resource]
-script = ExtResource("1_ipxwp")
+script = ExtResource("2_qjf3c")
 card_name = "Copious Marginalia"
 school = 2
 cost = 0
@@ -11,4 +12,6 @@ effects = Array[Dictionary]([{
 "amount": 2,
 "kind": "draw"
 }])
-art_id = "cards/marginalia"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_dlro8")
+art_id = "cards/copious_marginalia"

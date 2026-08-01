@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_diggx"]
+
+[resource]
+script = ExtResource("1_diggx")
+card_name = "Full Recovery"
+school = 4
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 25,
+"kind": "heal"
+}])
+art_id = "cards/full_recovery"

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_udf51"]
+
+[resource]
+script = ExtResource("1_udf51")
+card_name = "Complete Concordance"
+school = 2
+cost = 0
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "draw"
+}])
+art_id = "cards/complete_concordance"

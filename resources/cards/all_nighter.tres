@@ -1,13 +1,16 @@
 [gd_resource type="Resource" script_class="CardData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_w8065"]
+[ext_resource type="Resource" path="res://resources/cards/caffeine_binge.tres" id="1_ds1yf"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_5g7vj"]
 
 [resource]
-script = ExtResource("1_w8065")
+script = ExtResource("2_5g7vj")
 card_name = "All-Nighter"
 school = 2
 effects = Array[Dictionary]([{
 "amount": 2,
 "kind": "mana_next"
 }])
-art_id = "cards/cram"
+xp_to_evolve = 9
+evolved_card = ExtResource("1_ds1yf")
+art_id = "cards/all_nighter"

@@ -18,10 +18,15 @@ func run() -> void:
 	if library == null:
 		return
 
-	eq(library.cards.size(), 48, "twenty-four base cards plus twenty-four evolutions")
+	eq(library.cards.size(), 120, "twenty-four lines of five levels each")
 
-	var base_count := 0
+	var terminal_count := 0
+	var evolvable_count := 0
 	var names := {}
+	var art_ids := {}
+	# Tracks every card that is *someone's* evolved_card, so the roots (level1
+	# cards, the ones nobody points to) can be found afterward.
+	var is_evolved_card := {}
 	for card in library.cards:
 		check(card != null, "no null card in the library")
 		if card == null:
@@ -32,22 +37,65 @@ func run() -> void:
 		check(card.cost >= 0 and card.cost <= 3, "%s costs 0-3" % card.card_name)
 		check(card.effects.size() > 0, "%s does something" % card.card_name)
 		check(card.art_id != "", "%s declares an art id" % card.card_name)
+		# Every level now gets its own illustration (the art pipeline generates one
+		# per card, not one per line), so art_id must be unique per card rather
+		# than shared within a line — the inverse of what this used to assert.
+		check(not art_ids.has(card.art_id), "art id %s is unique" % card.art_id)
+		art_ids[card.art_id] = true
 		for effect in card.effects:
 			check(effect.has("kind"), "%s effect declares a kind" % card.card_name)
-		if not card.is_fully_evolved():
-			base_count += 1
+		if card.is_fully_evolved():
+			terminal_count += 1
+		else:
+			evolvable_count += 1
 			neq(card.evolved_card, card, "%s does not evolve into itself" % card.card_name)
-			check(
-				card.evolved_card.is_fully_evolved(),
-				"%s evolves into a terminal card" % card.card_name
-			)
-			eq(card.school, card.evolved_card.school, "%s keeps its school" % card.card_name)
 			eq(
-				card.art_id,
-				card.evolved_card.art_id,
-				"%s shares art with its evolution" % card.card_name
+				card.school,
+				card.evolved_card.school,
+				"%s keeps its school through evolution" % card.card_name
 			)
-	eq(base_count, 24, "exactly twenty-four cards can evolve")
+			is_evolved_card[card.evolved_card.card_name] = true
+	eq(evolvable_count, 96, "96 of 120 cards can still evolve (levels 1-4 of every line)")
+	eq(terminal_count, 24, "24 terminal, mastered cards, one per line")
+	eq(art_ids.size(), 120, "every one of the 120 cards has a distinct art id")
+
+	# Walk each line root (a card nobody's evolved_card points at) from level 1 to
+	# level 5: exactly five distinct levels, one shared school throughout, the
+	# 5/9/15/24 thresholds on levels 1-4, and termination at level 5. Pinning
+	# roots.size() before the walk means an empty or truncated library cannot pass
+	# every assertion below vacuously.
+	var roots: Array[CardData] = []
+	for card in library.cards:
+		if not is_evolved_card.has(card.card_name):
+			roots.append(card)
+	eq(roots.size(), 24, "exactly twenty-four line roots (level 1 cards)")
+
+	var expected_thresholds := [5, 9, 15, 24]
+	for root in roots:
+		var seen := {}
+		var node: CardData = root
+		var school: int = root.school
+		var depth := 0
+		while depth < 4:
+			check(not seen.has(node.card_name), "%s line has no repeated card" % root.card_name)
+			seen[node.card_name] = true
+			eq(node.school, school, "%s stays in one school across its whole line" % root.card_name)
+			check(
+				not node.is_fully_evolved(),
+				"%s level %d is not terminal early" % [root.card_name, depth + 1]
+			)
+			eq(
+				node.xp_to_evolve,
+				expected_thresholds[depth],
+				"%s level %d needs %d xp to evolve" % [root.card_name, depth + 1, expected_thresholds[depth]]
+			)
+			node = node.evolved_card
+			depth += 1
+		check(not seen.has(node.card_name), "%s line has no repeated card" % root.card_name)
+		seen[node.card_name] = true
+		eq(node.school, school, "%s's level 5 stays in the line's school" % root.card_name)
+		check(node.is_fully_evolved(), "%s line terminates at level 5" % root.card_name)
+		eq(seen.size(), 5, "%s line is exactly five levels long" % root.card_name)
 
 	# Every .tres under resources/ must load, including any the library does not index.
 	# `--import` scans assets but does not eagerly load an unreferenced .tres, so a

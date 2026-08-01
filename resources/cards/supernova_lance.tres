@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_k7uet"]
+
+[resource]
+script = ExtResource("1_k7uet")
+card_name = "Supernova Lance"
+effects = Array[Dictionary]([{
+"amount": 17,
+"kind": "damage"
+}])
+art_id = "cards/supernova_lance"

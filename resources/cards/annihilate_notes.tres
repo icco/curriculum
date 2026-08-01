@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_of5ne"]
+
+[resource]
+script = ExtResource("1_of5ne")
+card_name = "Annihilate Notes"
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 28,
+"kind": "damage"
+}])
+art_id = "cards/annihilate_notes"

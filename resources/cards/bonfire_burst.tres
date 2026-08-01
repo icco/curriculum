@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/wildblaze_burst.tres" id="1_3plys"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_a62e1"]
+
+[resource]
+script = ExtResource("2_a62e1")
+card_name = "Bonfire Burst"
+cost = 2
+effects = Array[Dictionary]([{
+"amount": 10,
+"kind": "damage"
+}, {
+"amount": 7,
+"kind": "status",
+"status": 0
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_3plys")
+art_id = "cards/bonfire_burst"

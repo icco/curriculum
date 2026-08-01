@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/permafrost_lance.tres" id="1_cn3db"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_qwpmq"]
+
+[resource]
+script = ExtResource("2_qwpmq")
+card_name = "Glacier Lance"
+school = 1
+effects = Array[Dictionary]([{
+"amount": 10,
+"kind": "damage"
+}, {
+"amount": 1,
+"kind": "status",
+"status": 1
+}])
+xp_to_evolve = 15
+evolved_card = ExtResource("1_cn3db")
+art_id = "cards/glacier_lance"

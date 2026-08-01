@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/bitter_finality.tres" id="1_sunpk"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_af78q"]
+
+[resource]
+script = ExtResource("2_af78q")
+card_name = "Bitter Judgment"
+school = 3
+effects = Array[Dictionary]([{
+"amount": 2,
+"kind": "self_damage"
+}, {
+"amount": 27,
+"kind": "damage"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_sunpk")
+art_id = "cards/bitter_judgment"

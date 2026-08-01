@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CardData" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/doctoral_immolation.tres" id="1_r74kw"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="2_4u46d"]
+
+[resource]
+script = ExtResource("2_4u46d")
+card_name = "Convocation Inferno"
+cost = 3
+effects = Array[Dictionary]([{
+"amount": 44,
+"kind": "damage"
+}])
+xp_to_evolve = 24
+evolved_card = ExtResource("1_r74kw")
+art_id = "cards/convocation_inferno"
+exhaust = true
