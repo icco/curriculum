@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dmft8gerhrlls"
-path="res://.godot/imported/cinder_pillar.png-5244e3da5d36cb750a797a21f1b35acb.ctex"
+uid="uid://b8yfraxt3h86x"
+path="res://.godot/imported/empyrean_lance.png-eb04b04603c2f66f1fe0ccb99835b557.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/cards/cinder_pillar.png"
-dest_files=["res://.godot/imported/cinder_pillar.png-5244e3da5d36cb750a797a21f1b35acb.ctex"]
+source_file="res://assets/sprites/cards/empyrean_lance.png"
+dest_files=["res://.godot/imported/empyrean_lance.png-eb04b04603c2f66f1fe0ccb99835b557.ctex"]
 
 [params]
 

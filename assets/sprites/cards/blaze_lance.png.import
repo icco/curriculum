@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://27jnpdw8mih4"
-path="res://.godot/imported/ember_barrage.png-aae185991ae2d54d3245ca2ad6e39f11.ctex"
+path="res://.godot/imported/blaze_lance.png-569679c6ce012efa495030c36ac03fee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/cards/ember_barrage.png"
-dest_files=["res://.godot/imported/ember_barrage.png-aae185991ae2d54d3245ca2ad6e39f11.ctex"]
+source_file="res://assets/sprites/cards/blaze_lance.png"
+dest_files=["res://.godot/imported/blaze_lance.png-569679c6ce012efa495030c36ac03fee.ctex"]
 
 [params]
 
