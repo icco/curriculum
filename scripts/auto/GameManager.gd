@@ -7,13 +7,16 @@ extends Node
 var run: Run = null
 
 
+## The whole library reaches the Run, not just its starting deck: examiners are
+## generated from it per run, so dropping it here left the faculty empty and every
+## examiner on its authored schools. Same defect as the one Main.start_new_run carried.
 func start_new_run(library: ContentLibrary) -> Run:
-	run = Run.new(library.new_starting_deck())
+	run = Run.new(library.new_starting_deck(), library)
 	return run
 
 
-func load_existing() -> Run:
-	run = SaveGame.load_run()
+func load_existing(library: ContentLibrary = null) -> Run:
+	run = SaveGame.load_run(library)
 	return run
 
 

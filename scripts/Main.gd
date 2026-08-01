@@ -87,13 +87,18 @@ func _show_menu() -> void:
 
 
 func start_new_run() -> void:
-	run = Run.new(library.new_starting_deck())
+	# The library, not just its starting deck. Passing only the deck was a real defect
+	# rather than a tidiness one: this run's examiners are GENERATED from the library, so
+	# a fresh run built without it rolled an empty faculty and faced the authored schools,
+	# while a continued run (which did pass the roster) faced rolled ones. Per-run content
+	# was live in tools/simulate.gd and dead in the actual game.
+	run = Run.new(library.new_starting_deck(), library)
 	SaveGame.save(run)
 	_show_catalog()
 
 
 func _continue_run() -> void:
-	run = SaveGame.load_run(library.enemies)
+	run = SaveGame.load_run(library)
 	if run == null:
 		start_new_run()
 		return

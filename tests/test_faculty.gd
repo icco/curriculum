@@ -40,12 +40,27 @@ func _roster() -> Array:
 	]
 
 
+## A library around a roster. `opening` is the starting deck's schools -- the faculty
+## reads them from the library rather than from any run's deck, so a suite that wants to
+## constrain the roll states them here.
+func _library(roster: Array, opening: Array = []) -> ContentLibrary:
+	var lib := ContentLibrary.new()
+	var enemies: Array[EnemyData] = []
+	enemies.assign(roster)
+	lib.enemies = enemies
+	var start: Array[CardData] = []
+	for school in opening:
+		start.append(_card(school, CardData.DAMAGE, 6))
+	lib.starting_deck = start
+	return lib
+
+
 func run() -> void:
 	# Deterministic in the seed: the whole save format rests on this, since a save
 	# stores one integer and rebuilds the faculty from it rather than serialising
 	# nine examiners.
-	var a := Faculty.new(_roster(), 4242)
-	var b := Faculty.new(_roster(), 4242)
+	var a := Faculty.new(_library(_roster()), 4242)
+	var b := Faculty.new(_library(_roster()), 4242)
 	for name in ["Aggressive", "Turtle", "Mixed"]:
 		var one: EnemyData = a.examiner(_enemy(name, 0, 0, []))
 		var two: EnemyData = b.examiner(_enemy(name, 0, 0, []))
@@ -56,7 +71,7 @@ func run() -> void:
 	# since any single pair can legitimately collide.
 	var seen := {}
 	for seed_value in range(1, 40):
-		var faculty := Faculty.new(_roster(), seed_value)
+		var faculty := Faculty.new(_library(_roster()), seed_value)
 		var signature := ""
 		for enemy in faculty.all():
 			signature += "%d," % enemy.warded_school
@@ -69,13 +84,17 @@ func run() -> void:
 	var roster := _roster()
 	var before: Array = []
 	for enemy in roster:
-		before.append([enemy.weak_school, enemy.warded_school, enemy.deck.size()])
-	var faculty := Faculty.new(roster, 99)
+		# The deck is compared CARD BY CARD, not by size. A generator that swapped a
+		# deck's contents in place while keeping its length -- exactly what a
+		# substitution bug writing through to the library looks like -- passes every
+		# size-based assertion identically.
+		before.append([enemy.weak_school, enemy.warded_school, enemy.deck.duplicate()])
+	var faculty := Faculty.new(_library(roster), 99)
 	for i in roster.size():
 		eq(
-			[roster[i].weak_school, roster[i].warded_school, roster[i].deck.size()],
+			[roster[i].weak_school, roster[i].warded_school, roster[i].deck],
 			before[i],
-			"%s's roster resource is unmodified" % roster[i].enemy_name
+			"%s's roster resource is unmodified, deck contents included" % roster[i].enemy_name
 		)
 		var variant: EnemyData = faculty.examiner(roster[i])
 		neq(variant, roster[i], "the variant is a distinct object")
@@ -88,7 +107,7 @@ func run() -> void:
 	# rather than merely hard.
 	var starting := [Schools.School.CINDER, Schools.School.WARD]
 	for seed_value in range(1, 60):
-		var f := Faculty.new(_roster(), seed_value, starting)
+		var f := Faculty.new(_library(_roster(), starting), seed_value)
 		for enemy in f.all():
 			neq(
 				enemy.warded_school,
@@ -104,7 +123,7 @@ func run() -> void:
 
 	# An empty roster is legal -- it is what a suite building a bare Run gets -- and
 	# must leave examiners on their authored schools rather than crashing.
-	var bare := Faculty.new([], 7)
+	var bare := Faculty.new(null, 7)
 	check(bare.is_empty(), "no roster means an empty faculty")
 	var untouched := _enemy("Solo", Schools.School.ROT, Schools.School.INK, [])
 	eq(bare.examiner(untouched), untouched, "an unknown examiner falls back to its own resource")

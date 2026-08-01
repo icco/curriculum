@@ -140,6 +140,42 @@ func run() -> void:
 			eq(partial_back.deck[0].xp, 2, "surviving card kept its own xp")
 	SaveGame.delete()
 
+	# A mid-run load must rebuild the IDENTICAL faculty -- same schools, same decks --
+	# from the one integer the save stores. Everything downstream rests on it: the
+	# Bestiary keys off examiner names and records what was learned about their schools,
+	# so a faculty that differs after a load turns every entry the player earned into a
+	# lie, and the decks they were drafting from change under them.
+	#
+	# The deck saved here is deliberately a DRAFTED one -- Frost and Rot cards the
+	# starting deck does not contain -- because that is the case that breaks. Generation
+	# is constrained by the schools the player OPENS with; read those off the run's
+	# current deck and a fresh run sees three schools where a continued run sees five,
+	# and the same seed rebuilds a different world. A round-trip on an untouched starting
+	# deck passes either way and proves nothing.
+	var library: ContentLibrary = load("res://resources/content_library.tres")
+	var drafted: Array = []
+	for slug in ["spark", "guard", "ink_blot", "frost_lance", "rot_seed", "glass_shard"]:
+		drafted.append(CardInstance.new(load("res://resources/cards/%s.tres" % slug)))
+	var mid_run := Run.new(drafted, library)
+	mid_run.record_result(_course("Basic Arcana 101"), Grading.Grade.B, 40)
+	SaveGame.save(mid_run)
+	var reloaded: Run = SaveGame.load_run(library)
+	check(reloaded != null, "mid-run save loaded")
+	if reloaded != null:
+		eq(reloaded.content_seed, mid_run.content_seed, "the content seed round-tripped")
+		var before_faculty: Array = mid_run.faculty.all()
+		var after_faculty: Array = reloaded.faculty.all()
+		eq(after_faculty.size(), before_faculty.size(), "the faculty is the same size")
+		check(not before_faculty.is_empty(), "the faculty is not empty -- the library reached it")
+		for i in mini(before_faculty.size(), after_faculty.size()):
+			var was: EnemyData = before_faculty[i]
+			var now: EnemyData = after_faculty[i]
+			eq(now.enemy_name, was.enemy_name, "examiner %d is the same one" % i)
+			eq(now.weak_school, was.weak_school, "%s kept its weak school" % was.enemy_name)
+			eq(now.warded_school, was.warded_school, "%s kept its ward" % was.enemy_name)
+			eq(now.deck, was.deck, "%s kept its exact deck" % was.enemy_name)
+	SaveGame.delete()
+
 	# A corrupt (unparseable) file does not crash the game.
 	var f := FileAccess.open(SaveGame.PATH, FileAccess.WRITE)
 	f.store_string("{not json")

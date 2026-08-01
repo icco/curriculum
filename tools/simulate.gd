@@ -44,7 +44,7 @@ func _process(_delta: float) -> bool:
 		# and differ only in their draws.
 		var world := i % worlds
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library.enemies, 500 + world)
+		var game := Run.new(library.new_starting_deck(), library, 500 + world)
 		var catalog := library.catalog()
 		var guard := 0
 		var last_course_lost: String = ""

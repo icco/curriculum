@@ -103,7 +103,7 @@ func run_policy(count: int) -> Dictionary:
 	for i in count:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library.enemies, 500 + i)
+		var game := Run.new(library.new_starting_deck(), library, 500 + i)
 		var catalog := library.catalog()
 		var guard := 0
 		while not game.is_over() and guard < 30:

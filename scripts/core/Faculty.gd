@@ -15,8 +15,12 @@ extends RefCounted
 ## easiest to get wrong invisibly, and the reason card XP lives on CardInstance rather
 ## than CardData. Nothing here writes to a loaded resource.
 ##
-## Generation is pure in (enemies, seed, starting_schools), which is what lets a save
-## store a single integer and rebuild the identical faculty.
+## Generation is pure in (library, seed), which is what lets a save store a single
+## integer and rebuild the identical faculty. Everything the roll is constrained by is
+## read off the ContentLibrary — including the schools the player opens with, which come
+## from `starting_deck` and NOT from the run's current deck. See
+## ContentLibrary.opening_schools() for why that distinction decides whether a continued
+## run faces the faculty it started against.
 ##
 ##
 ## WHY ONLY THE WARD IS ROLLED
@@ -51,14 +55,19 @@ var _variants := {}  ## enemy_name -> EnemyData
 var _order: Array[String] = []
 
 
-func _init(base_enemies: Array, content_seed: int, starting_schools: Array = []) -> void:
+## `content` may be null — that is what a suite constructing a bare Run gets, and it
+## leaves the faculty empty and every examiner on its authored schools.
+func _init(content: ContentLibrary, content_seed: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = content_seed
 
 	var roster: Array = []
-	for base in base_enemies:
-		if base != null:
-			roster.append(base)
+	var starting_schools: Array[int] = []
+	if content != null:
+		for base in content.enemies:
+			if base != null:
+				roster.append(base)
+		starting_schools = content.opening_schools()
 
 	# Dealt from a stratified bag rather than rolled independently. Uniform rolls
 	# cluster: with nine examiners and five schools, worlds where one school is nobody's

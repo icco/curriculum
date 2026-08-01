@@ -22,19 +22,19 @@ var content_seed := 0
 var faculty: Faculty = null
 
 
-## `enemies` is the content library's roster; passing none leaves the faculty empty and
-## every examiner on its authored schools, which is what suites constructing a bare Run
-## want. `seed_value` of 0 means "roll one", so only a load passes it explicitly.
-func _init(starting_deck: Array, enemies: Array = [], seed_value: int = 0) -> void:
+## `content` is the whole content library, because this run's examiners are generated
+## from it rather than merely indexed out of it; passing none leaves the faculty empty
+## and every examiner on its authored schools, which is what suites constructing a bare
+## Run want. `seed_value` of 0 means "roll one", so only a load passes it explicitly.
+##
+## Note what is NOT passed: `starting_deck`. The faculty's constraints read the schools
+## the player opens with off the library's authored starting deck, not off this run's
+## deck — on a load, `starting_deck` here is the drafted mid-run deck, and feeding that
+## to the generator would rebuild a different faculty from the same seed.
+func _init(starting_deck: Array, content: ContentLibrary = null, seed_value: int = 0) -> void:
 	deck = starting_deck.duplicate()
 	content_seed = seed_value if seed_value != 0 else _fresh_seed()
-	# The starting deck's schools shape the roll: the faculty has to stay learnable by
-	# the deck the player actually opens with. See Faculty's constraints.
-	var schools := {}
-	for card in deck:
-		if card != null and card.data != null:
-			schools[card.data.school] = true
-	faculty = Faculty.new(enemies, content_seed, schools.keys())
+	faculty = Faculty.new(content, content_seed)
 
 
 static func _fresh_seed() -> int:
