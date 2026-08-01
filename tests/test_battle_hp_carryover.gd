@@ -68,6 +68,14 @@ func run() -> void:
 	var overfull := Battle.new(_deck(6), _enemy(40), Bestiary.new(), rng, 9999)
 	eq(overfull.player.hp, Run.STARTING_HP, "a starting hp above max is clamped")
 
+	# 0 is the "full" sentinel, not a dead player walking in with nothing. Run
+	# guarantees this is unreachable in play (record_result clamps a win to at least
+	# 1 and restores to max on an F), but the sentinel is load-bearing enough that it
+	# should be intentional rather than incidental.
+	var zeroed := Battle.new(_deck(6), _enemy(40), Bestiary.new(), rng, 0)
+	eq(zeroed.player.hp, Run.STARTING_HP, "0 means full, not dead")
+	eq(zeroed.player_starting_hp, Run.STARTING_HP, "the sentinel records full, not 0")
+
 	# The round trip that was broken: damage taken in a battle must reach Run.hp and
 	# come back out into the NEXT battle.
 	var game := Run.new(_deck(6))

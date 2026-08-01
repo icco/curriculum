@@ -41,6 +41,11 @@ var _ward_played_this_turn := false
 ## caller with no run behind it (most tests) wants. Hit points are a RUN resource, not
 ## a per-battle buffer that refills — Run.hp is written by record_result and
 ## round-tripped by SaveGame, and reading it back here is what makes it mean anything.
+##
+## The player's MAXIMUM is Run.STARTING_HP by construction, not threaded in: nothing
+## in the game raises max hp, so Run.max_hp is always Run.STARTING_HP. If max-hp
+## upgrades ever land, Run.max_hp has to be passed in alongside starting_hp — SaveGame
+## already restores it as its own field, so the two would silently disagree here.
 func _init(
 	player_cards: Array,
 	enemy: EnemyData,
