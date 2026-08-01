@@ -2,16 +2,16 @@
 
 [ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_7wr4r"]
 [ext_resource type="Resource" path="res://resources/cards/spilled_ledger.tres" id="2_acyqi"]
-[ext_resource type="Resource" path="res://resources/cards/blightseed.tres" id="3_3ht34"]
-[ext_resource type="Resource" path="res://resources/cards/immolate_notes.tres" id="4_1x5x6"]
-[ext_resource type="Resource" path="res://resources/cards/cite_chapter_and_verse.tres" id="5_61uif"]
+[ext_resource type="Resource" path="res://resources/cards/frost_lance.tres" id="3_3ht34"]
+[ext_resource type="Resource" path="res://resources/cards/cite_chapter_and_verse.tres" id="4_1x5x6"]
+[ext_resource type="Resource" path="res://resources/cards/scorch_notes.tres" id="5_61uif"]
 [ext_resource type="Resource" path="res://resources/cards/bulwark.tres" id="6_mskk4"]
 [ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_ly70j"]
 
 [resource]
 script = ExtResource("7_ly70j")
 enemy_name = "Vice-Chancellor"
-max_hp = 45
+max_hp = 48
 mana_per_turn = 3
 deck = Array[ExtResource("1_7wr4r")]([ExtResource("2_acyqi"), ExtResource("3_3ht34"), ExtResource("4_1x5x6"), ExtResource("5_61uif"), ExtResource("6_mskk4")])
 weak_school = 1

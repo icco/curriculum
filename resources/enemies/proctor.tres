@@ -1,18 +1,19 @@
 [gd_resource type="Resource" script_class="EnemyData" format=3]
 
-[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_67m0f"]
-[ext_resource type="Resource" path="res://resources/cards/bulwark.tres" id="2_dexl2"]
-[ext_resource type="Resource" path="res://resources/cards/rime_lance.tres" id="3_tcirc"]
-[ext_resource type="Resource" path="res://resources/cards/glass_shard.tres" id="4_d66lf"]
-[ext_resource type="Resource" path="res://resources/cards/mirror_shard.tres" id="5_l4rev"]
-[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="6_ddolo"]
+[ext_resource type="Script" path="res://scripts/data/CardData.gd" id="1_dexl2"]
+[ext_resource type="Resource" path="res://resources/cards/bulwark.tres" id="2_tcirc"]
+[ext_resource type="Resource" path="res://resources/cards/guard.tres" id="3_d66lf"]
+[ext_resource type="Resource" path="res://resources/cards/rime_lance.tres" id="4_l4rev"]
+[ext_resource type="Resource" path="res://resources/cards/glass_shard.tres" id="5_ddolo"]
+[ext_resource type="Resource" path="res://resources/cards/still_the_hall.tres" id="6_ko50w"]
+[ext_resource type="Script" path="res://scripts/data/EnemyData.gd" id="7_gi2ng"]
 
 [resource]
-script = ExtResource("6_ddolo")
+script = ExtResource("7_gi2ng")
 enemy_name = "Proctor"
-max_hp = 22
+max_hp = 40
 mana_per_turn = 3
-deck = Array[ExtResource("1_67m0f")]([ExtResource("2_dexl2"), ExtResource("3_tcirc"), ExtResource("3_tcirc"), ExtResource("4_d66lf"), ExtResource("5_l4rev")])
+deck = Array[ExtResource("1_dexl2")]([ExtResource("2_tcirc"), ExtResource("3_d66lf"), ExtResource("4_l4rev"), ExtResource("5_ddolo"), ExtResource("6_ko50w")])
 warded_school = 4
 art_id = "entities/proctor"
 is_gate = true
