@@ -13,6 +13,8 @@ signal inspect_requested(card)
 const CARD_SIZE := Vector2(170, 255)
 ## How far up the card must be dragged before it counts as played.
 const PLAY_THRESHOLD := 120.0
+## How long a card takes to slide to its place in the fan.
+const SETTLE_TIME := 0.16
 
 var card: CardInstance = null
 
@@ -20,6 +22,11 @@ var _dragging := false
 var _drag_start := Vector2.ZERO
 var _home := Vector2.ZERO
 var _playable := true
+## The CardData this view's face was drawn from, so sync() can tell when a card has
+## evolved underneath a REUSED view and only then pay for a rebuild.
+var _rendered_data: CardData = null
+var _progress_box: Label = null
+var _tween: Tween = null
 
 
 func setup(instance: CardInstance) -> void:
@@ -31,11 +38,32 @@ func setup(instance: CardInstance) -> void:
 	_build()
 
 
-func _build() -> void:
-	for child in get_children():
-		child.queue_free()
+## Brings a reused view up to date. Views persist across a refresh now, so two things
+## can drift underneath one: the card can EVOLVE mid-battle (CardInstance swaps its
+## CardData pointer), which needs the whole face redrawn, and it can bank XP, which
+## only needs its progress line rewritten. Rebuilding unconditionally would throw away
+## the persistence this exists to provide.
+func sync() -> void:
 	if card == null:
 		return
+	if card.data != _rendered_data:
+		_build()
+	elif _progress_box != null and card.can_evolve():
+		_progress_box.text = card.progress()
+
+
+func _build() -> void:
+	# remove_child is NOT redundant with queue_free here. queue_free is deferred to
+	# the end of the frame, so without the explicit removal this view would still be
+	# holding its old face's nodes for the rest of the tick -- and _build then adds a
+	# second full set on top of them.
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	_progress_box = null
+	if card == null:
+		return
+	_rendered_data = card.data
 
 	var frame := TextureRect.new()
 	# The card's own school, not one hashed from the key: the ink IS the school cue.
@@ -103,12 +131,12 @@ func _build() -> void:
 	# card. Text scales to any threshold, and CardInstance.progress() also carries
 	# which level the card is on ("L2 3/9"), which discrete ticks never showed.
 	if card.can_evolve():
-		var progress_box := UIKit.label(card.progress(), 16)
-		progress_box.position = Vector2(10, CARD_SIZE.y - 20)
-		progress_box.size = Vector2(CARD_SIZE.x - 20, 16)
-		progress_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_paint_card_text(progress_box, text_colour)
-		add_child(progress_box)
+		_progress_box = UIKit.label(card.progress(), 16)
+		_progress_box.position = Vector2(10, CARD_SIZE.y - 20)
+		_progress_box.size = Vector2(CARD_SIZE.x - 20, 16)
+		_progress_box.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_paint_card_text(_progress_box, text_colour)
+		add_child(_progress_box)
 
 
 ## Turns a card's effects into short, plain-English text — "6 damage", "+6 block",
@@ -157,6 +185,31 @@ func _paint_card_text(label: Label, colour: Color) -> void:
 func set_playable(value: bool) -> void:
 	_playable = value
 	modulate.a = 1.0 if value else 0.45
+
+
+## Moves the card to its place in the fan, sliding rather than snapping when it can.
+##
+## `animate` is false for a card being dealt for the first time — it has no meaningful
+## previous position to travel from, so it is placed and then slid the short distance
+## HandFan offsets it by. Falls back to an instant move whenever there is no live
+## SceneTree, which is how every headless suite builds these.
+func settle_at(target: Vector2, target_rotation: float, animate: bool) -> void:
+	_home = target
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
+		_tween = null
+	if not animate or not is_inside_tree():
+		position = target
+		rotation = target_rotation
+		return
+	_tween = create_tween().set_parallel()
+	(
+		_tween
+		. tween_property(self, "position", target, SETTLE_TIME)
+		. set_trans(Tween.TRANS_CUBIC)
+		. set_ease(Tween.EASE_OUT)
+	)
+	_tween.tween_property(self, "rotation", target_rotation, SETTLE_TIME)
 
 
 func remember_home() -> void:
