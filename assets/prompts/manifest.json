@@ -1537,7 +1537,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A single small flat an upward-pointing triangle, solid Cinder ink (#D45C3C), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
+      "prompt": "A single small flat upward-pointing triangle, solid Cinder ink (#D45C3C), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
     },
     {
       "id": "schools/frost_sigil",
@@ -1546,7 +1546,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A single small flat a diamond, solid Frost ink (#498BAD), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
+      "prompt": "A single small flat diamond, solid Frost ink (#498BAD), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
     },
     {
       "id": "schools/ink_sigil",
@@ -1555,7 +1555,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A single small flat a filled circle, solid Ink ink (#000000), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
+      "prompt": "A single small flat filled circle, solid Ink ink (#000000), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
     },
     {
       "id": "schools/rot_sigil",
@@ -1564,7 +1564,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A single small flat a downward-pointing triangle, solid Rot ink (#6E7B3F), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
+      "prompt": "A single small flat downward-pointing triangle, solid Rot ink (#6E7B3F), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
     },
     {
       "id": "schools/ward_sigil",
@@ -1573,7 +1573,7 @@
       "known": false,
       "size": "square",
       "n": 2,
-      "prompt": "A single small flat a square, solid Ward ink (#E0A51F), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
+      "prompt": "A single small flat square, solid Ward ink (#E0A51F), centered on the warm cream ground (#F7EADD), with fine stippled grain along its edge. A school crest mark: geometric, symmetrical, no other elements, reads clearly at very small size (32px)."
     },
     {
       "id": "backdrops/tier_1",
