@@ -16,3 +16,12 @@ export_credentials.cfg
 
 # Rejected variants, kept locally until the sprite has been seen in-game.
 /assets/source/rejects/
+
+# tools/recraft.py: raw multi-variant Recraft output, one subdirectory per manifest
+# subject id. Only the accepted variant (assets/source/<id>/accepted.*) is
+# committed; the numbered v1/v2/... variants it was chosen from are not.
+/assets/source/**/v[0-9]*.png
+/assets/source/**/v[0-9]*.jpg
+/assets/source/**/v[0-9]*.jpeg
+/assets/source/**/v[0-9]*.webp
+/assets/source/.spend.log
