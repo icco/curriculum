@@ -167,14 +167,15 @@ func _init(content: ContentLibrary, content_seed: int, rolls: Rolls = Rolls.GENE
 		var fragile := _is_defensive(deck) or one_off
 		var tier := int(tier_of.get(base.enemy_name, 99))
 
-		# Both schools resolve as ONE constrained pick each, not as sequential patches.
-		# Applied in sequence they fight: an earlier version's "never weak and warded alike"
-		# fix-up ran after the defensive rule and could hand the ward straight back to a
-		# starting school, which test_faculty caught at 5 seeds in 60. The weakness is
-		# settled first so the ward can be constrained against its final value.
 		var syllabus: Array = syllabus_of.get(base.enemy_name, [])
 		var teaches := _teaches(deck, syllabus)
 
+		# Each school resolves as ONE constrained pick, not as a sequence of patches. Applied
+		# in sequence the rules fight each other: an earlier version's "never weak and warded
+		# alike" fix-up ran after the defensive rule and could hand the ward straight back to
+		# a starting school, which test_faculty caught at 5 seeds in 60. The weakness settles
+		# first so the ward can be constrained against its final value rather than its dealt
+		# one.
 		var weak := base.weak_school
 		if rolls == Rolls.GENERATIVE or rolls == Rolls.SCHOOLS:
 			weak = _weak_candidates(
