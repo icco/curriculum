@@ -16,3 +16,7 @@ export_credentials.cfg
 
 # Rejected variants, kept locally until the sprite has been seen in-game.
 /assets/source/rejects/
+
+# Agent worktrees. Live git repos, not project content -- a bare `git add -A` from the
+# repo root otherwise commits them as gitlinks.
+.claude/worktrees/
