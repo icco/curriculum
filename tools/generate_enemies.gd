@@ -15,6 +15,24 @@ const WARD := Schools.School.WARD
 
 ## [name, hp, mana, weak, warded, art, is_gate, deck card slugs]
 ##
+## THIS TABLE IS NOW A TEMPLATE, NOT THE CONTENT THE PLAYER MEETS. scripts/core/Faculty.gd
+## rolls each run its own weak school, warded school and deck from a run seed, and the rows
+## below are what it rolls *against*: it holds every slot's cost, role, size and status
+## profile and swaps only the card filling it, so the shape tuned here is exactly the shape
+## that ships while the cards, schools and matchups differ every run.
+##
+## What that means for editing this table:
+##
+## - The two rules below still bind, and bind harder. A deck's cost curve and status count
+##   are preserved slot for slot by the generator, so a mistake here is a mistake in every
+##   generated world rather than in one.
+## - The weak and warded columns are the fallback, not the matchup. They are what an
+##   examiner keeps when there is no library to generate from (a bare Run in a suite), and
+##   what the `none` roll mode in tools/simulate.gd pins to as a measurement control. Tuning
+##   them alone will not move the shipped game.
+## - Re-measure with tools/simulate.gd across WORLDS, not runs. A change here moves every
+##   generated world at once, and an aggregate hides a world it made unplayable.
+##
 ## Tuned against hit points that CARRY between courses. Before that landed, every
 ## fight started at a full 60 and an examiner only had to be survivable in isolation;
 ## now a deck's job is to cost the right amount of a resource the player keeps, and

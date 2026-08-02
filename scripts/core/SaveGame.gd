@@ -60,10 +60,10 @@ static func save(run: Run) -> bool:
 	return true
 
 
-## `enemies` is the content library's roster, needed to rebuild this run's examiner
-## variants from the saved seed. Defaulted so suites can round-trip a Run without one;
-## the examiners then fall back to their authored schools.
-static func load_run(enemies: Array = []) -> Run:
+## `content` is the content library, needed to rebuild this run's examiners from the
+## saved seed. Defaulted so suites can round-trip a Run without one; the examiners then
+## fall back to their authored schools.
+static func load_run(content: ContentLibrary = null) -> Run:
 	if not has_save():
 		return null
 	var file := FileAccess.open(PATH, FileAccess.READ)
@@ -89,7 +89,7 @@ static func load_run(enemies: Array = []) -> Run:
 	# A save written before per-run faculties has no seed. Passing 0 rolls a fresh one
 	# rather than failing the load; that run simply gets a new set of weaknesses, which
 	# is the least-bad outcome for a save that never had them recorded.
-	var run := Run.new(cards, enemies, int(parsed.get("content_seed", 0)))
+	var run := Run.new(cards, content, int(parsed.get("content_seed", 0)))
 	run.hp = int(parsed.get("hp", Run.STARTING_HP))
 	run.max_hp = int(parsed.get("max_hp", Run.STARTING_HP))
 	run.strikes = int(parsed.get("strikes", 0))

@@ -2,7 +2,26 @@ extends SceneTree
 
 ## Plays N headless runs with the greedy policy and reports how far they got. Balance
 ## work only; the gate is check.sh.
-##   godot --headless --path . --script tools/simulate.gd -- 20
+##   godot --headless --path . --script tools/simulate.gd -- <runs> <worlds> <rolls>
+##   godot --headless --path . --script tools/simulate.gd -- 120 12
+##
+## `rolls` pins the content generator, and exists so a measurement can be attributed. Run
+## a CONTROL before believing anything a generated world says: keep all the plumbing in
+## place and pin its output to the authored roster, and if the control does not reproduce
+## the baseline then the plumbing is broken and the generator is not the story.
+##   none      the authored roster, through all of the generative machinery
+##   wards     wards only — what shipped before decks and weaknesses became generative
+##   decks     decks only, authored schools
+##   schools   weaknesses and wards, authored decks
+##   generative (default) everything
+
+const ROLL_MODES := {
+	"generative": Faculty.Rolls.GENERATIVE,
+	"none": Faculty.Rolls.NONE,
+	"wards": Faculty.Rolls.WARDS,
+	"schools": Faculty.Rolls.SCHOOLS,
+	"decks": Faculty.Rolls.DECKS,
+}
 
 
 func _process(_delta: float) -> bool:
@@ -18,8 +37,23 @@ func _process(_delta: float) -> bool:
 	var worlds := 10
 	if args.size() > 1 and args[1].is_valid_int():
 		worlds = maxi(1, args[1].to_int())
+	var roll_name := "generative"
+	if args.size() > 2 and ROLL_MODES.has(args[2]):
+		roll_name = args[2]
+	var rolls: Faculty.Rolls = ROLL_MODES[roll_name]
+	# Which content seed world 0 is. Defaulted so the numbers in the docs stay reproducible;
+	# passed so a world that measured badly can be re-run on its own at a useful run count.
+	#   simulate.gd -- 40 1 generative 507   # 40 runs, all in the world seeded 507
+	var base_seed := 500
+	if args.size() > 3 and args[3].is_valid_int():
+		base_seed = args[3].to_int()
 
 	var library: ContentLibrary = load("res://resources/content_library.tres")
+	# How much of each deck the generator actually rebuilt. A generator whose every slot
+	# falls back to its authored card ships the authored roster with new plumbing over the
+	# top and passes every test while having generated nothing.
+	var slots_filled := 0
+	var slots_substituted := 0
 	var wins := 0
 	var total_courses := 0
 	var grade_counts := {}
@@ -44,7 +78,9 @@ func _process(_delta: float) -> bool:
 		# and differ only in their draws.
 		var world := i % worlds
 		rng.seed = 1000 + i
-		var game := Run.new(library.new_starting_deck(), library.enemies, 500 + world)
+		var game := Run.new(library.new_starting_deck(), library, base_seed + world, rolls)
+		slots_filled += game.faculty.slots_filled
+		slots_substituted += game.faculty.slots_substituted
 		var catalog := library.catalog()
 		var guard := 0
 		var last_course_lost: String = ""
@@ -135,7 +171,25 @@ func _process(_delta: float) -> bool:
 		total_courses += game.courses_passed
 		courses_passed_counts[game.courses_passed] = int(courses_passed_counts.get(game.courses_passed, 0)) + 1
 
-	print("%d runs: %d wins, %.1f courses passed on average" % [count, wins, float(total_courses) / float(count)])
+	print(
+		"%d runs over %d worlds, rolling %s: %d wins (%.1f%%), %.1f courses passed on average"
+		% [
+			count,
+			worlds,
+			roll_name,
+			wins,
+			100.0 * float(wins) / float(count),
+			float(total_courses) / float(count),
+		]
+	)
+	print(
+		"deck slots: %d filled, %d substituted (%.0f%% of the roster rebuilt per run)"
+		% [
+			slots_filled,
+			slots_substituted,
+			100.0 * float(slots_substituted) / maxf(1.0, float(slots_filled)),
+		]
+	)
 	print("grades: %s" % grade_counts)
 	print(
 		"endings: %d graduated, %d expelled (2 strikes), %d lost the final/ran dry, %d other"
@@ -146,14 +200,22 @@ func _process(_delta: float) -> bool:
 
 	# Per-world graduation, so a generator that makes some worlds unplayable cannot
 	# hide behind a healthy average.
+	# Reported WITH the content seed that produced each rate, not just as a sorted spread.
+	# A world at 0% is the one measurement worth chasing, and chasing it means being able to
+	# re-run that exact world concentrated — ten runs cannot tell an unwinnable world from
+	# an unlucky one, and an anonymous "0%" in a sorted list gives you nothing to re-run.
 	var rates: Array[float] = []
+	var by_rate: Array = []
 	for world in world_runs:
-		rates.append(100.0 * float(world_wins.get(world, 0)) / float(world_runs[world]))
+		var rate := 100.0 * float(world_wins.get(world, 0)) / float(world_runs[world])
+		rates.append(rate)
+		by_rate.append([rate, base_seed + int(world)])
 	rates.sort()
+	by_rate.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	if rates.size() > 1:
 		var spread := ""
-		for r in rates:
-			spread += "%.0f%% " % r
+		for entry in by_rate:
+			spread += "seed %d %.0f%%  " % [entry[1], entry[0]]
 		print(
 			"graduation by world (%d worlds, %d runs each): %s-- lowest %.0f%%, highest %.0f%%"
 			% [

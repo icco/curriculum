@@ -35,6 +35,26 @@ func catalog() -> Catalog:
 	return Catalog.new(courses)
 
 
+## The schools the player opens every run with — Cinder, Ward and Ink, from the spec's
+## 4 Spark / 4 Guard / 2 Ink Blot.
+##
+## Read off the AUTHORED starting deck, never off a run's current deck, and that
+## distinction is load-bearing rather than stylistic. Faculty's rolls are constrained by
+## what the player opens with, and a mid-run save restores a *drafted* deck: deriving
+## the constraint from `run.deck` would feed the generator five schools on load where it
+## saw three at the start, rebuild a different faculty from the same seed, and turn every
+## Bestiary entry into a lie. Derived from content, the constraint is a constant, which
+## is what makes generation pure in (library, seed).
+func opening_schools() -> Array[int]:
+	var seen := {}
+	var out: Array[int] = []
+	for card in starting_deck:
+		if card != null and not seen.has(card.school):
+			seen[card.school] = true
+			out.append(card.school)
+	return out
+
+
 ## Fresh CardInstances for a new run.
 func new_starting_deck() -> Array:
 	var out: Array = []
