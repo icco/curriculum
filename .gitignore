@@ -20,3 +20,6 @@ export_credentials.cfg
 # Agent worktrees. Live git repos, not project content -- a bare `git add -A` from the
 # repo root otherwise commits them as gitlinks.
 .claude/worktrees/
+
+# macOS
+.DS_Store
