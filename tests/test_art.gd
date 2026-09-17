@@ -56,3 +56,43 @@ func run() -> void:
 	# Reports what art is still procedural, which drives the manifest in Task 25.
 	var still_missing := ArtLibrary.missing_keys(keys)
 	print("    art: %d of %d keys still procedural" % [still_missing.size(), keys.size()])
+
+	# assets/prompts/manifest.json is the single source of prompt truth: a typo'd
+	# art_id currently falls back silently to procedural art (that's the whole point
+	# of ArtLibrary's fallback), so nothing else catches it. This does.
+	var manifest_file := FileAccess.open("res://assets/prompts/manifest.json", FileAccess.READ)
+	check(manifest_file != null, "assets/prompts/manifest.json exists")
+	if manifest_file == null:
+		return
+	var manifest = JSON.parse_string(manifest_file.get_as_text())
+	check(manifest != null, "manifest.json parses")
+	if manifest == null:
+		return
+
+	var manifest_ids := {}
+	var card_subjects := 0
+	for subject in manifest["subjects"]:
+		var sid: String = subject["id"]
+		check(not manifest_ids.has(sid), "manifest subject id %s is not a duplicate" % sid)
+		manifest_ids[sid] = true
+		if subject.get("category") == "card":
+			card_subjects += 1
+
+	# Every art_id this branch's content currently declares must resolve to a
+	# manifest subject. Every card resource on disk today still shares one art_id
+	# per line (five levels, one id) -- the per-level art_id split is landing on
+	# another branch and is not in this content_library.tres yet. This loop still
+	# catches a typo'd id today, and keeps catching one once the ids split, because
+	# today's shared ids are exactly the level-1 slug for each line and those are
+	# already in the manifest below.
+	for key in keys:
+		check(manifest_ids.has(key), "manifest has a subject for declared art_id %s" % key)
+
+	# The content model is five evolution levels per card line, sharing no art_id
+	# (Spark -> Ember Lance -> ... should read as one line getting visibly more
+	# powerful, not five unrelated images). That's 120 distinct card illustrations
+	# even though content_library.tres above still only exposes 24 shared ids until
+	# the per-level art_id split lands. Asserting the manifest's own count keeps
+	# that coverage locked in now rather than discovering a gap only after the
+	# other branch merges.
+	eq(card_subjects, 120, "manifest has a card subject for every one of the 120 card art ids")
