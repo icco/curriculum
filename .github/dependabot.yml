@@ -1,9 +1,17 @@
 version: 2
 updates:
-  # Godot/GDScript has no package manager and this project vendors no
-  # third-party libraries, so GitHub Actions are the only dependency surface.
-  # The gomod and docker ecosystems the template shipped with have nothing to
-  # scan here.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns:
+          - '*'
   - package-ecosystem: github-actions
     directory: /
     schedule:

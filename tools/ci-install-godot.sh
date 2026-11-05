@@ -3,7 +3,7 @@
 # export templates the Web/Linux/Android presets need.
 set -euo pipefail
 
-VERSION="${GODOT_VERSION:-4.7.1}"
+VERSION="${GODOT_VERSION:-4.7.2}"
 WITH_TEMPLATES="${1:-}"
 BASE="https://github.com/godotengine/godot/releases/download/${VERSION}-stable"
 DEST="$HOME/godot-bin"
