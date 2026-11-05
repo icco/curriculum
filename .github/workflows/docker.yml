@@ -7,7 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  GODOT_VERSION: 4.7.1
+  GODOT_VERSION: 4.7.2
 jobs:
   # Platform-independent output, so build it once for every architecture.
   export:

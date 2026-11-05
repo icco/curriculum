@@ -4,7 +4,7 @@ Guidance for coding agents working on Curriculum.
 
 ## Project Overview
 
-A roguelike deckbuilder game set in a magical academy, built with Godot 4.7.1 and GDScript for mobile portrait (1080×1920). Ships to Web, Linux, and Android.
+A roguelike deckbuilder game set in a magical academy, built with Godot 4.7.2 and GDScript for mobile portrait (1080×1920). Ships to Web, Linux, and Android.
 
 ## Commands & Testing
 

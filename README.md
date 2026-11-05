@@ -10,7 +10,7 @@ discovered. Your grade decides how much of the defeated examiner's deck you may 
 into your own. Cards gain XP as you play them and evolve mid-battle through five
 levels. A second F is expulsion — that is the only death condition.
 
-Godot 4.7.1, GDScript, mobile portrait (1080×1920). Ships to Web, Linux and Android.
+Godot 4.7.2, GDScript, mobile portrait (1080×1920). Ships to Web, Linux and Android.
 
 ---
 
